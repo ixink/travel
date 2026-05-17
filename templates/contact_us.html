@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us | Traveller Stop{% endblock %}
+
+{% block content %}
+
+<section class="info-hero">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-3">Contact Us</h1>
+        <p class="lead opacity-75">We're here to help. Reach out to us anytime.</p>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <div class="info-card">
+        <div class="row g-5">
+            <div class="col-lg-5">
+                <h2 class="fw-bold mb-4">Get in Touch</h2>
+                <p class="text-muted mb-5">Whether you have a question about bookings, hosting, or anything else, our team is ready to answer all your questions.</p>
+                
+                <div class="contact-info-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Email Support</h5>
+                        <p class="mb-0">knock.travellerstop@gmail.com</p>
+                        <p class="small text-muted">Response within 24 hours</p>
+                    </div>
+                </div>
+
+                <div class="contact-info-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Phone / WhatsApp</h5>
+                        <p class="mb-0">01575467289</p>
+                        <p class="small text-muted"> Thu - sat , 9am - 10pm</p>
+                          <p class="mb-0">01999071721</p>
+                        <p class="small text-muted">Mon - wed, 9am - 10pm</p>
+                    </div>
+                </div>
+
+                <div class="contact-info-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Office Location</h5>
+                        <p class="mb-0">Satarkul,Badda,Dhaka 1212</p>
+                        <p class="small text-muted">Bangladesh</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-7">
+                <div class="bg-light p-4 p-lg-5 rounded-4 border">
+                    <h3 class="fw-bold mb-4">Send us a Message</h3>
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Full Name</label>
+                                <input type="text" class="form-control" placeholder="John Doe" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Email Address</label>
+                                <input type="email" class="form-control" placeholder="john@example.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Subject</label>
+                                <input type="text" class="form-control" placeholder="How can we help?" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Message</label>
+                                <textarea class="form-control" rows="5" placeholder="Your message here..." required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-red w-100 py-3 mt-2">Send Message</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

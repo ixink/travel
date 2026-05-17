@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Post Your Room - Traveller Stop{% endblock %}
+
+{% block content %}
+
+<div class="bg-premium min-vh-100 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                
+                <div class="text-center mb-5">
+                    <h1 class="display-5 fw-bold text-dark mb-2">Host Your Space</h1>
+                    <p class="lead text-secondary">Join our community of hosts and start earning today</p>
+                </div>
+
+                <div class="card glass-card border-0 overflow-hidden">
+                    <div class="row g-0">
+                        <!-- Sidebar Info (Desktop Only) -->
+                        <div class="col-lg-4 bg-dark text-white p-4 p-lg-5 d-none d-lg-flex flex-column justify-content-center">
+                            <div class="mb-5">
+                                <h4 class="fw-bold text-danger mb-4">Why host with us?</h4>
+                                <div class="d-flex gap-3 mb-4">
+                                    <div class="fs-3"><i class="fas fa-shield-alt"></i></div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Secure Payments</h6>
+                                        <p class="small text-secondary mb-0">Get paid directly via bKash or Nagad.</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-3 mb-4">
+                                    <div class="fs-3"><i class="fas fa-users"></i></div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Verified Guests</h6>
+                                        <p class="small text-secondary mb-0">Hosts interact with NID-verified travellers.</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-3">
+                                    <div class="fs-3"><i class="fas fa-chart-line"></i></div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Easy Management</h6>
+                                        <p class="small text-secondary mb-0">Simple tools to manage your listings.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-auto pt-4 border-top border-secondary">
+                                <p class="small mb-0 opacity-75">Need help? <a href="#" class="text-white fw-bold">Contact Support</a></p>
+                            </div>
+                        </div>
+
+                        <!-- Form Area -->
+                        <div class="col-lg-8 p-4 p-lg-5 bg-white">
+                            <form method="POST" enctype="multipart/form-data" id="roomForm">
+                                
+                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">Room Details</h5>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary">Room Title</label>
+                                    <input type="text" name="title" class="form-control form-control-lg" 
+                                           placeholder="e.g. Modern Studio with Balcony in Gulshan" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary">Description</label>
+                                    <textarea name="description" class="form-control" rows="4" 
+                                              placeholder="Tell guests about your place, location, and what makes it special..." required></textarea>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">Location</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-map-marker-alt text-danger"></i></span>
+                                            <input type="text" name="location" class="form-control form-control-lg border-start-0 ps-0" 
+                                                   placeholder="Gulshan, Dhaka" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">Price / Night (৳)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0 fw-bold">৳</span>
+                                            <input type="number" name="price" class="form-control form-control-lg border-start-0 ps-0" 
+                                                   placeholder="2500" min="500" step="50" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">Available From</label>
+                                        <input type="date" name="available_from" class="form-control form-control-lg" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">Available Until</label>
+                                        <input type="date" name="available_to" class="form-control form-control-lg" required>
+                                    </div>
+                                </div>
+
+                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2 mt-5">Photos & Amenities</h5>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary">Upload Photo</label>
+                                    <div class="upload-zone text-center p-4 border border-2 border-dashed rounded-4 bg-light position-relative">
+                                        <input type="file" name="room_image" id="room_image" class="form-control position-absolute inset-0 opacity-0 w-100 h-100 cursor-pointer" accept="image/*" required>
+                                        <div id="uploadPlaceholder">
+                                            <i class="fas fa-cloud-upload-alt fa-3x text-secondary mb-3"></i>
+                                            <p class="mb-0 fw-bold text-dark">Click or drag photo here</p>
+                                            <p class="small text-muted mb-0">High resolution landscape photos work best</p>
+                                        </div>
+                                        <div id="imagePreview" class="d-none">
+                                            <img id="previewImg" src="#" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px;">
+                                            <p class="mt-2 mb-0 text-danger small fw-bold">Click to change photo</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-5">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary d-block mb-3">Amenities</label>
+                                    <div class="row g-2">
+                                        {% set all_amenities = [
+                                            ('Free WiFi', 'wifi'), ('Air Conditioning', 'wind'), ('Parking', 'car'),
+                                            ('Television', 'tv'), ('Kitchen', 'utensils'), ('Balcony', 'umbrella-beach'),
+                                            ('Hot Water', 'tint'), ('Breakfast', 'coffee'), ('Security', 'shield-alt')
+                                        ] %}
+                                        {% for name, icon in all_amenities %}
+                                        <div class="col-md-4 col-6">
+                                            <div class="amenity-checkbox p-2 border rounded-3 text-center transition">
+                                                <input type="checkbox" name="amenities" value="{{ name }}" id="amenity_{{ loop.index }}" class="btn-check">
+                                                <label class="btn btn-outline-light text-dark border-0 w-100 d-flex flex-column align-items-center gap-1" for="amenity_{{ loop.index }}">
+                                                    <i class="fas fa-{{ icon }} fs-5"></i>
+                                                    <span class="small">{{ name }}</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-red w-100 py-3 fs-5 fw-bold">
+                                    <i class="fas fa-check-circle me-2"></i> List Your Room
+                                </button>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.cursor-pointer { cursor: pointer; }
+.transition { transition: all 0.3s; }
+
+.amenity-checkbox input:checked + label {
+    background: #fff5f5;
+    color: var(--primary-red) !important;
+    border: 1px solid var(--primary-red) !important;
+    border-radius: 8px;
+}
+
+.upload-zone:hover {
+    border-color: var(--primary-red) !important;
+    background: #fef2f2 !important;
+}
+</style>
+
+<script>
+document.getElementById('room_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('previewImg').src = event.target.result;
+            document.getElementById('imagePreview').classList.remove('d-none');
+            document.getElementById('uploadPlaceholder').classList.add('d-none');
+        }
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+{% endblock %}

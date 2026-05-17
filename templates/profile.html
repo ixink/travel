@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Traveller Stop{% endblock %}
+
+{% block content %}
+
+<div class="bg-premium min-vh-100 py-5">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- Profile Sidebar -->
+            <div class="col-lg-4">
+                <div class="card glass-card border-0 sticky-top" style="top: 100px;">
+                    <div class="card-body text-center p-4">
+                        
+                        <!-- Profile Picture -->
+                        <div class="position-relative d-inline-block mb-4">
+                            {% if user.profile_pic %}
+                                <img src="{{ url_for('static', filename=user.profile_pic) }}" 
+                                     alt="{{ user.username }}" 
+                                     class="rounded-circle border border-5 border-white shadow-lg"
+                                     width="160" height="160" style="object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle border border-5 border-white shadow-lg bg-light d-flex align-items-center justify-content-center" 
+                                     style="width: 160px; height: 160px;">
+                                    <i class="fas fa-user-circle fa-7x text-secondary opacity-50"></i>
+                                </div>
+                            {% endif %}
+                            <button class="btn btn-red btn-sm rounded-circle position-absolute bottom-0 end-0 p-2 shadow" onclick="editProfile()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+
+                        <h3 class="fw-bold text-dark mb-1">{{ user.username }}</h3>
+                        <p class="text-secondary small mb-3">{{ user.email }}</p>
+
+                        <!-- Verification Badges -->
+                        <div class="d-flex justify-content-center gap-2 mb-4">
+                            <span class="badge bg-{{ 'success' if user.get('nid_verified') else 'warning' }}-subtle text-{{ 'success' if user.get('nid_verified') else 'warning' }} border border-{{ 'success' if user.get('nid_verified') else 'warning' }}-subtle px-3 py-2 rounded-pill">
+                                <i class="fas fa-id-card me-1"></i> {{ 'NID Verified' if user.get('nid_verified') else 'Verify NID' }}
+                            </span>
+                        </div>
+
+                        <div class="text-start space-y-3 mb-4">
+                            <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
+                                <i class="fas fa-map-marker-alt text-danger fs-5"></i>
+                                <div>
+                                    <small class="text-muted d-block small-text">Location</small>
+                                    <span class="fw-semibold">{{ user.location|default('Set Location') }}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3 mt-2">
+                                <i class="fas fa-phone text-danger fs-5"></i>
+                                <div>
+                                    <small class="text-muted d-block small-text">Phone</small>
+                                    <span class="fw-semibold">{{ user.phone|default('Add Number') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="editProfile()" class="btn btn-red w-100 py-2 rounded-3">
+                            <i class="fas fa-cog me-2"></i> Account Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                
+                <!-- My Bookings Section -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold text-dark mb-0">My Travel History</h4>
+                </div>
+
+                <div class="card glass-card border-0 mb-5 overflow-hidden">
+                    <div class="card-body p-0">
+                        {% if my_bookings %}
+                        <!-- Desktop Table -->
+                        <div class="table-responsive d-none d-lg-block">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Stay Details</th>
+                                        <th>Duration</th>
+                                        <th>Total Paid</th>
+                                        <th>Status</th>
+                                        <th class="pe-4 text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for b in my_bookings %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">Room #{{ b.room_id }}</div>
+                                            <small class="text-muted">Booking #{{ b.id }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="small">{{ b.checkin }}</div>
+                                            <div class="small text-muted">to {{ b.checkout }}</div>
+                                        </td>
+                                        <td class="fw-bold text-dark">৳{{ b.total_amount }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 
+                                            {% if b.status == 'confirmed' %}bg-success-subtle text-success
+                                            {% elif b.status == 'pending_payment' %}bg-warning-subtle text-warning
+                                            {% elif b.status == 'cancel_requested' %}bg-info-subtle text-info
+                                            {% elif b.status == 'cancelled' %}bg-danger-subtle text-danger
+                                            {% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                                {{ b.status|upper|replace('_', ' ') }}
+                                            </span>
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            {% if b.status not in ['cancelled', 'cancel_requested'] %}
+                                            <button onclick="cancelBooking({{ b.id }}, '{{ b.payment_status }}')" 
+                                                    class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                Cancel
+                                            </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Cards -->
+                        <div class="d-lg-none p-3">
+                            {% for b in my_bookings %}
+                            <div class="card border mb-3 rounded-4 shadow-sm bg-white">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <div class="fw-bold text-dark fs-5">Room #{{ b.room_id }}</div>
+                                            <small class="text-muted d-block">Booking #{{ b.id }}</small>
+                                        </div>
+                                        <span class="badge rounded-pill px-2 py-1 small
+                                        {% if b.status == 'confirmed' %}bg-success-subtle text-success
+                                        {% elif b.status == 'pending_payment' %}bg-warning-subtle text-warning
+                                        {% elif b.status == 'cancel_requested' %}bg-info-subtle text-info
+                                        {% elif b.status == 'cancelled' %}bg-danger-subtle text-danger
+                                        {% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                            {{ b.status|upper|replace('_', ' ') }}
+                                        </span>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Check-in</small>
+                                            <span class="small fw-semibold">{{ b.checkin }}</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Check-out</small>
+                                            <span class="small fw-semibold">{{ b.checkout }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="fw-bold text-danger">৳{{ b.total_amount }}</div>
+                                        {% if b.status not in ['cancelled', 'cancel_requested'] %}
+                                        <button onclick="cancelBooking({{ b.id }}, '{{ b.payment_status }}')" 
+                                                class="btn btn-danger btn-sm rounded-pill px-4">
+                                            Cancel Stay
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <div class="opacity-25 mb-3"><i class="fas fa-suitcase fa-4x"></i></div>
+                            <h5 class="fw-bold">No trips found</h5>
+                            <p class="text-secondary small">Your future adventures will appear here.</p>
+                            <a href="{{ url_for('rooms_page') }}" class="btn btn-red btn-sm px-4">Find a Room</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- My Listings Section -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold text-dark mb-0">My Properties</h4>
+                    <a href="{{ url_for('post_room') }}" class="btn btn-red btn-sm px-3">
+                        <i class="fas fa-plus me-1"></i> Add New
+                    </a>
+                </div>
+
+                <div class="row g-4">
+                    {% if my_rooms %}
+                        {% for room in my_rooms %}
+                        <div class="col-md-6">
+                            <div class="card room-card border-0 shadow-sm overflow-hidden h-100">
+                                <div class="position-relative">
+                                    <img src="{{ get_room_image(room.image_url) }}" 
+                                         class="card-img-top" style="height: 180px; object-fit: cover;" alt="...">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-dark bg-opacity-75">৳{{ room.price_per_night }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold mb-1 text-truncate">{{ room.title }}</h6>
+                                    <p class="text-muted small mb-3"><i class="fas fa-map-marker-alt me-1"></i> {{ room.location }}</p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('edit_room', room_id=room.id) }}" class="btn btn-outline-secondary btn-sm flex-fill">Edit</a>
+                                        <a href="{{ url_for('room_detail', room_id=room.id) }}" class="btn btn-outline-danger btn-sm flex-fill">Preview</a>
+                                        <form method="POST" action="{{ url_for('delete_room', room_id=room.id) }}" 
+                                              onsubmit="return confirm('⚠️ Are you sure you want to PERMANENTLY delete this listing?');" class="flex-shrink-0">
+                                            <button type="submit" class="btn btn-danger btn-sm px-2">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="card glass-card border-0 text-center py-5">
+                                <div class="opacity-25 mb-3"><i class="fas fa-home fa-4x"></i></div>
+                                <h5 class="fw-bold">Ready to host?</h5>
+                                <p class="text-secondary small">List your room and start earning money.</p>
+                                <a href="{{ url_for('post_room') }}" class="btn btn-red btn-sm px-4">Get Started</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="profileForm" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase fw-bold text-secondary">Profile Picture</label>
+                        <input type="file" class="form-control" name="profile_pic" accept="image/*">
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Phone</label>
+                            <input type="text" class="form-control" name="phone" value="{{ user.phone|default('') }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Location</label>
+                            <input type="text" class="form-control" name="location" value="{{ user.location|default('') }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Profession</label>
+                            <input type="text" class="form-control" name="profession" value="{{ user.profession|default('') }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Education</label>
+                            <input type="text" class="form-control" name="qualification" value="{{ user.qualification|default('') }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">NID Number</label>
+                            <input type="text" class="form-control" name="nid" value="{{ user.nid|default('') }}" maxlength="13">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-red px-4" onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function cancelBooking(id, paymentStatus) {
+    let confirmMsg = "Are you sure you want to cancel this booking?";
+    if (paymentStatus === 'paid') {
+        confirmMsg = "Since this booking is PAID, cancellation requires admin approval. A refund request will be sent. Continue?";
+    }
+    
+    if (!confirm(confirmMsg)) return;
+    
+    try {
+        const response = await fetch(`/cancel-booking/${id}`, { method: 'POST' });
+        const result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert(result.message || "Cancellation failed");
+        }
+    } catch (error) {
+        alert("Server error during cancellation");
+    }
+}
+
+function editProfile() {
+    new bootstrap.Modal(document.getElementById('editProfileModal')).show();
+}
+
+async function saveProfile() {
+    const formData = new FormData(document.getElementById('profileForm'));
+    const saveBtn = event.target;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+    
+    try {
+        const response = await fetch('/update-profile', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+            location.reload();
+        } else {
+            alert(result.message || "Update failed");
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Save Changes';
+        }
+    } catch (error) {
+        alert("Server error");
+        saveBtn.disabled = false;
+    }
+}
+</script>
+
+<style>
+.small-text { font-size: 0.75rem; letter-spacing: 0.5px; }
+.space-y-3 > * + * { margin-top: 1rem; }
+.bg-success-subtle { background-color: #dcfce7 !important; }
+.bg-warning-subtle { background-color: #fef9c3 !important; }
+.bg-info-subtle { background-color: #e0f2fe !important; }
+.bg-secondary-subtle { background-color: #f1f5f9 !important; }
+</style>
+
+{% endblock %}

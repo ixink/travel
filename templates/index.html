@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Traveller Stop - Your Adventure Starts Here{% endblock %}
+
+{% block content %}
+
+<!-- ULTRA PREMIUM HERO SECTION -->
+<header class="hero d-flex flex-column align-items-center justify-content-center">
+    <div class="container position-relative z-3 text-center">
+        
+        <!-- Hero Text -->
+        <div class="mb-4 mb-lg-5">
+            <h1 class="display-4 fw-bold text-white mb-2 floating">Explore Bangladesh with Confidence</h1>
+            <p class="lead text-white fs-6 opacity-90 mx-auto" style="max-width: 500px;">
+                The perfect platform for Travellers exploring the beauty of Bangladesh. Book authentic stays from trusted local hosts.
+            </p>
+        </div>
+
+        <!-- UNIFIED SEARCH BAR (PRIORITY #1) -->
+        <div class="d-flex justify-content-center">
+            <form method="GET" action="{{ url_for('rooms_page') }}" class="unified-search-bar">
+                
+                <div class="search-input-group text-start">
+                    <label class="search-label">Location</label>
+                    <input type="text" name="location" class="search-input" placeholder="Destination" 
+                           value="{{ request.args.get('location', '') }}" required>
+                </div>
+
+                <div class="search-input-group text-start">
+                    <label class="search-label">Check-in</label>
+                    <input type="date" name="checkin" class="search-input">
+                </div>
+
+                <div class="search-input-group text-start">
+                    <label class="search-label">Check-out</label>
+                    <input type="date" name="checkout" class="search-input">
+                </div>
+
+                <button type="submit" class="search-btn-circle ms-auto">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- QUICK HOST TEASER (Visible on Mobile) -->
+        <div class="mt-4 mt-lg-5 pt-2">
+            <div class="glass-card d-inline-flex align-items-center gap-2 gap-lg-3 p-1 p-lg-2 ps-3 ps-lg-4 rounded-pill border-white border-opacity-25">
+                <span class="text-white small fw-bold d-none d-sm-inline opacity-75">WANT TO EARN?</span>
+                <a href="{{ url_for('post_room') }}" class="btn btn-red btn-glow-red rounded-pill px-3 px-lg-4 py-2 fw-bold small">
+                    <i class="fas fa-plus-circle me-1"></i> Post Room in 2 min & Earn Money
+                </a>
+            </div>
+        </div>
+
+    </div>
+</header>
+
+<div class="bg-premium py-5">
+    <div class="container py-lg-5">
+
+        <!-- SECTION: FEATURED STAYS -->
+        <div class="d-flex justify-content-between align-items-end mb-5">
+            <div>
+                <h6 class="text-danger fw-bold text-uppercase ls-1 mb-2">Curated for you</h6>
+                <h2 class="display-5 fw-bold text-dark mb-0">Most Popular Stays</h2>
+            </div>
+            <a href="{{ url_for('rooms_page') }}" class="btn btn-red btn-glow-red rounded-pill px-4 d-none d-md-inline-block">
+                View All Stays <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+        <div class="row g-4 mb-5">
+            {% for room in featured_rooms %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card room-card border-0 shadow-lg overflow-hidden h-100">
+                    
+                    <div class="position-relative">
+                        <img src="{{ get_room_image(room.image_url) }}" 
+                             class="card-img-top" alt="{{ room.title }}"
+                             style="height: 260px; object-fit: cover;">
+                        
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-white text-danger fw-bold px-3 py-2 rounded-pill shadow">
+                                ৳{{ room.price_per_night }}
+                            </span>
+                        </div>
+
+                        <div class="position-absolute bottom-0 start-0 m-3">
+                            <span class="badge bg-dark bg-opacity-75 text-white border border-white border-opacity-25 rounded-pill px-3 py-2 small">
+                                <i class="fas fa-star text-warning me-1"></i> 4.9
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 d-flex flex-column">
+                        <h5 class="card-title fw-bold text-dark mb-1 text-truncate">{{ room.title }}</h5>
+                        <p class="text-muted small mb-3">
+                            <i class="fas fa-map-marker-alt text-danger me-1"></i> {{ room.location }}
+                        </p>
+                        
+                        <p class="card-text text-secondary small flex-grow-1">
+                            {{ room.description[:90] }}...
+                        </p>
+
+                        <div class="mt-4 pt-3 border-top d-flex gap-2">
+                            <a href="{{ url_for('room_detail', room_id=room.id) }}" 
+                               class="btn btn-outline-secondary rounded-pill fw-bold flex-fill btn-sm py-2">
+                                Details
+                            </a>
+                            <a href="{{ url_for('room_detail', room_id=room.id) }}" 
+                               class="btn btn-danger rounded-pill fw-bold flex-fill btn-sm py-2 shadow-sm">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center d-md-none mb-5">
+            <a href="{{ url_for('rooms_page') }}" class="btn btn-red btn-glow-red rounded-pill px-5">
+                Browse All Rooms
+            </a>
+        </div>
+
+        <!-- SECTION: PREMIUM HOSTING CTA -->
+        <div class="host-banner mt-lg-5">
+            <div class="row align-items-center position-relative z-2">
+                <div class="col-lg-7">
+                    <h6 class="text-danger fw-bold text-uppercase ls-1 mb-3">Earn with us</h6>
+                    <h2 class="display-4 fw-bold mb-4">Post your room and start earning today.</h2>
+                    <p class="lead mb-5 opacity-90">
+                        Join thousands of hosts in Bangladesh. We provide the tools, security, and guests you need to grow your hosting business safely.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{{ url_for('post_room') }}" class="btn btn-red btn-lg px-5 py-3 rounded-pill fw-bold btn-glow-red">
+                            <i class="fas fa-plus-circle me-2"></i> List Your Room Now
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- SECTION: TESTIMONIALS / STATS -->
+<div class="py-5 bg-white">
+    <div class="container py-lg-5">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="display-4 fw-bold text-danger mb-2">5,000+</div>
+                    <h5 class="fw-bold">Happy Travellers</h5>
+                    <p class="text-secondary small">Satisfied guests across all districts of Bangladesh.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 border-start border-end border-light">
+                    <div class="display-4 fw-bold text-danger mb-2">1,200+</div>
+                    <h5 class="fw-bold">Verified Rooms</h5>
+                    <p class="text-secondary small">Every listing is manually reviewed for quality and safety.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="display-4 fw-bold text-danger mb-2">৳2M+</div>
+                    <h5 class="fw-bold">Host Earnings</h5>
+                    <p class="text-secondary small">Helping local hosts grow their income through hospitality.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Hero Styles -->
+<style>
+.hero {
+    height: 95vh;
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), 
+                url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+    margin-top: -56px;
+    padding-top: 56px;
+}
+
+.ls-1 { letter-spacing: 2px; }
+
+@media (max-width: 991px) {
+    .hero {
+        height: auto;
+        padding-top: 150px;
+        padding-bottom: 80px;
+    }
+    .hero h1 { font-size: 3rem; }
+}
+</style>
+
+{% endblock %}

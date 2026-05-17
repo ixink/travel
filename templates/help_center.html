@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Help Center | Traveller Stop{% endblock %}
+
+{% block content %}
+
+<section class="info-hero">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-3">Help Center</h1>
+        <p class="lead opacity-75">Find answers to your questions and learn how to use Traveller Stop.</p>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <div class="info-card">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <button class="nav-link active text-start py-3 px-4 rounded-3 mb-2" id="v-pills-booking-tab" data-bs-toggle="pill" data-bs-target="#v-pills-booking" type="button" role="tab">
+                        <i class="fas fa-calendar-alt me-2"></i> Booking & Payments
+                    </button>
+                    <button class="nav-link text-start py-3 px-4 rounded-3 mb-2" id="v-pills-hosting-tab" data-bs-toggle="pill" data-bs-target="#v-pills-hosting" type="button" role="tab">
+                        <i class="fas fa-home me-2"></i> Hosting on TS
+                    </button>
+                    <button class="nav-link text-start py-3 px-4 rounded-3 mb-2" id="v-pills-account-tab" data-bs-toggle="pill" data-bs-target="#v-pills-account" type="button" role="tab">
+                        <i class="fas fa-user-circle me-2"></i> Account & Profile
+                    </button>
+                    <button class="nav-link text-start py-3 px-4 rounded-3 mb-2" id="v-pills-safety-tab" data-bs-toggle="pill" data-bs-target="#v-pills-safety" type="button" role="tab">
+                        <i class="fas fa-shield-alt me-2"></i> Safety & Security
+                    </button>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <!-- Booking & Payments -->
+                    <div class="tab-pane fade show active" id="v-pills-booking" role="tabpanel">
+                        <h3 class="fw-bold mb-4">Booking & Payments</h3>
+                        <div class="accordion accordion-flush" id="bookingAccordion">
+                            <div class="accordion-item border-bottom">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#q1">
+                                        How do I book a room?
+                                    </button>
+                                </h2>
+                                <div id="q1" class="accordion-collapse collapse" data-bs-parent="#bookingAccordion">
+                                    <div class="accordion-body text-muted">
+                                        Simply browse our rooms, select your dates, and click "Book Now". You will be taken to a secure payment page to confirm your booking.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-bottom">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#q2">
+                                        What payment methods do you accept?
+                                    </button>
+                                </h2>
+                                <div id="q2" class="accordion-collapse collapse" data-bs-parent="#bookingAccordion">
+                                    <div class="accordion-body text-muted">
+                                        We accept bKash, Nagad, Rocket, Upay, and Binance Pay. Mobile banking payments are verified automatically or manually via TRXID.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hosting -->
+                    <div class="tab-pane fade" id="v-pills-hosting" role="tabpanel">
+                        <h3 class="fw-bold mb-4">Hosting on TS</h3>
+                        <p class="text-muted">Information for property owners and managers.</p>
+                        <!-- Add hosting FAQs here -->
+                    </div>
+
+                    <!-- Account -->
+                    <div class="tab-pane fade" id="v-pills-account" role="tabpanel">
+                        <h3 class="fw-bold mb-4">Account & Profile</h3>
+                        <p class="text-muted">Manage your personal information and preferences.</p>
+                    </div>
+
+                    <!-- Safety -->
+                    <div class="tab-pane fade" id="v-pills-safety" role="tabpanel">
+                        <h3 class="fw-bold mb-4">Safety & Security</h3>
+                        <p class="text-muted">Our commitment to your safety during your travels.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.nav-pills .nav-link { color: var(--text-dark); background: #f8fafc; border: 1px solid #eee; }
+.nav-pills .nav-link.active { background: var(--primary-red); color: white; border-color: var(--primary-red); }
+.accordion-button:not(.collapsed) { background-color: transparent; color: var(--primary-red); box-shadow: none; }
+</style>
+
+{% endblock %}

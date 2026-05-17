@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Traveller Stop{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Sidebar / Mobile Nav -->
+        <div class="col-lg-3 col-xl-2 bg-dark text-white p-4 admin-sidebar">
+            <div class="d-flex align-items-center mb-4 d-none d-lg-flex">
+                <h4 class="mb-0 text-danger fw-bold">
+                    <i class="fas fa-user-shield me-2"></i> Admin Panel
+                </h4>
+            </div>
+            
+            <div class="nav flex-column flex-row-mobile gap-2">
+                <a href="#" onclick="showSection('dashboard')" class="nav-link active" id="nav-dashboard">
+                    <i class="fas fa-tachometer-alt"></i> <span class="d-none d-lg-inline">Dashboard</span>
+                </a>
+                <a href="#" onclick="showSection('bookings')" class="nav-link" id="nav-bookings">
+                    <i class="fas fa-calendar-check"></i> <span class="d-none d-lg-inline">Bookings</span>
+                </a>
+                <a href="#" onclick="showSection('users')" class="nav-link" id="nav-users">
+                    <i class="fas fa-users"></i> <span class="d-none d-lg-inline">Users</span>
+                </a>
+                <a href="#" onclick="showSection('payments')" class="nav-link" id="nav-payments">
+                    <i class="fas fa-money-bill-wave"></i> <span class="d-none d-lg-inline">Payments</span>
+                </a>
+                <a href="#" onclick="showSection('coupons')" class="nav-link" id="nav-coupons">
+                    <i class="fas fa-tags"></i> <span class="d-none d-lg-inline">Coupons</span>
+                </a>
+                <a href="#" onclick="showSection('nid')" class="nav-link" id="nav-nid">
+                    <i class="fas fa-id-card"></i> <span class="d-none d-lg-inline">NID</span>
+                </a>
+            </div>
+
+            <hr class="text-secondary my-4 d-none d-lg-block">
+
+            <a href="{{ url_for('logout') }}" class="nav-link text-danger d-none d-lg-block">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-xl-10 p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 id="page-title" class="fw-bold">Admin Dashboard</h2>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <span class="text-muted">Welcome, Admin</span>
+                </div>
+            </div>
+
+            <!-- ==================== DASHBOARD ==================== -->
+            <div id="section-dashboard">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Total Users</h5>
+                                <h2 class="text-primary fw-bold">{{ users|length }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Total Rooms</h5>
+                                <h2 class="text-success fw-bold">{{ rooms|length }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Pending Bookings</h5>
+                                <h2 class="text-warning fw-bold">
+                                    {{ bookings|selectattr('payment_status', 'equalto', 'unpaid')|list|length }}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Total Revenue</h5>
+                                <h2 class="text-danger fw-bold">
+                                    ৳{{ payments|sum(attribute='amount')|default(0)|round(0) }}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== USERS MANAGEMENT ==================== -->
+            <div id="section-users" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Users Management</h4>
+                    <a href="{{ url_for('export_users') }}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export All Users (CSV)
+                    </a>
+                </div>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Location</th>
+                                    <th>NID</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>#{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone|default('—') }}</td>
+                                    <td>{{ user.location|default('—') }}</td>
+                                    <td>{{ user.nid|default('—') }}</td>
+                                    <td>
+                                        {% if user.get('blocked') %}
+                                            <span class="badge bg-danger">Blocked</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('block_user', user_id=user.id) }}" 
+                                           class="btn btn-sm {{ 'btn-danger' if not user.get('blocked') else 'btn-success' }}">
+                                            {{ 'Block' if not user.get('blocked') else 'Unblock' }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== NID VERIFICATION ==================== -->
+            <div id="section-nid" class="d-none">
+                <h4 class="mb-3">NID / Passport Verification</h4>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>NID Number</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                {% if user.nid %}
+                                <tr>
+                                    <td>#{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td><strong>{{ user.nid }}</strong></td>
+                                    <td>
+                                        <span class="badge {% if user.get('nid_verified') %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ 'Verified' if user.get('nid_verified') else 'Pending' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if not user.get('nid_verified') %}
+                                        <a href="{{ url_for('verify_nid', user_id=user.id) }}" 
+                                           class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Verify
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Verified</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== PAYMENTS ==================== -->
+            <div id="section-payments" class="d-none">
+                <h4 class="mb-3">Payment Records</h4>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Method</th>
+                                    <th>Amount</th>
+                                    <th>TRXID</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in payments %}
+                                <tr>
+                                    <td>#{{ p.id }}</td>
+                                    <td>{{ p.method }}</td>
+                                    <td>৳{{ p.amount }}</td>
+                                    <td><code>{{ p.trxid }}</code></td>
+                                    <td>
+                                        <span class="badge {% if p.status == 'PAID' or p.status == 'CONFIRMED' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ p.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ p.time|datetimeformat }}</td>
+                                    <td>
+                                        {% if p.status != 'CONFIRMED' %}
+                                        <a href="{{ url_for('confirm_payment', payment_id=p.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            Confirm
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Confirmed</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== BOOKINGS ==================== -->
+            <div id="section-bookings" class="d-none">
+                <h4 class="mb-3">Booking Management</h4>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User ID</th>
+                                    <th>Room ID</th>
+                                    <th>Check-in</th>
+                                    <th>Check-out</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th class="pe-4 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for b in bookings %}
+                                <tr>
+                                    <td>#{{ b.id }}</td>
+                                    <td>#{{ b.user_id }}</td>
+                                    <td>#{{ b.room_id }}</td>
+                                    <td>{{ b.checkin }}</td>
+                                    <td>{{ b.checkout }}</td>
+                                    <td>৳{{ b.total_amount }}</td>
+                                    <td>
+                                        <span class="badge 
+                                        {% if b.status == 'confirmed' %}bg-success
+                                        {% elif b.status == 'pending_payment' %}bg-warning
+                                        {% elif b.status == 'cancel_requested' %}bg-info
+                                        {% elif b.status == 'cancelled' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                            {{ b.status|upper|replace('_', ' ') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if b.payment_status == 'paid' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ b.payment_status|upper }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        {% if b.payment_status == 'unpaid' %}
+                                        <a href="{{ url_for('admin_manual_confirm', booking_id=b.id) }}" 
+                                           class="btn btn-sm btn-outline-success rounded-pill px-3"
+                                           onclick="return confirm('Manually confirm payment for this booking?');">
+                                            Confirm
+                                        </a>
+                                        {% endif %}
+                                        {% if b.status == 'cancel_requested' %}
+                                        <a href="{{ url_for('admin_approve_cancellation', booking_id=b.id) }}" 
+                                           class="btn btn-sm btn-danger rounded-pill px-3"
+                                           onclick="return confirm('Approve cancellation and mark as cancelled?');">
+                                            Approve Cancel
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== COUPONS ==================== -->
+            <div id="section-coupons" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Coupon Management</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+                        <i class="fas fa-plus"></i> Add New Coupon
+                    </button>
+                </div>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Usage</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in coupons %}
+                                <tr>
+                                    <td>#{{ c.id }}</td>
+                                    <td><code>{{ c.code }}</code></td>
+                                    <td>{{ c.discount_percent }}%</td>
+                                    <td>{{ c.used }} / {{ c.max_uses }}</td>
+                                    <td>
+                                        <span class="badge {% if c.active %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ 'Active' if c.active else 'Inactive' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ c.created_at|datetimeformat }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Coupon Modal -->
+            <div class="modal fade" id="addCouponModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Coupon</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('admin_coupons') }}">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Coupon Code</label>
+                                    <input type="text" name="code" class="form-control" required style="text-transform: uppercase;">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Discount Percent (%)</label>
+                                    <input type="number" name="discount" class="form-control" min="1" max="100" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Max Uses</label>
+                                    <input type="number" name="max_uses" class="form-control" min="1" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Create Coupon</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showSection(section) {
+    // Hide all sections
+    document.querySelectorAll('[id^="section-"]').forEach(el => {
+        el.classList.add('d-none');
+    });
+    
+    // Show selected
+    const target = document.getElementById(`section-${section}`);
+    if (target) target.classList.remove('d-none');
+
+    // Update active nav
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    const activeLink = document.getElementById(`nav-${section}`);
+    if (activeLink) activeLink.classList.add('active');
+
+    // Update title
+    const titles = {
+        'dashboard': 'Admin Dashboard',
+        'bookings': 'Booking Management',
+        'users': 'Users Management',
+        'payments': 'Payment Records',
+        'coupons': 'Coupon Management',
+        'nid': 'NID Verification'
+    };
+    document.getElementById('page-title').textContent = titles[section] || 'Admin Panel';
+}
+
+// Initialize on load
+window.onload = function() {
+    showSection('dashboard');
+};
+</script>
+{% endblock %}

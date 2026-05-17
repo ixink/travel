@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Coupons - Admin | Traveller Stop{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">
+            <i class="fas fa-tags text-danger"></i> Manage Discount Coupons
+        </h2>
+        <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+        </a>
+    </div>
+
+    <!-- Create New Coupon Form -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Create New Coupon</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Coupon Code</label>
+                    <input type="text" name="code" class="form-control text-uppercase" 
+                           placeholder="SUMMER25" maxlength="20" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Discount (%)</label>
+                    <input type="number" name="discount" class="form-control" 
+                           placeholder="15" min="1" max="80" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Max Uses</label>
+                    <input type="number" name="max_uses" class="form-control" 
+                           value="10" min="1" required>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="fas fa-plus"></i> Create Coupon
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Existing Coupons -->
+    <h4 class="mb-3">Active Coupons ({{ coupons|length }})</h4>
+
+    {% if coupons %}
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Coupon Code</th>
+                    <th>Discount</th>
+                    <th>Used / Max</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coupon in coupons %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><strong class="text-uppercase">{{ coupon.code }}</strong></td>
+                    <td>
+                        <span class="badge bg-success fs-6">{{ coupon.discount_percent }}%</span>
+                    </td>
+                    <td>
+                        {{ coupon.used }} / {{ coupon.max_uses }}
+                        {% if coupon.used >= coupon.max_uses %}
+                            <span class="badge bg-danger">Exhausted</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if coupon.active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ coupon.created_at|truncate(16, true, '') }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin_coupons') }}" style="display:inline;">
+                            <!-- You can add toggle active/inactive later if needed -->
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="if(confirm('Delete this coupon?')) { /* Add delete logic */ }">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="fas fa-tags fa-3x mb-3 text-muted"></i>
+        <h5>No coupons created yet</h5>
+        <p>Create your first coupon above.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto uppercase coupon code
+    document.querySelector('input[name="code"]').addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+</script>
+{% endblock %}

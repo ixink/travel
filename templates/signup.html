@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up - Traveller Stop{% endblock %}
+
+{% block content %}
+<div class="bg-premium min-vh-100 d-flex align-items-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6 col-xl-5">
+                
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-dark">Join Traveller Stop</h2>
+                    <p class="text-secondary">Start your journey as a traveler or host</p>
+                </div>
+
+                <div class="card glass-card border-0">
+                    <div class="card-body p-4 p-lg-5">
+                        
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, msg in messages %}
+                                    <div class="alert alert-{{ 'danger' if category=='danger' else 'success' }} rounded-3 small mb-4">
+                                        <i class="fas fa-exclamation-circle me-2"></i> {{ msg }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST">
+                            <div class="form-floating mb-3">
+                                <input type="text" name="username" class="form-control" id="floatingUsername" placeholder="Username" required>
+                                <label for="floatingUsername">Full Name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="name@example.com" required>
+                                <label for="floatingEmail">Email Address</label>
+                            </div>
+                            <div class="form-floating mb-4">
+                                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required>
+                                <label for="floatingPassword">Create Password</label>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-uppercase text-secondary">I want to:</label>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <select name="role" class="form-select form-select-lg">
+                                            <option value="traveler">Explore & Book Stays</option>
+                                            <option value="host">List My Property</option>
+                                            <option value="both">Both</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-red w-100 btn-lg py-3 fw-bold">
+                                <i class="fas fa-user-plus me-2"></i> Create Account
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="mb-0 text-secondary">Already have an account?</p>
+                            <a href="{{ url_for('login') }}" class="text-danger fw-bold text-decoration-none">Sign In Instead</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 text-muted small">
+                    <p class="mb-0">By signing up, you agree to our <a href="#" class="text-dark">Terms</a> and <a href="#" class="text-dark">Privacy Policy</a>.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

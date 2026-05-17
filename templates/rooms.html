@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Rooms - Traveller Stop{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Page Header -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="fw-bold display-5 mb-3">
+                {% if location %}
+                    Rooms in <span class="text-danger">{{ location }}</span>
+                {% else %}
+                    All Available Rooms
+                {% endif %}
+            </h2>
+            <p class="lead text-muted">Discover comfortable and affordable stays across Bangladesh</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-5 align-items-end">
+        <div class="col-lg-8">
+            <form method="GET" class="d-flex gap-3">
+                <div class="flex-grow-1">
+                    <input type="text" name="location" class="form-control form-control-lg" 
+                           placeholder="Search by location (Dhaka, Cox's Bazar, Sylhet...)" 
+                           value="{{ location|default('') }}">
+                </div>
+                <button type="submit" class="btn btn-danger btn-lg px-5">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+        </div>
+
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <span class="text-muted me-3">{{ rooms|length }} rooms found</span>
+            <a href="{{ url_for('rooms_page') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear Filter
+            </a>
+        </div>
+    </div>
+
+    <!-- Rooms Grid -->
+    <div class="row g-4">
+        {% for room in rooms %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card room-card h-100 shadow-sm border-0 overflow-hidden">
+                
+                <!-- Image -->
+                <div class="position-relative">
+                    <img src="{{ get_room_image(room.image_url) }}" 
+                         class="card-img-top" 
+                         alt="{{ room.title }}"
+                         style="height: 245px; object-fit: cover;">
+                    
+                    <div class="position-absolute top-3 end-3 bg-white px-3 py-1 rounded-pill shadow-sm">
+                        <strong class="text-danger fs-5">৳{{ room.price_per_night | int }}</strong>
+                        <small class="text-muted">/night</small>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-semibold mb-2">{{ room.title }}</h5>
+                    
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i> {{ room.location }}
+                    </p>
+
+                    <p class="text-muted small flex-grow-1">
+                        {{ room.description[:130]|default('Beautiful and comfortable stay') }}
+                        {% if room.description|length > 130 %}...{% endif %}
+                    </p>
+
+                    <!-- Amenities (if available) -->
+                    {% if room.amenities and room.amenities|length > 0 %}
+                    <div class="mb-3">
+                        {% for amenity in room.amenities[:3] %}
+                        <span class="badge bg-light text-dark me-1 mb-1">{{ amenity }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-auto d-flex gap-2">
+                        <a href="{{ url_for('room_detail', room_id=room.id) }}" 
+                           class="btn btn-outline-secondary rounded-pill fw-bold flex-fill btn-sm py-2">
+                            Details
+                        </a>
+                        <a href="{{ url_for('room_detail', room_id=room.id) }}" 
+                           class="btn btn-danger rounded-pill fw-bold flex-fill btn-sm py-2 shadow-sm">
+                            Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No Results -->
+    {% if not rooms %}
+    <div class="text-center py-5 my-5">
+        <i class="fas fa-house-circle-exclamation fa-5x text-muted mb-4"></i>
+        <h3>No rooms found</h3>
+        <p class="text-muted lead">We couldn't find any rooms matching your criteria.</p>
+        <a href="{{ url_for('rooms_page') }}" class="btn btn-danger btn-lg px-5">
+            Show All Rooms
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

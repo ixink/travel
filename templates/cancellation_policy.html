@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Cancellation Policy | Traveller Stop{% endblock %}
+
+{% block content %}
+
+<section class="info-hero">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-3">Cancellation Policy</h1>
+        <p class="lead opacity-75">Transparent and fair rules for cancellations and refunds.</p>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <div class="info-card">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <div class="policy-section">
+                    <h4><i class="fas fa-undo-alt"></i> Standard Cancellation</h4>
+                    <p class="text-muted">For most bookings, you can cancel and receive a full refund if the cancellation is made at least <strong>48 hours</strong> before the scheduled check-in time.</p>
+                </div>
+
+                <div class="policy-section">
+                    <h4><i class="fas fa-hourglass-half"></i> Late Cancellation</h4>
+                    <p class="text-muted">Cancellations made less than 48 hours but more than 24 hours before check-in will incur a <strong>50% cancellation fee</strong>.</p>
+                </div>
+
+                <div class="policy-section">
+                    <h4><i class="fas fa-times-circle"></i> Non-Refundable Period</h4>
+                    <p class="text-muted">Cancellations made within <strong>24 hours</strong> of the scheduled check-in time are non-refundable.</p>
+                </div>
+
+                <div class="policy-section">
+                    <h4><i class="fas fa-user-shield"></i> Admin Review Process</h4>
+                    <p class="text-muted">All cancellation requests for paid bookings are reviewed by our administration team. Once approved, refunds are processed within 5-7 business days to your original payment method or TS wallet.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="p-4 bg-light rounded-4 border">
+                    <h5 class="fw-bold mb-3">Host Cancellations</h5>
+                    <p class="small text-muted">In the rare event that a host needs to cancel your booking, you will receive a <strong>100% refund</strong> immediately, and our support team will help you find an alternative stay.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
