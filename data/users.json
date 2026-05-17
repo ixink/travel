@@ -1,0 +1,27 @@
+[
+    {
+        "id": 1,
+        "username": "admin",
+        "email": "admin@travellerstop.com",
+        "password": "scrypt:32768:8:1$Ks8ryyTYjgERAcFL$bb8c95dec984ba3a247dd909e614f1f9f1f38f95a0e07ae5206376dac2db0c0f32849a1a7968a13b80a88aa382104ca90a1ec26346ecc4b04c4af650ce4925e8",
+        "is_admin": true,
+        "role": "both",
+        "created_at": "2026-05-11T21:00:05.007742"
+    },
+    {
+        "id": 2,
+        "username": "Rakib",
+        "email": "mobashirrakib8452@gmail.com",
+        "password": "scrypt:32768:8:1$ZEFjiGxlUgMbHuUk$aa3bec27217dc353d7ac8fc80a0644b300fd0e4cead5390013c2875f8e7c55c52b07d7815b74ef8679e0edf9b717f6a6bb9ac11ffbfcec67249323a9f9a2f5ed",
+        "is_admin": false,
+        "role": "traveler",
+        "created_at": "2026-05-11T22:28:41.671351",
+        "phone": "01999071721",
+        "location": "Banani",
+        "profession": "student",
+        "qualification": "udsgydhjd",
+        "nid": "2424555163111",
+        "profile_pic": "uploads/profile_pics/20260516181843_post.png",
+        "nid_verified": true
+    }
+]

@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "booking_id": 7,
+        "user_id": 2,
+        "name": "MANUAL",
+        "method": "ADMIN_OVERRIDE",
+        "amount": 2000.0,
+        "sender": "ADMIN",
+        "trxid": "MANUAL_7_205854",
+        "status": "CONFIRMED",
+        "time": "2026-05-17T20:58:54.092155"
+    }
+]
