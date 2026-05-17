@@ -1,0 +1,9 @@
+instance/
+__pycache__/
+*.pyc
+.env
+data/*.json
+static/uploads/profile_pics/*
+static/uploads/rooms/*
+!static/uploads/profile_pics/.gitkeep
+!static/uploads/rooms/.gitkeep
