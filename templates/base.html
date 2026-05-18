@@ -195,5 +195,18 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     
     {% block scripts %}{% endblock %}
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        socket.on('update_online_users', function(data) {
+            const countElem = document.getElementById('online-count');
+            if (countElem) countElem.innerText = data.count;
+        });
+        socket.on('new_room_posted', function(data) {
+            // Optional: Show a small toast or notification
+            console.log('New room posted:', data);
+        });
+    </script>
 </body>
 </html>
