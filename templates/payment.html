@@ -40,6 +40,7 @@
                                 
                                 <form id="paymentForm">
                                     <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                    <input type="hidden" name="amount" value="{{ booking.total_amount }}">
 
                                     <div class="mb-4">
                                         <label class="form-label small text-uppercase fw-bold text-secondary">Select Method</label>
