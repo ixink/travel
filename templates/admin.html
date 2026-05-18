@@ -138,7 +138,7 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a href="{{ url_for('block_user', user_id=user.id) }}" 
+                                        <a href="{{ url_for('block_user', uid=user.id) }}" 
                                            class="btn btn-sm {{ 'btn-danger' if not user.blocked else 'btn-success' }}">
                                             {{ 'Block' if not user.blocked else 'Unblock' }}
                                         </a>
@@ -182,7 +182,7 @@
                                     </td>
                                     <td>
                                         {% if not user.nid_verified %}
-                                        <a href="{{ url_for('verify_nid', user_id=user.id) }}" 
+                                        <a href="{{ url_for('verify_nid', uid=user.id) }}" 
                                            class="btn btn-sm btn-success">
                                             <i class="fas fa-check"></i> Verify
                                         </a>
@@ -231,7 +231,7 @@
                                     <td>{{ p.time|datetimeformat }}</td>
                                     <td>
                                         {% if p.status != 'CONFIRMED' %}
-                                        <a href="{{ url_for('confirm_payment', payment_id=p.id) }}" 
+                                        <a href="{{ url_for('confirm_payment', pid=p.id) }}" 
                                            class="btn btn-sm btn-primary">
                                             Confirm
                                         </a>
@@ -292,14 +292,14 @@
                                     </td>
                                     <td class="pe-4 text-end">
                                         {% if b.payment_status == 'unpaid' %}
-                                        <a href="{{ url_for('admin_manual_confirm', booking_id=b.id) }}" 
+                                        <a href="{{ url_for('admin_manual_confirm', bid=b.id) }}" 
                                            class="btn btn-sm btn-outline-success rounded-pill px-3"
                                            onclick="return confirm('Manually confirm payment for this booking?');">
                                             Confirm
                                         </a>
                                         {% endif %}
                                         {% if b.status == 'cancel_requested' %}
-                                        <a href="{{ url_for('admin_approve_cancellation', booking_id=b.id) }}" 
+                                        <a href="{{ url_for('admin_approve_cancellation', bid=b.id) }}" 
                                            class="btn btn-sm btn-danger rounded-pill px-3"
                                            onclick="return confirm('Approve cancellation and mark as cancelled?');">
                                             Approve Cancel
