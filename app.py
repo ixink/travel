@@ -25,22 +25,22 @@ app = Flask(__name__,
             static_folder=os.path.join(BASE_DIR, 'static'),
             template_folder=os.path.join(BASE_DIR, 'templates'))
 
-# ===================== SECURITY =====================
+# ===================== PRODUCTION SECURITY =====================
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or secrets.token_hex(32)
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-app.config['SESSION_COOKIE_SECURE'] = not app.config['DEBUG']
+app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 604800
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
-app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
 if not db_url:
-    raise RuntimeError("DATABASE_URL not set. Please configure your database.")
+    raise RuntimeError("DATABASE_URL not set.")
 
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -50,7 +50,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+
+# ===================== SOCKETIO (Production Ready) =====================
+socketio = SocketIO(app, 
+                    cors_allowed_origins="*", 
+                    async_mode='eventlet',
+                    ping_timeout=60,
+                    ping_interval=25)
 
 oauth = OAuth(app)
 google = oauth.register(
@@ -115,8 +121,6 @@ class Booking(db.Model):
     payment_status = db.Column(db.String(20), default='unpaid')
     booked_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    payments = db.relationship('Payment', backref='booking', lazy=True)
-
 class Payment(db.Model):
     __tablename__ = 'payments'
     id = db.Column(db.Integer, primary_key=True)
@@ -139,24 +143,6 @@ class Coupon(db.Model):
     used = db.Column(db.Integer, default=0)
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-# ===================== SOCKETIO =====================
-online_users_count = 0
-counter_lock = threading.Lock()
-
-@socketio.on('connect')
-def handle_connect():
-    global online_users_count
-    with counter_lock:
-        online_users_count += 1
-    emit('update_online_users', {'count': max(1, online_users_count)}, broadcast=True)
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    global online_users_count
-    with counter_lock:
-        online_users_count = max(0, online_users_count - 1)
-    emit('update_online_users', {'count': max(1, online_users_count)}, broadcast=True)
 
 # ===================== HELPERS =====================
 def get_user_by_email(email):
@@ -183,27 +169,21 @@ def is_allowed_email(email):
     allowed = {'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'protonmail.com', 'me.com'}
     return email.split('@')[-1].lower() in allowed
 
-# ===================== IMAGE SAVE (Fast - No Resize) =====================
 def save_uploaded_file(file, folder_type):
     if not file or not file.filename:
         return None
-
     ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
     if ext not in {'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'}:
         return None
-
     try:
         filename = secure_filename(file.filename)
         unique_name = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
         subfolder = 'profile_pics' if folder_type == 'profile' else 'rooms'
-        
         folder = os.path.join(BASE_DIR, 'static', 'uploads', subfolder)
         os.makedirs(folder, exist_ok=True)
-
         full_path = os.path.join(folder, unique_name)
         file.save(full_path)
         return f"uploads/{subfolder}/{unique_name}"
-
     except Exception as e:
         logger.error(f"Image save error: {e}")
         return None
@@ -223,7 +203,7 @@ def inject_global_data():
     return {
         'current_user': user,
         'profile_complete': is_profile_complete(user),
-        'online_users': max(1, online_users_count),
+        'online_users': 1,  # Simplified for production
         'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or "https://images.unsplash.com/photo-1522771739844-649f6d175d97")
     }
 
@@ -427,7 +407,7 @@ def cancel_booking(booking_id):
         db.session.rollback()
         return jsonify({"success": False, "message": "Database error"})
 
-# ===================== AUTH ROUTES =====================
+# ===================== AUTH =====================
 @app.route('/login/google')
 def google_login():
     return google.authorize_redirect(url_for('google_authorize', _external=True))
@@ -439,7 +419,7 @@ def google_authorize():
         info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
         email = info.get('email')
         if not email:
-            flash("Could not retrieve email from Google.", "warning")
+            flash("Could not retrieve email.", "warning")
             return redirect(url_for('login'))
 
         user = User.query.filter_by(google_id=info.get('sub')).first()
@@ -550,17 +530,13 @@ def update_profile():
             uploaded_image = save_uploaded_file(file, 'profile')
             if uploaded_image:
                 user.profile_pic = uploaded_image
-            else:
-                return jsonify({"success": False, "message": "Invalid image format."}), 400
 
         db.session.commit()
-
         return jsonify({
             "success": True,
             "message": "Profile updated successfully!",
             "profile_pic": url_for('static', filename=user.profile_pic) if user.profile_pic else None
         })
-
     except Exception as e:
         db.session.rollback()
         logger.error(f"Profile Update Error: {e}")
@@ -676,4 +652,4 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=app.config['DEBUG'])
+    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
