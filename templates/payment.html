@@ -39,6 +39,7 @@
                                 <h5 class="fw-bold mb-4">How would you like to pay?</h5>
                                 
                                 <form id="paymentForm">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="booking_id" value="{{ booking.id }}">
                                     <input type="hidden" name="amount" value="{{ booking.total_amount }}">
 
@@ -164,6 +165,9 @@
 .bg-danger-subtle { background-color: #fef2f2 !important; }
 </style>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 const form = document.getElementById('paymentForm');
 form.addEventListener('submit', async function(e){
@@ -177,7 +181,10 @@ form.addEventListener('submit', async function(e){
     try {
         const response = await fetch("{{ url_for('pay') }}", {
             method: 'POST',
-            body: new FormData(form)
+            body: new FormData(form),
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
         });
         const data = await response.json();
         
@@ -195,5 +202,4 @@ form.addEventListener('submit', async function(e){
     }
 });
 </script>
-
 {% endblock %}
