@@ -1,212 +1,431 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Traveller Stop - Book unique rooms, homes and experiences across Bangladesh.">
-    <meta name="keywords" content="hotel, booking, bangladesh, dhaka, cox bazar, sylhet, stay, room rent">
-    <title>{% block title %}Traveller Stop - Book Unique Stays{% endblock %}</title>
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ range(1, 9999) | random }}">
-    
-    <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top transition" id="mainNavbar">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="TS" class="logo-img">
-            </a>
+{% block title %}Admin Dashboard - Traveller Stop{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Sidebar / Mobile Nav -->
+        <div class="col-lg-3 col-xl-2 bg-dark text-white p-4 admin-sidebar">
+            <div class="d-flex align-items-center mb-4 d-none d-lg-flex">
+                <h4 class="mb-0 text-danger fw-bold">
+                    <i class="fas fa-user-shield me-2"></i> Admin Panel
+                </h4>
+            </div>
             
-            <div class="d-flex align-items-center gap-2 d-lg-none">
-                {% if current_user %}
-                <a href="{{ url_for('post_room') }}" class="btn btn-red btn-sm rounded-pill px-3 fw-bold">
-                    <i class="fas fa-plus me-1"></i> Post Room
+            <div class="nav flex-column flex-row-mobile gap-2">
+                <a href="#" onclick="showSection('dashboard')" class="nav-link active" id="nav-dashboard">
+                    <i class="fas fa-tachometer-alt"></i> <span class="d-none d-lg-inline">Dashboard</span>
                 </a>
-                {% endif %}
-                <button class="navbar-toggler border-0 shadow-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <i class="fas fa-bars-staggered"></i>
-                </button>
+                <a href="#" onclick="showSection('bookings')" class="nav-link" id="nav-bookings">
+                    <i class="fas fa-calendar-check"></i> <span class="d-none d-lg-inline">Bookings</span>
+                </a>
+                <a href="#" onclick="showSection('users')" class="nav-link" id="nav-users">
+                    <i class="fas fa-users"></i> <span class="d-none d-lg-inline">Users</span>
+                </a>
+                <a href="#" onclick="showSection('payments')" class="nav-link" id="nav-payments">
+                    <i class="fas fa-money-bill-wave"></i> <span class="d-none d-lg-inline">Payments</span>
+                </a>
+                <a href="#" onclick="showSection('coupons')" class="nav-link" id="nav-coupons">
+                    <i class="fas fa-tags"></i> <span class="d-none d-lg-inline">Coupons</span>
+                </a>
+                <a href="#" onclick="showSection('nid')" class="nav-link" id="nav-nid">
+                    <i class="fas fa-id-card"></i> <span class="d-none d-lg-inline">NID</span>
+                </a>
             </div>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center gap-lg-4 py-4 py-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'index' %}active text-danger{% endif %}" 
-                           href="{{ url_for('index') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'rooms_page' %}active text-danger{% endif %}" 
-                           href="{{ url_for('rooms_page') }}">Explore</a>
-                    </li>
-                    
-                    {% if current_user %}
-                    <li class="nav-item d-none d-lg-block">
-                        <a href="{{ url_for('post_room') }}" class="btn btn-outline-light rounded-pill px-4 fw-bold btn-sm">
-                            <i class="fas fa-plus-circle me-1"></i> Become a Host
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown w-100 w-lg-auto">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center justify-content-center gap-2 bg-white bg-opacity-10 rounded-pill px-4 py-2 mt-3 mt-lg-0" 
-                           href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px;">
-                                <i class="fas fa-user text-white small"></i>
+
+            <hr class="text-secondary my-4 d-none d-lg-block">
+
+            <a href="{{ url_for('logout') }}" class="nav-link text-danger d-none d-lg-block">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-xl-10 p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 id="page-title" class="fw-bold">Admin Dashboard</h2>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <span class="text-muted">Welcome, Admin</span>
+                </div>
+            </div>
+
+            <!-- ==================== DASHBOARD ==================== -->
+            <div id="section-dashboard">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Total Users</h5>
+                                <h2 class="text-primary fw-bold">{{ users|length }}</h2>
                             </div>
-                            <span>{{ current_user.username }}</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end glass-card border-0 shadow-lg mt-3 p-2 animate slideIn">
-                            <li><a class="dropdown-item rounded-3 py-2" href="{{ url_for('profile') }}"><i class="fas fa-user-circle me-3 text-danger"></i> My Profile</a></li>
-                            <li><a class="dropdown-item rounded-3 py-2" href="{{ url_for('post_room') }}"><i class="fas fa-plus-circle me-3 text-danger"></i> Post a Room</a></li>
-                            {% if session.get('is_admin') %}
-                            <li><hr class="dropdown-divider opacity-10"></li>
-                            <li><a class="dropdown-item rounded-3 py-2 text-warning" href="{{ url_for('admin') }}"><i class="fas fa-crown me-3"></i> Admin Dashboard</a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider opacity-10"></li>
-                            <li><a class="dropdown-item rounded-3 py-2 text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-3"></i> Logout</a></li>
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link px-0 fw-semibold" href="{{ url_for('login') }}">Login</a>
-                    </li>
-                    <li class="nav-item w-100 w-lg-auto mt-3 mt-lg-0">
-                        <a class="btn btn-red btn-glow-red px-5 py-2 rounded-pill w-100 fw-bold" href="{{ url_for('signup') }}">Join Free</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Flash Messages -->
-    <div class="container mt-5 pt-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' if category == 'warning' else 'info' }} 
-                                alert-dismissible fade show flash-message" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Total Rooms</h5>
+                                <h2 class="text-success fw-bold">{{ rooms|length }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Pending Bookings</h5>
+                                <h2 class="text-warning fw-bold">
+                                    {{ bookings|selectattr('payment_status', 'equalto', 'unpaid')|list|length }}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm h-100 border-0">
+                            <div class="card-body text-center">
+                                <h5 class="text-muted">Total Revenue</h5>
+                                <h2 class="text-danger fw-bold">
+                                    ৳{{ payments|sum(attribute='amount')|default(0)|round(0) }}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== USERS MANAGEMENT ==================== -->
+            <div id="section-users" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Users Management</h4>
+                    <a href="{{ url_for('export_users') }}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export All Users (CSV)
+                    </a>
+                </div>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Location</th>
+                                    <th>NID</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>#{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone|default('—') }}</td>
+                                    <td>{{ user.location|default('—') }}</td>
+                                    <td>{{ user.nid|default('—') }}</td>
+                                    <td>
+                                        {% if user.blocked %}
+                                            <span class="badge bg-danger">Blocked</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('block_user', uid=user.id) }}" 
+                                           class="btn btn-sm {{ 'btn-danger' if not user.blocked else 'btn-success' }}">
+                                            {{ 'Block' if not user.blocked else 'Unblock' }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== NID VERIFICATION ==================== -->
+            <div id="section-nid" class="d-none">
+                <h4 class="mb-3">NID / Passport Verification</h4>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>NID Number</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                {% if user.nid %}
+                                <tr>
+                                    <td>#{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td><strong>{{ user.nid }}</strong></td>
+                                    <td>
+                                        <span class="badge {% if user.nid_verified %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ 'Verified' if user.nid_verified else 'Pending' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if not user.nid_verified %}
+                                        <a href="{{ url_for('verify_nid', uid=user.id) }}" 
+                                           class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Verify
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Verified</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== PAYMENTS ==================== -->
+            <div id="section-payments" class="d-none">
+                <h4 class="mb-3">Payment Records</h4>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Method</th>
+                                    <th>Amount</th>
+                                    <th>TRXID</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in payments %}
+                                <tr>
+                                    <td>#{{ p.id }}</td>
+                                    <td>{{ p.method }}</td>
+                                    <td>৳{{ p.amount }}</td>
+                                    <td><code>{{ p.trxid }}</code></td>
+                                    <td>
+                                        <span class="badge {% if p.status == 'PAID' or p.status == 'CONFIRMED' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ p.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ p.time|datetimeformat }}</td>
+                                    <td>
+                                        {% if p.status != 'CONFIRMED' %}
+                                        <a href="{{ url_for('confirm_payment', pid=p.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            Confirm
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Confirmed</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== BOOKINGS ==================== -->
+            <div id="section-bookings" class="d-none">
+                <h4 class="mb-3">Booking Management</h4>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User ID</th>
+                                    <th>Room ID</th>
+                                    <th>Check-in</th>
+                                    <th>Check-out</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th class="pe-4 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for b in bookings %}
+                                <tr>
+                                    <td>#{{ b.id }}</td>
+                                    <td>#{{ b.user_id }}</td>
+                                    <td>#{{ b.room_id }}</td>
+                                    <td>{{ b.checkin }}</td>
+                                    <td>{{ b.checkout }}</td>
+                                    <td>৳{{ b.total_amount }}</td>
+                                    <td>
+                                        <span class="badge 
+                                        {% if b.status == 'confirmed' %}bg-success
+                                        {% elif b.status == 'pending_payment' %}bg-warning
+                                        {% elif b.status == 'cancel_requested' %}bg-info
+                                        {% elif b.status == 'cancelled' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                            {{ b.status|upper|replace('_', ' ') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if b.payment_status == 'paid' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ b.payment_status|upper }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        {% if b.payment_status == 'unpaid' %}
+                                        <a href="{{ url_for('admin_manual_confirm', bid=b.id) }}" 
+                                           class="btn btn-sm btn-outline-success rounded-pill px-3"
+                                           onclick="return confirm('Manually confirm payment for this booking?');">
+                                            Confirm
+                                        </a>
+                                        {% endif %}
+                                        {% if b.status == 'cancel_requested' %}
+                                        <a href="{{ url_for('admin_approve_cancellation', bid=b.id) }}" 
+                                           class="btn btn-sm btn-danger rounded-pill px-3"
+                                           onclick="return confirm('Approve cancellation and mark as cancelled?');">
+                                            Approve Cancel
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== COUPONS ==================== -->
+            <div id="section-coupons" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Coupon Management</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+                        <i class="fas fa-plus"></i> Add New Coupon
+                    </button>
+                </div>
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Usage</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in coupons %}
+                                <tr>
+                                    <td>#{{ c.id }}</td>
+                                    <td><code>{{ c.code }}</code></td>
+                                    <td>{{ c.discount_percent }}%</td>
+                                    <td>{{ c.used }} / {{ c.max_uses }}</td>
+                                    <td>
+                                        <span class="badge {% if c.active %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ 'Active' if c.active else 'Inactive' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ c.created_at|datetimeformat }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Coupon Modal -->
+            <div class="modal fade" id="addCouponModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Coupon</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('admin_coupons') }}">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Coupon Code</label>
+                                    <input type="text" name="code" class="form-control" required style="text-transform: uppercase;">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Discount Percent (%)</label>
+                                    <input type="number" name="discount" class="form-control" min="1" max="100" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Max Uses</label>
+                                    <input type="number" name="max_uses" class="form-control" min="1" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Create Coupon</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
+</div>
 
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+{% endblock %}
 
-    <!-- Footer -->
-    <footer class="footer mt-auto py-5 bg-dark text-white">
-        <div class="container">
-            <div class="row g-4">
-                <!-- Brand Section -->
-                <div class="col-lg-4 mb-4">
-                    <div class="footer-brand mb-3">
-                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="footer-logo mb-3">
-                    </div>
-                    <p class="text-secondary mb-4 pe-lg-5">
-                        Bangladesh's most trusted platform for unique stays and local experiences. We connect travellers with amazing hosts across the country.
-                    </p>
-                    <div class="social-links d-flex gap-3">
-                        <a href="https://www.facebook.com/travellerstop" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.facebook.com/travellerstop" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.facebook.com/travellerstop" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="https://www.facebook.com/travellerstop" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-
-                <!-- Quick Links -->
-                <div class="col-6 col-md-3 col-lg-2">
-                    <h5 class="fw-bold mb-4">Company</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li><a href="{{ url_for('index') }}">Home</a></li>
-                        <li><a href="{{ url_for('rooms_page') }}">Browse Rooms</a></li>
-                        <li><a href="{{ url_for('about') }}">About Us</a></li>
-                        <li><a href="{{ url_for('services') }}">Our Services</a></li>
-                        <li><a href="{{ url_for('contact') }}">Contact Us</a></li>
-                    </ul>
-                </div>
-
-                <!-- Support -->
-                <div class="col-6 col-md-3 col-lg-2">
-                    <h5 class="fw-bold mb-4">Support</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li><a href="{{ url_for('help_center') }}">Help Center</a></li>
-                        <li><a href="{{ url_for('safety_tips') }}">Safety Tips</a></li>
-                        <li><a href="{{ url_for('terms') }}">Terms of Service</a></li>
-                        <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
-                        <li><a href="{{ url_for('cancellation_policy') }}">Cancellation</a></li>
-                    </ul>
-                </div>
-
-                <!-- Newsletter -->
-                <div class="col-lg-4 col-md-6">
-                    <h5 class="fw-bold mb-4">Join Our Community</h5>
-                    <p class="text-secondary mb-4">Subscribe to our newsletter for exclusive travel deals and local guides.</p>
-                    <form class="newsletter-form position-relative">
-                        <div class="input-group mb-3">
-                            <input type="email" class="form-control bg-transparent border-secondary text-white py-3 ps-4" placeholder="Enter your email" required>
-                            <button class="btn btn-red px-4" type="submit">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </form>
-                    <div class="payment-methods mt-4">
-                        <small class="text-secondary d-block mb-3 text-uppercase fw-bold">Secure Payment Partners</small>
-                        <div class="d-flex gap-3 align-items-center opacity-75">
-                            <img src="https://freelogopng.com/images/all_img/1656234782bkash-app-logo.png" height="24" alt="bKash">
-                            <img src="https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png" height="24" alt="Nagad">
-                            <img src="https://images.seeklogo.com/logo-png/31/1/dutch-bangla-rocket-logo-png_seeklogo-317692.png" height="24" alt="Rocket">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="my-5 border-secondary opacity-25">
-
-            <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <p class="text-secondary small mb-0">&copy; 2026 Traveller Stop Ltd. All Rights Reserved.</p>
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <p class="text-secondary small mb-0">Designed with <i class="fas fa-heart text-danger mx-1"></i> for Bangladesh</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}
+<script>
+function showSection(section) {
+    // Hide all sections
+    document.querySelectorAll('[id^="section-"]').forEach(el => {
+        el.classList.add('d-none');
+    });
     
-    <!-- Custom Script -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    
-    {% block scripts %}{% endblock %}
-    <!-- Socket.IO -->
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script>
-        const socket = io();
-        socket.on('update_online_users', function(data) {
-            const countElem = document.getElementById('online-count');
-            if (countElem) countElem.innerText = data.count;
-        });
-        socket.on('new_room_posted', function(data) {
-            // Optional: Show a small toast or notification
-            console.log('New room posted:', data);
-        });
-    </script>
-</body>
-</html>
+    // Show selected
+    const target = document.getElementById(`section-${section}`);
+    if (target) target.classList.remove('d-none');
+
+    // Update active nav
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    const activeLink = document.getElementById(`nav-${section}`);
+    if (activeLink) activeLink.classList.add('active');
+
+    // Update title
+    const titles = {
+        'dashboard': 'Admin Dashboard',
+        'bookings': 'Booking Management',
+        'users': 'Users Management',
+        'payments': 'Payment Records',
+        'coupons': 'Coupon Management',
+        'nid': 'NID Verification'
+    };
+    document.getElementById('page-title').textContent = titles[section] || 'Admin Panel';
+}
+
+// Initialize on load
+window.onload = function() {
+    showSection('dashboard');
+};
+</script>
+{% endblock %}
