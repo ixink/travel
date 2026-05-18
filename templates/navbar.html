@@ -14,7 +14,7 @@
                 <li class="nav-item"><a class="nav-link" href="/rooms">Browse Rooms</a></li>
                 <li class="nav-item"><a class="nav-link" href="/post-room">List Your Room</a></li>
                 
-                {% if session.user_id %}
+                {% if current_user %}
                     <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
                     <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
                 {% else %}
