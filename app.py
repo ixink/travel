@@ -27,7 +27,7 @@ app = Flask(__name__,
             static_folder=os.path.join(BASE_DIR, 'static'),
             template_folder=os.path.join(BASE_DIR, 'templates'))
 
-# ===================== SECURITY CONFIG =====================
+# ===================== SECURITY =====================
 app.config['DOMAIN'] = os.getenv('DOMAIN', 'travellerstop.com')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or secrets.token_hex(32)
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
@@ -222,7 +222,7 @@ def is_allowed_email(email):
     allowed = {'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'protonmail.com', 'me.com'}
     return email.split('@')[-1].lower() in allowed
 
-# ===================== TEMPLATE FILTERS & CONTEXT =====================
+# ===================== TEMPLATE & SECURITY =====================
 @app.template_filter('datetimeformat')
 def datetimeformat(value, fmt='%Y-%m-%d'):
     if not value: return ""
@@ -243,19 +243,20 @@ def inject_global_data():
 
 @app.after_request
 def add_security_headers(response):
-    for k, v in {
+    headers = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'X-XSS-Protection': '1; mode=block',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
         'Referrer-Policy': 'strict-origin-when-cross-origin'
-    }.items():
+    }
+    for k, v in headers.items():
         response.headers[k] = v
 
     csp = ("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://kit.fontawesome.com https://cdnjs.cloudflare.com 'unsafe-inline'; "
-           "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://use.fontawesome.com; "
-           "img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com https://use.fontawesome.com; "
-           "connect-src 'self' wss: https:; frame-src 'self' https://accounts.google.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests;")
+           "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+           "img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; "
+           "connect-src 'self' wss: https:; frame-src 'self' https://accounts.google.com; object-src 'none';")
     response.headers['Content-Security-Policy'] = csp
     return response
 
@@ -303,17 +304,15 @@ def rooms_page():
 @app.route('/room/<int:room_id>')
 def room_detail(room_id):
     room = db.session.get(Room, room_id)
-    if not room:
-        return redirect(url_for('rooms_page'))
+    if not room: return redirect(url_for('rooms_page'))
     return render_template('room_detail.html', room=room)
 
 @app.route('/post-room', methods=['GET', 'POST'])
 def post_room():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+    if 'user_id' not in session: return redirect(url_for('login'))
     user = get_user_by_id(session['user_id'])
     if not user or not is_profile_complete(user):
-        flash('Please complete your profile and NID verification first.', 'warning')
+        flash('Please complete your profile first.', 'warning')
         return redirect(url_for('profile'))
 
     if request.method == 'POST':
@@ -332,12 +331,11 @@ def post_room():
             )
             db.session.add(room)
             db.session.commit()
-            socketio.emit('new_room_posted', {'title': room.title, 'location': room.location}, broadcast=True)
             flash('Room posted successfully!', 'success')
             return redirect(url_for('profile'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Error posting room: {str(e)}', 'danger')
+            flash(f'Error: {str(e)}', 'danger')
     return render_template('post_room.html')
 
 @app.route('/edit-room/<int:room_id>', methods=['GET', 'POST'])
@@ -353,14 +351,13 @@ def edit_room(room_id):
             room.price_per_night = float(request.form['price'])
             room.amenities = request.form.getlist('amenities')
             img = save_uploaded_file(request.files.get('room_image'), 'room')
-            if img:
-                room.image_url = img
+            if img: room.image_url = img
             db.session.commit()
             flash('Room updated successfully!', 'success')
             return redirect(url_for('profile'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Error updating room: {str(e)}', 'danger')
+            flash(f'Error: {str(e)}', 'danger')
     return render_template('edit_room.html', room=room)
 
 @app.route('/delete-room/<int:room_id>', methods=['POST'])
@@ -379,9 +376,10 @@ def delete_room(room_id):
         flash('Room deleted!', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Error deleting room: {str(e)}', 'danger')
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('profile'))
 
+# ===================== BOOKING & PAYMENT =====================
 @app.route('/book/<int:room_id>', methods=['POST'])
 def book_room(room_id):
     if 'user_id' not in session: return redirect(url_for('login'))
@@ -390,7 +388,8 @@ def book_room(room_id):
         flash('Please complete your profile first.', 'warning')
         return redirect(url_for('profile'))
 
-    ci, co = request.form.get('checkin'), request.form.get('checkout')
+    ci = request.form.get('checkin')
+    co = request.form.get('checkout')
     try:
         nights = (datetime.strptime(co, '%Y-%m-%d') - datetime.strptime(ci, '%Y-%m-%d')).days
     except:
@@ -399,7 +398,7 @@ def book_room(room_id):
 
     room = db.session.get(Room, room_id)
     if not room or nights <= 0:
-        flash('Invalid room or duration.', 'danger')
+        flash('Invalid booking.', 'danger')
         return redirect(url_for('room_detail', room_id=room_id))
 
     total = room.price_per_night * nights
@@ -419,7 +418,7 @@ def book_room(room_id):
         )
         db.session.add(booking)
         db.session.commit()
-        flash('Booking created successfully! Please complete payment.', 'success')
+        flash('Booking created! Complete payment.', 'success')
         return redirect(url_for('payment_page', booking_id=booking.id))
     except Exception as e:
         db.session.rollback()
@@ -445,23 +444,19 @@ def pay():
         name = request.form.get('name', 'User')
         sender = request.form.get('sender', '')
 
-        if not trx:
-            return jsonify({"status": "failed", "msg": "Transaction ID is required"})
+        if not trx: return jsonify({"status": "failed", "msg": "Transaction ID required"})
         if Payment.query.filter_by(trxid=trx).first():
             return jsonify({"status": "failed", "msg": "TRXID already used"})
 
         booking = db.session.get(Booking, bid)
-        if not booking:
-            return jsonify({"status": "failed", "msg": "Booking not found"})
+        if not booking: return jsonify({"status": "failed", "msg": "Booking not found"})
 
-        p = Payment(
-            booking_id=bid, user_id=session['user_id'], name=name,
-            method=method, amount=amt, sender=sender, trxid=trx, status='PENDING'
-        )
+        p = Payment(booking_id=bid, user_id=session['user_id'], name=name,
+                    method=method, amount=amt, sender=sender, trxid=trx)
         db.session.add(p)
         db.session.commit()
         socketio.emit('payment_status_update', {'booking_id': bid, 'status': 'PENDING'}, broadcast=True)
-        return jsonify({"status": "success", "msg": "Payment submitted successfully. Waiting for admin confirmation."})
+        return jsonify({"status": "success", "msg": "Payment submitted. Waiting for confirmation."})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Payment error: {e}")
@@ -469,13 +464,9 @@ def pay():
 
 @app.route('/cancel-booking/<int:booking_id>', methods=['POST'])
 def cancel_booking(booking_id):
-    if 'user_id' not in session:
-        return jsonify({"success": False}), 401
+    if 'user_id' not in session: return jsonify({"success": False}), 401
     b = db.session.get(Booking, booking_id)
-    if not b or b.user_id != session['user_id']:
-        return jsonify({"success": False}), 403
-    if b.status in ['cancelled', 'cancel_requested']:
-        return jsonify({"success": False})
+    if not b or b.user_id != session['user_id']: return jsonify({"success": False}), 403
     try:
         b.status = 'cancel_requested' if b.payment_status == 'paid' else 'cancelled'
         db.session.commit()
@@ -484,7 +475,7 @@ def cancel_booking(booking_id):
         db.session.rollback()
         return jsonify({"success": False, "message": "Database error"})
 
-# ===================== AUTH ROUTES =====================
+# ===================== AUTH =====================
 @app.route('/login/google')
 def google_login():
     return google.authorize_redirect(url_for('google_authorize', _external=True))
@@ -496,7 +487,7 @@ def google_authorize():
         info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
         email = info.get('email')
         if not email:
-            flash("Could not retrieve email from Google.", "warning")
+            flash("Could not get email from Google.", "warning")
             return redirect(url_for('login'))
 
         user = User.query.filter_by(google_id=info.get('sub')).first()
@@ -505,13 +496,8 @@ def google_authorize():
             if user:
                 user.google_id = info.get('sub')
             else:
-                user = User(
-                    username=info.get('name', email.split('@')[0]),
-                    email=email,
-                    google_id=info.get('sub'),
-                    profile_pic=info.get('picture', ''),
-                    role='traveler'
-                )
+                user = User(username=info.get('name', email.split('@')[0]), email=email,
+                           google_id=info.get('sub'), role='traveler')
                 db.session.add(user)
             db.session.commit()
 
@@ -526,7 +512,7 @@ def google_authorize():
         return redirect(url_for('admin' if user.is_admin else 'profile'))
     except Exception as e:
         logger.error(f"Google Auth Error: {e}")
-        flash("Google authentication failed.", "warning")
+        flash("Google login failed.", "warning")
         return redirect(url_for('login'))
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -537,7 +523,7 @@ def signup():
         password = request.form.get('password', '')
 
         if not is_allowed_email(email):
-            flash('Please use a valid email address.', 'danger')
+            flash('Please use a valid email.', 'danger')
             return redirect(url_for('signup'))
         if get_user_by_email(email):
             flash('Email already registered!', 'danger')
@@ -572,7 +558,7 @@ def login():
             session['username'] = u.username
             session['is_admin'] = u.is_admin
             return redirect(url_for('admin' if u.is_admin else 'profile'))
-        flash('Invalid email or password.', 'danger')
+        flash('Invalid credentials.', 'danger')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -602,22 +588,35 @@ def update_profile():
         return jsonify({"success": False, "message": "User not found."}), 404
 
     try:
+        logger.info(f"Profile update started for user {user.id}")
+
         # Text fields
-        for field in ['phone', 'location', 'profession', 'qualification', 'nid']:
+        fields = ['phone', 'location', 'profession', 'qualification', 'nid']
+        for field in fields:
             if field in request.form:
-                val = request.form.get(field, '').strip()
-                setattr(user, field, val if val else None)
+                value = request.form.get(field, '').strip()
+                setattr(user, field, value if value else None)
 
         # Profile Picture
         file = request.files.get('profile_pic')
         if file and file.filename:
-            uploaded = save_uploaded_file(file, 'profile')
-            if uploaded:
-                user.profile_pic = uploaded
+            uploaded_image = save_uploaded_file(file, 'profile')
+            if uploaded_image:
+                # Delete old image if exists
+                if user.profile_pic and not user.profile_pic.startswith('http'):
+                    try:
+                        old_path = os.path.join(BASE_DIR, 'static', user.profile_pic)
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    except:
+                        pass
+                user.profile_pic = uploaded_image
             else:
                 return jsonify({"success": False, "message": "Invalid image format."}), 400
 
         db.session.commit()
+        logger.info(f"Profile updated successfully for user {user.id}")
+
         return jsonify({
             "success": True,
             "message": "Profile updated successfully!",
@@ -626,14 +625,13 @@ def update_profile():
 
     except Exception as e:
         db.session.rollback()
-        logger.error(f"UPDATE PROFILE ERROR: {str(e)}")
-        return jsonify({"success": False, "message": str(e)}), 500
+        logger.error(f"UPDATE PROFILE ERROR (User {user.id}): {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": "Server error. Please try again."}), 500
 
-# ===================== ADMIN ROUTES =====================
+# ===================== ADMIN =====================
 @app.route('/admin')
 def admin():
-    if not session.get('is_admin'):
-        return redirect(url_for('index'))
+    if not session.get('is_admin'): return redirect(url_for('index'))
     return render_template('admin.html',
                          users=User.query.all(),
                          rooms=Room.query.all(),
@@ -695,17 +693,15 @@ def admin_coupons():
     if not session.get('is_admin'): return redirect(url_for('index'))
     if request.method == 'POST':
         try:
-            c = Coupon(
-                code=request.form['code'].upper(),
-                discount_percent=int(request.form['discount']),
-                max_uses=int(request.form['max_uses'])
-            )
+            c = Coupon(code=request.form['code'].upper(),
+                      discount_percent=int(request.form['discount']),
+                      max_uses=int(request.form['max_uses']))
             db.session.add(c)
             db.session.commit()
-            flash('Coupon created successfully!', 'success')
+            flash('Coupon created!', 'success')
         except Exception as e:
             db.session.rollback()
-            flash(f"Error: {str(e)}", "danger")
+            flash(f'Error: {str(e)}', 'danger')
     return render_template('admin_coupons.html', coupons=Coupon.query.all())
 
 @app.route('/admin/export-users')
@@ -742,17 +738,12 @@ def init_db():
         admin_email = os.getenv('ADMIN_EMAIL', 'admin@travellerstop.com')
         admin_pass = os.getenv('ADMIN_PASSWORD', 'admin123')
         if not User.query.filter_by(email=admin_email).first():
-            admin = User(
-                username='Admin',
-                email=admin_email,
-                password=generate_password_hash(admin_pass),
-                is_admin=True,
-                role='admin',
-                nid_verified=True
-            )
+            admin = User(username='Admin', email=admin_email,
+                        password=generate_password_hash(admin_pass),
+                        is_admin=True, role='admin', nid_verified=True)
             db.session.add(admin)
             db.session.commit()
-            logger.info(f"✅ Admin account created: {admin_email}")
+            logger.info(f"✅ Admin created: {admin_email}")
 
 if __name__ == '__main__':
     init_db()
