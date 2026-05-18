@@ -131,7 +131,7 @@
                                     <td>{{ user.location|default('—') }}</td>
                                     <td>{{ user.nid|default('—') }}</td>
                                     <td>
-                                        {% if user.get('blocked') %}
+                                        {% if user.blocked %}
                                             <span class="badge bg-danger">Blocked</span>
                                         {% else %}
                                             <span class="badge bg-success">Active</span>
@@ -139,8 +139,8 @@
                                     </td>
                                     <td>
                                         <a href="{{ url_for('block_user', user_id=user.id) }}" 
-                                           class="btn btn-sm {{ 'btn-danger' if not user.get('blocked') else 'btn-success' }}">
-                                            {{ 'Block' if not user.get('blocked') else 'Unblock' }}
+                                           class="btn btn-sm {{ 'btn-danger' if not user.blocked else 'btn-success' }}">
+                                            {{ 'Block' if not user.blocked else 'Unblock' }}
                                         </a>
                                     </td>
                                 </tr>
@@ -176,12 +176,12 @@
                                     <td>{{ user.email }}</td>
                                     <td><strong>{{ user.nid }}</strong></td>
                                     <td>
-                                        <span class="badge {% if user.get('nid_verified') %}bg-success{% else %}bg-warning{% endif %}">
-                                            {{ 'Verified' if user.get('nid_verified') else 'Pending' }}
+                                        <span class="badge {% if user.nid_verified %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ 'Verified' if user.nid_verified else 'Pending' }}
                                         </span>
                                     </td>
                                     <td>
-                                        {% if not user.get('nid_verified') %}
+                                        {% if not user.nid_verified %}
                                         <a href="{{ url_for('verify_nid', user_id=user.id) }}" 
                                            class="btn btn-sm btn-success">
                                             <i class="fas fa-check"></i> Verify
