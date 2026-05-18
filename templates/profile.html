@@ -249,6 +249,7 @@
             </div>
             <div class="modal-body p-4">
                 <form id="profileForm" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div id="modalAlert" class="alert d-none small py-2"></div>
 
                     <div class="mb-4">
@@ -290,6 +291,9 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 async function cancelBooking(id, paymentStatus) {
     let confirmMsg = "Are you sure you want to cancel this booking?";
@@ -302,7 +306,10 @@ async function cancelBooking(id, paymentStatus) {
     try {
         const response = await fetch(`/cancel-booking/${id}`, { 
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
         });
         const result = await response.json();
         if (result.success) {
@@ -317,7 +324,8 @@ async function cancelBooking(id, paymentStatus) {
 }
 
 function editProfile() {
-    const modal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+    const modalEl = document.getElementById('editProfileModal');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
     modal.show();
 }
 
@@ -331,7 +339,13 @@ async function saveProfile(btn) {
     alertDiv.classList.add('d-none');
     
     try {
-        const response = await fetch('/update-profile', { method: 'POST', body: formData });
+        const response = await fetch('/update-profile', { 
+            method: 'POST', 
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        });
         const result = await response.json();
         
         if (result.success) {
@@ -364,5 +378,4 @@ async function saveProfile(btn) {
 .bg-info-subtle { background-color: #e0f2fe !important; }
 .bg-secondary-subtle { background-color: #f1f5f9 !important; }
 </style>
-
 {% endblock %}
