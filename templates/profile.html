@@ -8,80 +8,54 @@
 
             <!-- LEFT SIDEBAR -->
             <div class="col-lg-4">
-
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden sticky-top profile-sidebar">
 
                     <div class="profile-cover"></div>
 
                     <div class="card-body text-center p-4">
 
-                        {% if user.profile_pic %}
-                            <img src="{{ url_for('static', filename=user.profile_pic) }}"
-                                 class="profile-avatar shadow"
-                                 alt="Profile">
-                        {% else %}
-                            <img src="https://ui-avatars.com/api/?name={{ user.username }}"
-                                 class="profile-avatar shadow"
-                                 alt="Profile">
-                        {% endif %}
+                        <!-- Profile Picture -->
+                        <img id="currentProfilePic"
+                             src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else 'https://ui-avatars.com/api/?name=' + user.username }}"
+                             class="profile-avatar shadow"
+                             alt="Profile">
 
-                        <h3 class="fw-bold mt-3 mb-1">
-                            {{ user.username }}
-                        </h3>
-
-                        <p class="text-muted small mb-3">
-                            {{ user.email }}
-                        </p>
+                        <h3 class="fw-bold mt-3 mb-1">{{ user.username }}</h3>
+                        <p class="text-muted small mb-3">{{ user.email }}</p>
 
                         {% if user.nid_verified %}
-                        <span class="badge bg-success rounded-pill px-3 py-2">
-                            <i class="fas fa-check-circle me-1"></i>
-                            Verified User
-                        </span>
+                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                <i class="fas fa-check-circle me-1"></i> Verified User
+                            </span>
                         {% else %}
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-                            <i class="fas fa-exclamation-triangle me-1"></i>
-                            Not Verified
-                        </span>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Not Verified
+                            </span>
                         {% endif %}
 
                         <hr>
 
                         <div class="text-start">
-
                             <div class="mb-3">
-                                <small class="text-muted d-block">
-                                    Phone
-                                </small>
-                                <span class="fw-semibold">
-                                    {{ user.phone or 'Not Added' }}
-                                </span>
+                                <small class="text-muted d-block">Phone</small>
+                                <span class="fw-semibold">{{ user.phone or 'Not Added' }}</span>
                             </div>
-
                             <div class="mb-3">
-                                <small class="text-muted d-block">
-                                    Location
-                                </small>
-                                <span class="fw-semibold">
-                                    {{ user.location or 'Not Added' }}
-                                </span>
+                                <small class="text-muted d-block">Location</small>
+                                <span class="fw-semibold">{{ user.location or 'Not Added' }}</span>
                             </div>
-
                             <div class="mb-3">
-                                <small class="text-muted d-block">
-                                    Profession
-                                </small>
-                                <span class="fw-semibold">
-                                    {{ user.profession or 'Not Added' }}
-                                </span>
+                                <small class="text-muted d-block">Profession</small>
+                                <span class="fw-semibold">{{ user.profession or 'Not Added' }}</span>
                             </div>
-
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Qualification</small>
+                                <span class="fw-semibold">{{ user.qualification or 'Not Added' }}</span>
+                            </div>
                         </div>
 
-                        <button class="btn btn-danger w-100 rounded-3 mt-3"
-                                onclick="openProfileModal()">
-                            <i class="fas fa-user-edit me-2"></i>
-                            Edit Profile
+                        <button class="btn btn-danger w-100 rounded-3 mt-3" onclick="openProfileModal()">
+                            <i class="fas fa-user-edit me-2"></i> Edit Profile
                         </button>
 
                     </div>
@@ -91,154 +65,83 @@
             <!-- MAIN CONTENT -->
             <div class="col-lg-8">
 
-                <!-- BOOKINGS -->
+                <!-- My Bookings -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold mb-0">
-                        My Bookings
-                    </h4>
+                    <h4 class="fw-bold mb-0">My Bookings</h4>
                 </div>
 
                 <div class="card border-0 shadow-sm rounded-4 mb-5">
                     <div class="card-body">
-
                         {% if my_bookings %}
-
                             {% for booking in my_bookings %}
-
                             <div class="booking-item">
-
                                 <div class="d-flex justify-content-between flex-wrap gap-3">
-
                                     <div>
-                                        <h5 class="fw-bold mb-1">
-                                            {{ booking.room.title }}
-                                        </h5>
-
+                                        <h5 class="fw-bold mb-1">{{ booking.room.title }}</h5>
                                         <div class="small text-muted">
                                             {{ booking.checkin }} → {{ booking.checkout }}
                                         </div>
                                     </div>
-
                                     <div class="text-end">
-
-                                        <div class="fw-bold text-danger fs-5">
-                                            ৳{{ booking.total_amount }}
-                                        </div>
-
-                                        <span class="badge bg-dark rounded-pill mt-1">
-                                            {{ booking.status }}
-                                        </span>
-
+                                        <div class="fw-bold text-danger fs-5">৳{{ booking.total_amount }}</div>
+                                        <span class="badge bg-dark rounded-pill mt-1">{{ booking.status|upper }}</span>
                                     </div>
                                 </div>
-
                             </div>
-
                             {% endfor %}
-
                         {% else %}
-
                             <div class="text-center py-5">
-                                <h5 class="fw-bold">
-                                    No Bookings Yet
-                                </h5>
-
-                                <a href="/rooms"
-                                   class="btn btn-danger rounded-pill px-4 mt-3">
+                                <h5 class="fw-bold">No Bookings Yet</h5>
+                                <a href="/rooms" class="btn btn-danger rounded-pill px-4 mt-3">
                                     Explore Rooms
                                 </a>
                             </div>
-
                         {% endif %}
-
                     </div>
                 </div>
 
-                <!-- MY LISTINGS -->
+                <!-- My Listings -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-
-                    <h4 class="fw-bold mb-0">
-                        My Listings
-                    </h4>
-
-                    <a href="/post-room"
-                       class="btn btn-outline-danger rounded-pill">
-                        <i class="fas fa-plus me-1"></i>
-                        Add Property
+                    <h4 class="fw-bold mb-0">My Listings</h4>
+                    <a href="/post-room" class="btn btn-outline-danger rounded-pill">
+                        <i class="fas fa-plus me-1"></i> Add Property
                     </a>
-
                 </div>
 
                 <div class="row g-4">
-
                     {% if my_rooms %}
-
                         {% for room in my_rooms %}
-
                         <div class="col-md-6">
-
                             <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 room-card">
-
-                                <img src="{{ get_room_image(room.image_url) }}"
-                                     class="room-image"
-                                     alt="{{ room.title }}">
-
+                                <img src="{{ get_room_image(room.image_url) }}" 
+                                     class="room-image" alt="{{ room.title }}">
                                 <div class="card-body">
-
-                                    <h5 class="fw-bold">
-                                        {{ room.title }}
-                                    </h5>
-
+                                    <h5 class="fw-bold">{{ room.title }}</h5>
                                     <p class="text-muted small">
-                                        <i class="fas fa-map-marker-alt me-1"></i>
-                                        {{ room.location }}
+                                        <i class="fas fa-map-marker-alt me-1"></i> {{ room.location }}
                                     </p>
-
                                     <div class="d-flex gap-2">
-
-                                        <a href="{{ url_for('room_detail', room_id=room.id) }}"
-                                           class="btn btn-outline-dark btn-sm flex-fill rounded-pill">
-                                            View
-                                        </a>
-
-                                        <a href="{{ url_for('edit_room', room_id=room.id) }}"
-                                           class="btn btn-danger btn-sm flex-fill rounded-pill">
-                                            Edit
-                                        </a>
-
+                                        <a href="{{ url_for('room_detail', room_id=room.id) }}" 
+                                           class="btn btn-outline-dark btn-sm flex-fill rounded-pill">View</a>
+                                        <a href="{{ url_for('edit_room', room_id=room.id) }}" 
+                                           class="btn btn-danger btn-sm flex-fill rounded-pill">Edit</a>
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                         {% endfor %}
-
                     {% else %}
-
                         <div class="col-12">
-
                             <div class="card border-0 shadow-sm rounded-4">
                                 <div class="card-body text-center py-5">
-
-                                    <h5 class="fw-bold">
-                                        No Listings Yet
-                                    </h5>
-
-                                    <a href="/post-room"
-                                       class="btn btn-danger rounded-pill px-4 mt-3">
+                                    <h5 class="fw-bold">No Listings Yet</h5>
+                                    <a href="/post-room" class="btn btn-danger rounded-pill px-4 mt-3">
                                         Become a Host
                                     </a>
-
                                 </div>
                             </div>
-
                         </div>
-
                     {% endif %}
-
                 </div>
 
             </div>
@@ -246,166 +149,105 @@
     </div>
 </div>
 
-<!-- EDIT PROFILE MODAL -->
-<div class="modal fade"
-     id="profileModal"
-     tabindex="-1">
-
+<!-- ===================== EDIT PROFILE MODAL ===================== -->
+<div class="modal fade" id="profileModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-
-        <div class="modal-content border-0 rounded-4">
+        <div class="modal-content border-0 rounded-4 shadow">
 
             <div class="modal-header border-0">
-
-                <h5 class="fw-bold">
-                    Edit Profile
-                </h5>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"></button>
-
+                <h5 class="fw-bold mb-0">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body p-4">
+                <div id="profileAlert" class="alert d-none"></div>
 
-                <div id="profileAlert"
-                     class="alert d-none"></div>
+                <form id="profileForm" enctype="multipart/form-data">
 
-                <form id="profileForm"
-                      enctype="multipart/form-data">
+                    <!-- Profile Picture Preview -->
+                    <div class="mb-4 text-center">
+                        <img id="previewImage" 
+                             src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else 'https://ui-avatars.com/api/?name=' + user.username }}"
+                             class="rounded-circle mb-3" 
+                             style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <br>
+                        <input type="file" name="profile_pic" id="profilePicInput" accept="image/*" class="form-control">
+                    </div>
 
-                    <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Profile Picture
-                        </label>
-
-                        <input type="file"
-                               name="profile_pic"
-                               class="form-control">
-
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input type="text" name="phone" value="{{ user.phone or '' }}" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Location</label>
+                            <input type="text" name="location" value="{{ user.location or '' }}" class="form-control">
+                        </div>
                     </div>
 
                     <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Phone
-                        </label>
-
-                        <input type="text"
-                               name="phone"
-                               value="{{ user.phone or '' }}"
-                               class="form-control">
-
+                        <label class="form-label fw-semibold">Profession</label>
+                        <input type="text" name="profession" value="{{ user.profession or '' }}" class="form-control">
                     </div>
 
                     <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Location
-                        </label>
-
-                        <input type="text"
-                               name="location"
-                               value="{{ user.location or '' }}"
-                               class="form-control">
-
+                        <label class="form-label fw-semibold">Qualification</label>
+                        <input type="text" name="qualification" value="{{ user.qualification or '' }}" class="form-control">
                     </div>
 
                     <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Profession
-                        </label>
-
-                        <input type="text"
-                               name="profession"
-                               value="{{ user.profession or '' }}"
-                               class="form-control">
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Qualification
-                        </label>
-
-                        <input type="text"
-                               name="qualification"
-                               value="{{ user.qualification or '' }}"
-                               class="form-control">
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            NID Number
-                        </label>
-
-                        <input type="text"
-                               name="nid"
-                               value="{{ user.nid or '' }}"
-                               class="form-control">
-
+                        <label class="form-label fw-semibold">NID Number</label>
+                        <input type="text" name="nid" value="{{ user.nid or '' }}" class="form-control">
                     </div>
 
                 </form>
-
             </div>
 
             <div class="modal-footer border-0">
-
-                <button class="btn btn-secondary rounded-pill px-4"
-                        data-bs-dismiss="modal">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
                     Cancel
                 </button>
-
-                <button class="btn btn-danger rounded-pill px-4"
-                        id="saveBtn"
-                        onclick="saveProfile()">
+                <button type="button" class="btn btn-danger rounded-pill px-5" id="saveBtn" onclick="saveProfile()">
                     Save Changes
                 </button>
-
             </div>
 
         </div>
-
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-
 function openProfileModal() {
-
-    const modal = new bootstrap.Modal(
-        document.getElementById('profileModal')
-    );
-
+    document.getElementById('profileAlert').classList.add('d-none');
+    const modal = new bootstrap.Modal(document.getElementById('profileModal'));
     modal.show();
 }
 
-async function saveProfile() {
+// Image Preview
+document.getElementById('profilePicInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('previewImage').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
 
+async function saveProfile() {
     const btn = document.getElementById('saveBtn');
+    const alertBox = document.getElementById('profileAlert');
+    const form = document.getElementById('profileForm');
 
     btn.disabled = true;
-
-    btn.innerHTML = `
-        <span class="spinner-border spinner-border-sm me-2"></span>
-        Saving...
-    `;
-
-    const form = document.getElementById('profileForm');
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
 
     const formData = new FormData(form);
 
     try {
-
         const response = await fetch('/update-profile', {
             method: 'POST',
             body: formData
@@ -413,67 +255,42 @@ async function saveProfile() {
 
         const data = await response.json();
 
-        const alertBox = document.getElementById('profileAlert');
-
         if (data.success) {
-
             alertBox.className = 'alert alert-success';
-
-            alertBox.innerHTML = data.message;
-
+            alertBox.textContent = data.message;
             alertBox.classList.remove('d-none');
 
+            // Reload after success
             setTimeout(() => {
-                location.reload();
-            }, 1000);
-
+                window.location.reload();
+            }, 1200);
         } else {
-
             alertBox.className = 'alert alert-danger';
-
-            alertBox.innerHTML = data.message;
-
+            alertBox.textContent = data.message || 'Update failed';
             alertBox.classList.remove('d-none');
-
+            
             btn.disabled = false;
-
             btn.innerHTML = 'Save Changes';
         }
-
     } catch (err) {
-
         console.error(err);
-
-        const alertBox = document.getElementById('profileAlert');
-
         alertBox.className = 'alert alert-danger';
-
-        alertBox.innerHTML = 'Something went wrong';
-
+        alertBox.textContent = 'Network error. Please try again.';
         alertBox.classList.remove('d-none');
-
+        
         btn.disabled = false;
-
         btn.innerHTML = 'Save Changes';
     }
 }
 </script>
 
 <style>
-
-.profile-page {
-    background: #f8fafc;
-}
-
-.profile-sidebar {
-    top: 100px;
-}
-
+.profile-page { background: #f8fafc; }
+.profile-sidebar { top: 100px; }
 .profile-cover {
-    height: 120px;
-    background: linear-gradient(135deg,#dc2626,#ef4444);
+    height: 130px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
 }
-
 .profile-avatar {
     width: 140px;
     height: 140px;
@@ -483,28 +300,21 @@ async function saveProfile() {
     margin-top: -70px;
     background: white;
 }
-
 .room-image {
     height: 220px;
     object-fit: cover;
 }
-
 .booking-item {
     padding: 20px 0;
     border-bottom: 1px solid #eee;
 }
-
-.booking-item:last-child {
-    border-bottom: none;
-}
-
+.booking-item:last-child { border-bottom: none; }
 .room-card {
-    transition: 0.3s;
+    transition: all 0.3s;
 }
-
 .room-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
 }
-
 </style>
 {% endblock %}
