@@ -122,25 +122,31 @@ async function saveProfile(btn) {
     const formData = new FormData(document.getElementById('profileForm'));
     const alertDiv = document.getElementById('modalAlert');
     const originalText = btn.innerHTML;
-    
+
     btn.disabled = true; 
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
     alertDiv.classList.add('d-none');
-    
+
     try {
-        const res = await fetch('/update-profile', { method: 'POST', body: formData });
-        if (!res.ok) throw new Error('Server returned ' + res.status);
+        const res = await fetch('/update-profile', { 
+            method: 'POST', 
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+
         const result = await res.json();
-        
+
         if (result.success) { 
+            // Instant feedback and reload
             alertDiv.className = 'alert alert-success small py-2'; 
             alertDiv.textContent = result.message; 
             alertDiv.classList.remove('d-none'); 
-            setTimeout(() => location.reload(), 1000); 
+            location.reload(); 
         } else { 
             throw new Error(result.message || "Update failed");
         }
     } catch (err) { 
+        console.error("Save Error:", err);
         alertDiv.className = 'alert alert-danger small py-2'; 
         alertDiv.textContent = err.message || "Connection error"; 
         alertDiv.classList.remove('d-none'); 
