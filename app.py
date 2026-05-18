@@ -13,7 +13,7 @@ from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 import secrets
 
-# ===================== CONFIGURATION =====================
+# ===================== LOAD ENVIRONMENT VARIABLES =====================
 load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -25,22 +25,23 @@ app = Flask(__name__,
             static_folder=os.path.join(BASE_DIR, 'static'),
             template_folder=os.path.join(BASE_DIR, 'templates'))
 
-# ===================== PRODUCTION SECURITY =====================
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or secrets.token_hex(32)
+# ===================== CONFIGURATION FROM .env =====================
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_SECURE'] = not app.config['DEBUG']
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 604800
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
-app.config['PREFERRED_URL_SCHEME'] = 'https'
+app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
+app.config['DOMAIN'] = os.getenv('DOMAIN', 'travellerstop.com')
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
 if not db_url:
-    raise RuntimeError("DATABASE_URL not set.")
+    raise RuntimeError("DATABASE_URL is not set in .env file!")
 
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -50,13 +51,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
-
-# ===================== SOCKETIO (Production Ready) =====================
-socketio = SocketIO(app, 
-                    cors_allowed_origins="*", 
-                    async_mode='eventlet',
-                    ping_timeout=60,
-                    ping_interval=25)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 oauth = OAuth(app)
 google = oauth.register(
@@ -144,6 +139,24 @@ class Coupon(db.Model):
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+# ===================== SOCKETIO =====================
+online_users_count = 0
+counter_lock = threading.Lock()
+
+@socketio.on('connect')
+def handle_connect():
+    global online_users_count
+    with counter_lock:
+        online_users_count += 1
+    emit('update_online_users', {'count': max(1, online_users_count)}, broadcast=True)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    global online_users_count
+    with counter_lock:
+        online_users_count = max(0, online_users_count - 1)
+    emit('update_online_users', {'count': max(1, online_users_count)}, broadcast=True)
+
 # ===================== HELPERS =====================
 def get_user_by_email(email):
     if not email: return None
@@ -203,7 +216,7 @@ def inject_global_data():
     return {
         'current_user': user,
         'profile_complete': is_profile_complete(user),
-        'online_users': 1,  # Simplified for production
+        'online_users': max(1, online_users_count),
         'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or "https://images.unsplash.com/photo-1522771739844-649f6d175d97")
     }
 
@@ -407,7 +420,7 @@ def cancel_booking(booking_id):
         db.session.rollback()
         return jsonify({"success": False, "message": "Database error"})
 
-# ===================== AUTH =====================
+# ===================== AUTH ROUTES =====================
 @app.route('/login/google')
 def google_login():
     return google.authorize_redirect(url_for('google_authorize', _external=True))
@@ -419,7 +432,7 @@ def google_authorize():
         info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
         email = info.get('email')
         if not email:
-            flash("Could not retrieve email.", "warning")
+            flash("Could not retrieve email from Google.", "warning")
             return redirect(url_for('login'))
 
         user = User.query.filter_by(google_id=info.get('sub')).first()
@@ -640,9 +653,9 @@ def cancellation_policy(): return render_template('cancellation_policy.html')
 def init_db():
     with app.app_context():
         db.create_all()
-        admin_email = os.getenv('ADMIN_EMAIL', 'admin@travellerstop.com')
-        admin_pass = os.getenv('ADMIN_PASSWORD', 'admin123')
-        if not User.query.filter_by(email=admin_email).first():
+        admin_email = os.getenv('ADMIN_EMAIL')
+        admin_pass = os.getenv('ADMIN_PASSWORD')
+        if admin_email and not User.query.filter_by(email=admin_email).first():
             admin = User(username='Admin', email=admin_email,
                         password=generate_password_hash(admin_pass),
                         is_admin=True, role='admin', nid_verified=True)
@@ -652,4 +665,4 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
+    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=app.config['DEBUG'])
