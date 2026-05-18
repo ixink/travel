@@ -35,8 +35,11 @@
                                 <label for="floatingEmail">Email Address</label>
                             </div>
                             <div class="form-floating mb-4">
-                                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required>
+                                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required minlength="8">
                                 <label for="floatingPassword">Create Password</label>
+                                <div class="form-text text-muted small mt-1 px-2">
+                                    Min 8 chars: Upper, Lower, Number & Special Char.
+                                </div>
                             </div>
                             
                             <div class="mb-4">
