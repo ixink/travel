@@ -36,8 +36,8 @@
 
                         <!-- Verification Badges -->
                         <div class="d-flex justify-content-center gap-2 mb-4">
-                            <span class="badge bg-{{ 'success' if user.get('nid_verified') else 'warning' }}-subtle text-{{ 'success' if user.get('nid_verified') else 'warning' }} border border-{{ 'success' if user.get('nid_verified') else 'warning' }}-subtle px-3 py-2 rounded-pill">
-                                <i class="fas fa-id-card me-1"></i> {{ 'NID Verified' if user.get('nid_verified') else 'Verify NID' }}
+                            <span class="badge bg-{{ 'success' if user.nid_verified else 'warning' }}-subtle text-{{ 'success' if user.nid_verified else 'warning' }} border border-{{ 'success' if user.nid_verified else 'warning' }}-subtle px-3 py-2 rounded-pill">
+                                <i class="fas fa-id-card me-1"></i> {{ 'NID Verified' if user.nid_verified else 'Verify NID' }}
                             </span>
                         </div>
 
