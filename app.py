@@ -30,7 +30,7 @@ app = Flask(__name__,
 
 # ===================== PRODUCTION SECURITY =====================
 # Website Configuration
-app.config['DOMAIN'] = 'travellerstop.com'
+app.config['DOMAIN'] = os.getenv('DOMAIN', 'travellerstop.com')
 
 # Use a secure secret key from environment or generate a random one for the session
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -38,7 +38,7 @@ if not app.config['SECRET_KEY']:
     logger.warning("SECRET_KEY not set. Generating a random key for this session.")
     app.config['SECRET_KEY'] = secrets.token_hex(32)
 
-# Dynadot API Configuration (Add these to your .env)
+# Dynadot API Configuration
 app.config['DYNADOT_API_KEY'] = os.getenv('DYNADOT_API_KEY')
 app.config['DYNADOT_SECRET_KEY'] = os.getenv('DYNADOT_SECRET_KEY')
 
@@ -51,7 +51,7 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 604800
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
-app.config['PREFERRED_URL_SCHEME'] = 'https' if not app.config['DEBUG'] else 'http'
+app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
@@ -64,7 +64,7 @@ def ensure_https():
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
 if not db_url:
-    raise RuntimeError("DATABASE_URL not set. Production database is required.")
+    raise RuntimeError("DATABASE_URL not set. Production database (PostgreSQL) is required.")
 
 # Fix for Heroku-style postgres URLs
 if db_url.startswith("postgres://"):
