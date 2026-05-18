@@ -2,61 +2,82 @@
 {% block title %}Login - Traveller Stop{% endblock %}
 
 {% block content %}
-<div class="bg-premium min-vh-100 d-flex align-items-center py-5">
+<div class="auth-wrapper min-vh-100 d-flex align-items-center py-5">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5 col-xl-4">
+            <div class="col-md-10 col-lg-8 col-xl-7">
                 
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold text-dark">Welcome Back</h2>
-                    <p class="text-secondary">Sign in to continue your journey</p>
-                </div>
-
-                <div class="card glass-card border-0">
-                    <div class="card-body p-4 p-lg-5">
-                        
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                {% for category, msg in messages %}
-                                    <div class="alert alert-{{ 'danger' if category=='danger' else 'success' }} rounded-3 small mb-4">
-                                        <i class="fas fa-exclamation-circle me-2"></i> {{ msg }}
+                <div class="card glass-card border-0 overflow-hidden shadow-lg">
+                    <div class="row g-0">
+                        <!-- Left Side: Image/Graphics (Desktop Only) -->
+                        <div class="col-lg-5 d-none d-lg-block auth-sidebar" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') center/cover;">
+                            <div class="h-100 d-flex flex-column justify-content-center p-5 text-white">
+                                <h3 class="fw-bold mb-4">Your Next Adventure Awaits</h3>
+                                <p class="small opacity-75">Sign in to access your bookings, saved stays, and personalized travel recommendations.</p>
+                                <div class="mt-4">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="fas fa-check-circle text-danger"></i>
+                                        <span class="small">5,000+ Verified Stays</span>
                                     </div>
-                                {% endfor %}
-                            {% endif %}
-                        {% endwith %}
-
-                        <form method="POST">
-                            <div class="form-floating mb-3">
-                                <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="name@example.com" required>
-                                <label for="floatingEmail">Email Address</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-check-circle text-danger"></i>
+                                        <span class="small">Secure Payments</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-floating mb-4">
-                                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required>
-                                <label for="floatingPassword">Password</label>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-red w-100 btn-lg py-3 fw-bold mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i> Sign In
-                            </button>
+                        </div>
 
-                            <div class="text-center my-3">
-                                <span class="text-muted small text-uppercase fw-bold">or</span>
+                        <!-- Right Side: Form -->
+                        <div class="col-lg-7 p-4 p-lg-5 bg-white">
+                            <div class="text-center mb-4">
+                                <h2 class="fw-bold text-dark">Welcome Back</h2>
+                                <p class="text-secondary small">Sign in to continue your journey</p>
                             </div>
 
-                            <a href="{{ url_for('google_login') }}" class="btn btn-outline-dark w-100 btn-lg py-3 fw-bold">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" width="20" class="me-2"> Continue with Google
-                            </a>
-                        </form>
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, msg in messages %}
+                                        <div class="alert alert-{{ 'danger' if category=='danger' else 'success' }} rounded-3 small mb-4 py-2">
+                                            <i class="fas fa-exclamation-circle me-2"></i> {{ msg }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
 
-                        <div class="text-center mt-4">
-                            <p class="mb-0 text-secondary">New to Traveller Stop?</p>
-                            <a href="{{ url_for('signup') }}" class="text-danger fw-bold text-decoration-none">Create an Account</a>
+                            <form method="POST">
+                                <div class="form-floating mb-3">
+                                    <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="name@example.com" required>
+                                    <label for="floatingEmail">Email Address</label>
+                                </div>
+                                <div class="form-floating mb-4">
+                                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required>
+                                    <label for="floatingPassword">Password</label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-red w-100 btn-lg py-3 fw-bold mb-3 shadow-sm">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                                </button>
+
+                                <div class="text-center my-3">
+                                    <span class="text-muted small text-uppercase fw-bold opacity-50">or continue with</span>
+                                </div>
+
+                                <a href="{{ url_for('google_login') }}" class="btn btn-outline-light w-100 btn-lg py-2 fw-bold border shadow-sm d-flex align-items-center justify-content-center gap-2 text-dark">
+                                    <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-google-icon-logo-png-transparent-svg-vector-bie-supply-14.png" width="22" alt="Google">
+                                    <span>Google Account</span>
+                                </a>
+                            </form>
+
+                            <div class="text-center mt-4 pt-3 border-top">
+                                <p class="mb-0 text-secondary small">New to Traveller Stop?</p>
+                                <a href="{{ url_for('signup') }}" class="text-danger fw-bold text-decoration-none small">Create a Free Account</a>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="text-center mt-4 text-muted small">
-                    <a href="{{ url_for('index') }}" class="text-muted text-decoration-none">
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('index') }}" class="text-muted text-decoration-none small opacity-75">
                         <i class="fas fa-arrow-left me-1"></i> Back to Home
                     </a>
                 </div>
@@ -65,4 +86,22 @@
         </div>
     </div>
 </div>
+
+<style>
+.auth-wrapper {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    position: relative;
+    overflow: hidden;
+}
+.auth-wrapper::before {
+    content: "";
+    position: absolute;
+    top: -10%; right: -10%; width: 400px; height: 400px;
+    background: rgba(230, 57, 70, 0.05);
+    border-radius: 50%;
+}
+.auth-sidebar {
+    min-height: 500px;
+}
+</style>
 {% endblock %}
