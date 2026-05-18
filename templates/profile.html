@@ -249,7 +249,6 @@
             </div>
             <div class="modal-body p-4">
                 <form id="profileForm" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div id="modalAlert" class="alert d-none small py-2"></div>
 
                     <div class="mb-4">
@@ -307,8 +306,7 @@ async function cancelBooking(id, paymentStatus) {
         const response = await fetch(`/cancel-booking/${id}`, { 
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
+                'Content-Type': 'application/json'
             }
         });
         const result = await response.json();
@@ -341,10 +339,7 @@ async function saveProfile(btn) {
     try {
         const response = await fetch('/update-profile', { 
             method: 'POST', 
-            body: formData,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token() }}'
-            }
+            body: formData
         });
         const result = await response.json();
         
