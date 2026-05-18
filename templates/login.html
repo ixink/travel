@@ -5,23 +5,28 @@
 <div class="auth-wrapper min-vh-100 d-flex align-items-center py-5">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-10 col-lg-8 col-xl-7">
+            <div class="col-md-11 col-lg-10 col-xl-8">
                 
-                <div class="card glass-card border-0 overflow-hidden shadow-lg">
+                <div class="card auth-card border-0 overflow-hidden shadow-lg">
                     <div class="row g-0">
                         <!-- Left Side: Image/Graphics (Desktop Only) -->
-                        <div class="col-lg-5 d-none d-lg-block auth-sidebar" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') center/cover;">
+                        <div class="col-lg-5 d-none d-lg-block auth-sidebar" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') center/cover;">
                             <div class="h-100 d-flex flex-column justify-content-center p-5 text-white">
-                                <h3 class="fw-bold mb-4">Your Next Adventure Awaits</h3>
-                                <p class="small opacity-75">Sign in to access your bookings, saved stays, and personalized travel recommendations.</p>
-                                <div class="mt-4">
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <i class="fas fa-check-circle text-danger"></i>
-                                        <span class="small">5,000+ Verified Stays</span>
+                                <h3 class="display-6 fw-bold mb-4">Your Next Adventure Awaits</h3>
+                                <p class="lead fs-6 opacity-90 mb-5">Sign in to access your bookings, saved stays, and personalized travel recommendations.</p>
+                                
+                                <div class="space-y-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="auth-icon-circle"><i class="fas fa-check"></i></div>
+                                        <span class="fw-medium">5,000+ Verified Stays</span>
                                     </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="fas fa-check-circle text-danger"></i>
-                                        <span class="small">Secure Payments</span>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="auth-icon-circle"><i class="fas fa-shield-alt"></i></div>
+                                        <span class="fw-medium">Secure Payments</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="auth-icon-circle"><i class="fas fa-headset"></i></div>
+                                        <span class="fw-medium">24/7 Support</span>
                                     </div>
                                 </div>
                             </div>
@@ -29,15 +34,15 @@
 
                         <!-- Right Side: Form -->
                         <div class="col-lg-7 p-4 p-lg-5 bg-white">
-                            <div class="text-center mb-4">
-                                <h2 class="fw-bold text-dark">Welcome Back</h2>
-                                <p class="text-secondary small">Sign in to continue your journey</p>
+                            <div class="mb-5 text-center text-lg-start">
+                                <h2 class="fw-bold text-dark mb-2">Welcome Back</h2>
+                                <p class="text-secondary">Sign in to continue your journey</p>
                             </div>
 
                             {% with messages = get_flashed_messages(with_categories=true) %}
                                 {% if messages %}
                                     {% for category, msg in messages %}
-                                        <div class="alert alert-{{ 'danger' if category=='danger' else 'success' }} rounded-3 small mb-4 py-2">
+                                        <div class="alert alert-{{ 'danger' if category=='danger' else 'success' }} border-0 rounded-4 small mb-4 py-3 animate slideIn">
                                             <i class="fas fa-exclamation-circle me-2"></i> {{ msg }}
                                         </div>
                                     {% endfor %}
@@ -45,40 +50,51 @@
                             {% endwith %}
 
                             <form method="POST">
-                                <div class="form-floating mb-3">
-                                    <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="name@example.com" required>
-                                    <label for="floatingEmail">Email Address</label>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-uppercase text-secondary ls-1">Email Address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="far fa-envelope text-muted"></i></span>
+                                        <input type="email" name="email" class="form-control bg-light border-start-0 rounded-end-4 py-3" placeholder="e.g. travel@example.com" required>
+                                    </div>
                                 </div>
-                                <div class="form-floating mb-4">
-                                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required>
-                                    <label for="floatingPassword">Password</label>
+
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold small text-uppercase text-secondary ls-1 mb-0">Password</label>
+                                        <a href="#" class="text-danger small fw-bold text-decoration-none">Forgot?</a>
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="fas fa-lock text-muted"></i></span>
+                                        <input type="password" name="password" class="form-control bg-light border-start-0 rounded-end-4 py-3" placeholder="••••••••" required>
+                                    </div>
                                 </div>
                                 
-                                <button type="submit" class="btn btn-red w-100 btn-lg py-3 fw-bold mb-3 shadow-sm">
+                                <button type="submit" class="btn btn-red w-100 btn-lg py-3 fw-bold mb-4 shadow-sm">
                                     <i class="fas fa-sign-in-alt me-2"></i> Sign In
                                 </button>
 
-                                <div class="text-center my-3">
-                                    <span class="text-muted small text-uppercase fw-bold opacity-50">or continue with</span>
+                                <div class="text-center position-relative my-4">
+                                    <hr class="text-muted opacity-25">
+                                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small fw-bold text-uppercase">or continue with</span>
                                 </div>
 
-                                <a href="{{ url_for('google_login') }}" class="btn btn-outline-light w-100 btn-lg py-2 fw-bold border shadow-sm d-flex align-items-center justify-content-center gap-2 text-dark">
-                                    <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-google-icon-logo-png-transparent-svg-vector-bie-supply-14.png" width="22" alt="Google">
+                                <a href="{{ url_for('google_login') }}" class="btn btn-white w-100 btn-lg py-2 fw-bold border-2 shadow-sm d-flex align-items-center justify-content-center gap-3 text-dark transition-all">
+                                    <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-google-icon-logo-png-transparent-svg-vector-bie-supply-14.png" width="24" alt="Google">
                                     <span>Google Account</span>
                                 </a>
                             </form>
 
-                            <div class="text-center mt-4 pt-3 border-top">
+                            <div class="text-center mt-5 pt-4 border-top">
                                 <p class="mb-0 text-secondary small">New to Traveller Stop?</p>
-                                <a href="{{ url_for('signup') }}" class="text-danger fw-bold text-decoration-none small">Create a Free Account</a>
+                                <a href="{{ url_for('signup') }}" class="text-danger fw-bold text-decoration-none">Create a Free Account</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="text-center mt-4">
-                    <a href="{{ url_for('index') }}" class="text-muted text-decoration-none small opacity-75">
-                        <i class="fas fa-arrow-left me-1"></i> Back to Home
+                    <a href="{{ url_for('index') }}" class="text-secondary text-decoration-none small transition-all hover-danger">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Home
                     </a>
                 </div>
 
@@ -89,19 +105,66 @@
 
 <style>
 .auth-wrapper {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    position: relative;
-    overflow: hidden;
+    background: #f8fafc;
+    background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
 }
-.auth-wrapper::before {
-    content: "";
-    position: absolute;
-    top: -10%; right: -10%; width: 400px; height: 400px;
-    background: rgba(230, 57, 70, 0.05);
-    border-radius: 50%;
+
+.auth-card {
+    border-radius: 2rem;
+    background: #ffffff;
 }
+
 .auth-sidebar {
-    min-height: 500px;
+    min-height: 600px;
+}
+
+.auth-icon-circle {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.ls-1 { letter-spacing: 1px; }
+
+.input-group-text {
+    border: 1px solid #e2e8f0;
+}
+
+.form-control {
+    border: 1px solid #e2e8f0;
+}
+
+.btn-white {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-white:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.hover-danger:hover {
+    color: var(--primary-red) !important;
+}
+
+.space-y-3 > * + * { margin-top: 1.25rem; }
+
+@media (max-width: 991px) {
+    .auth-card {
+        border-radius: 1.5rem;
+    }
 }
 </style>
 {% endblock %}
