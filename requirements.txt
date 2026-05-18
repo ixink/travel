@@ -1,6 +1,7 @@
 Flask
 Flask-SQLAlchemy
 Flask-SocketIO
+Flask-WTF
 authlib
 psycopg2-binary
 Pillow
