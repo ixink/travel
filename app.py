@@ -453,17 +453,31 @@ def profile():
 @app.route('/update-profile', methods=['POST'])
 def update_profile():
     u = get_user_by_id(session.get('user_id'))
-    if not u: return jsonify({"success": False, "message": "Unauthorized"}), 401
+    if not u: 
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    
     try:
-        for field in ['phone', 'location', 'profession', 'qualification', 'nid']:
-            if field in request.form:
-                val = request.form[field].strip()[:200]
-                setattr(u, field, val)
-        img = save_uploaded_file(request.files.get('profile_pic'), 'profile')
-        if img: u.profile_pic = img
-        db.session.commit(); return jsonify({"success": True, "message": "Profile updated!"})
+        # Update text fields
+        fields = ['phone', 'location', 'profession', 'qualification', 'nid']
+        for f in fields:
+            if f in request.form:
+                val = request.form[f].strip()
+                setattr(u, f, val if val else None)
+        
+        # Update profile picture
+        if 'profile_pic' in request.files:
+            file = request.files['profile_pic']
+            if file and file.filename:
+                img_path = save_uploaded_file(file, 'profile')
+                if img_path:
+                    u.profile_pic = img_path
+
+        db.session.commit()
+        return jsonify({"success": True, "message": "Profile updated successfully!"})
     except Exception as e:
-        db.session.rollback(); return jsonify({"success": False, "message": str(e)})
+        db.session.rollback()
+        logger.error(f"Profile update error: {e}")
+        return jsonify({"success": False, "message": "Failed to update profile. Please try again."})
 
 # ===================== ADMIN ROUTES =====================
 @app.route('/admin')
