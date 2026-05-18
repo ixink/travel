@@ -42,6 +42,11 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center gap-lg-4 py-4 py-lg-0">
                     <li class="nav-item">
+                        <span class="nav-link px-0 fw-semibold text-success">
+                            <i class="fas fa-circle me-1 small"></i> <span id="online-count">{{ online_users }}</span> Online
+                        </span>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'index' %}active text-danger{% endif %}" 
                            href="{{ url_for('index') }}">Home</a>
                     </li>
@@ -51,6 +56,10 @@
                     </li>
                     
                     {% if current_user %}
+                    <li class="nav-item">
+                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'profile' %}active text-danger{% endif %}" 
+                           href="{{ url_for('profile') }}">Profile</a>
+                    </li>
                     <li class="nav-item d-none d-lg-block">
                         <a href="{{ url_for('post_room') }}" class="btn btn-outline-light rounded-pill px-4 fw-bold btn-sm">
                             <i class="fas fa-plus-circle me-1"></i> Become a Host
