@@ -14,11 +14,10 @@
 
                     <div class="card-body text-center p-4">
 
-                        <!-- Profile Picture -->
                         <img id="currentProfilePic"
-                             src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else 'https://ui-avatars.com/api/?name=' + user.username }}"
+                             src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else 'https://ui-avatars.com/api/?name=' + user.username|urlencode }}"
                              class="profile-avatar shadow"
-                             alt="Profile">
+                             alt="Profile Picture">
 
                         <h3 class="fw-bold mt-3 mb-1">{{ user.username }}</h3>
                         <p class="text-muted small mb-3">{{ user.email }}</p>
@@ -149,8 +148,8 @@
     </div>
 </div>
 
-<!-- ===================== EDIT PROFILE MODAL ===================== -->
-<div class="modal fade" id="profileModal" tabindex="-1">
+<!-- ===================== ADVANCED EDIT PROFILE MODAL ===================== -->
+<div class="modal fade" id="profileModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
 
@@ -164,22 +163,24 @@
 
                 <form id="profileForm" enctype="multipart/form-data">
 
-                    <!-- Profile Picture Preview -->
+                    <!-- Profile Picture -->
                     <div class="mb-4 text-center">
                         <img id="previewImage" 
-                             src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else 'https://ui-avatars.com/api/?name=' + user.username }}"
-                             class="rounded-circle mb-3" 
-                             style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                             src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else 'https://ui-avatars.com/api/?name=' + user.username|urlencode }}"
+                             class="rounded-circle mb-3 shadow-sm" 
+                             style="width: 130px; height: 130px; object-fit: cover; border: 5px solid #fff;">
                         <br>
-                        <input type="file" name="profile_pic" id="profilePicInput" accept="image/*" class="form-control">
+                        <input type="file" name="profile_pic" id="profilePicInput" 
+                               accept="image/*" class="form-control">
+                        <small class="text-muted">JPG, PNG, WebP (Max 10MB)</small>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Phone Number</label>
                             <input type="text" name="phone" value="{{ user.phone or '' }}" class="form-control">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Location</label>
                             <input type="text" name="location" value="{{ user.location or '' }}" class="form-control">
                         </div>
@@ -208,7 +209,7 @@
                     Cancel
                 </button>
                 <button type="button" class="btn btn-danger rounded-pill px-5" id="saveBtn" onclick="saveProfile()">
-                    Save Changes
+                    <i class="fas fa-save me-2"></i> Save Changes
                 </button>
             </div>
 
@@ -219,6 +220,7 @@
 
 {% block scripts %}
 <script>
+// Open Modal
 function openProfileModal() {
     document.getElementById('profileAlert').classList.add('d-none');
     const modal = new bootstrap.Modal(document.getElementById('profileModal'));
@@ -237,13 +239,18 @@ document.getElementById('profilePicInput').addEventListener('change', function(e
     }
 });
 
+// Save Profile - Fixed & Optimized
 async function saveProfile() {
     const btn = document.getElementById('saveBtn');
     const alertBox = document.getElementById('profileAlert');
     const form = document.getElementById('profileForm');
 
+    const originalBtnText = btn.innerHTML;
+
     btn.disabled = true;
     btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
+
+    alertBox.classList.add('d-none');
 
     const formData = new FormData(form);
 
@@ -257,29 +264,36 @@ async function saveProfile() {
 
         if (data.success) {
             alertBox.className = 'alert alert-success';
-            alertBox.textContent = data.message;
+            alertBox.textContent = data.message || "Profile updated successfully!";
             alertBox.classList.remove('d-none');
 
-            // Reload after success
+            // Update profile picture instantly
+            if (data.profile_pic) {
+                document.getElementById('currentProfilePic').src = data.profile_pic;
+            }
+
+            // Auto close modal and reload after success
             setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
                 window.location.reload();
-            }, 1200);
+            }, 1500);
+
         } else {
             alertBox.className = 'alert alert-danger';
-            alertBox.textContent = data.message || 'Update failed';
+            alertBox.textContent = data.message || "Update failed. Please try again.";
             alertBox.classList.remove('d-none');
             
             btn.disabled = false;
-            btn.innerHTML = 'Save Changes';
+            btn.innerHTML = originalBtnText;
         }
     } catch (err) {
         console.error(err);
         alertBox.className = 'alert alert-danger';
-        alertBox.textContent = 'Network error. Please try again.';
+        alertBox.textContent = 'Network error. Please check your connection and try again.';
         alertBox.classList.remove('d-none');
         
         btn.disabled = false;
-        btn.innerHTML = 'Save Changes';
+        btn.innerHTML = originalBtnText;
     }
 }
 </script>
@@ -288,16 +302,16 @@ async function saveProfile() {
 .profile-page { background: #f8fafc; }
 .profile-sidebar { top: 100px; }
 .profile-cover {
-    height: 130px;
+    height: 140px;
     background: linear-gradient(135deg, #dc2626, #ef4444);
 }
 .profile-avatar {
-    width: 140px;
-    height: 140px;
+    width: 145px;
+    height: 145px;
     border-radius: 50%;
     object-fit: cover;
     border: 6px solid white;
-    margin-top: -70px;
+    margin-top: -75px;
     background: white;
 }
 .room-image {
@@ -310,11 +324,11 @@ async function saveProfile() {
 }
 .booking-item:last-child { border-bottom: none; }
 .room-card {
-    transition: all 0.3s;
+    transition: all 0.3s ease;
 }
 .room-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.12) !important;
 }
 </style>
 {% endblock %}
