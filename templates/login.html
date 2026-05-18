@@ -6,24 +6,33 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-11 col-lg-10 col-xl-8">
-                
+
                 <div class="card auth-card border-0 overflow-hidden shadow-lg">
                     <div class="row g-0">
-                        <!-- Left Side: Image/Graphics (Desktop Only) -->
-                        <div class="col-lg-5 d-none d-lg-block auth-sidebar" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') center/cover;">
+
+                        <!-- Left Side -->
+                        <div class="col-lg-5 d-none d-lg-block auth-sidebar"
+                             style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)),
+                             url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80')
+                             center/cover;">
+                            
                             <div class="h-100 d-flex flex-column justify-content-center p-5 text-white">
                                 <h3 class="display-6 fw-bold mb-4">Your Next Adventure Awaits</h3>
-                                <p class="lead fs-6 opacity-90 mb-5">Sign in to access your bookings, saved stays, and personalized travel recommendations.</p>
-                                
+                                <p class="lead fs-6 opacity-90 mb-5">
+                                    Sign in to access your bookings, saved stays, and personalized travel recommendations.
+                                </p>
+
                                 <div class="space-y-3">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="auth-icon-circle"><i class="fas fa-check"></i></div>
                                         <span class="fw-medium">5,000+ Verified Stays</span>
                                     </div>
+
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="auth-icon-circle"><i class="fas fa-shield-alt"></i></div>
                                         <span class="fw-medium">Secure Payments</span>
                                     </div>
+
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="auth-icon-circle"><i class="fas fa-headset"></i></div>
                                         <span class="fw-medium">24/7 Support</span>
@@ -32,68 +41,107 @@
                             </div>
                         </div>
 
-                        <!-- Right Side: Form -->
+                        <!-- Right Side -->
                         <div class="col-lg-7 p-4 p-lg-5 bg-white">
+
                             <div class="mb-5 text-center text-lg-start">
                                 <h2 class="fw-bold text-dark mb-2">Welcome Back</h2>
                                 <p class="text-secondary">Sign in to continue your journey</p>
                             </div>
 
+                            <!-- FLASH MESSAGES -->
                             {% with messages = get_flashed_messages(with_categories=true) %}
                                 {% if messages %}
                                     {% for category, msg in messages %}
-                                        <div class="alert alert-{{ 'danger' if category=='danger' else 'success' }} border-0 rounded-4 small mb-4 py-3 animate slideIn">
-                                            <i class="fas fa-exclamation-circle me-2"></i> {{ msg }}
+                                        <div class="alert alert-{{ 'danger' if category=='danger' else 'success' }} border-0 rounded-4 small mb-4 py-3">
+                                            <i class="fas fa-info-circle me-2"></i> {{ msg }}
                                         </div>
                                     {% endfor %}
                                 {% endif %}
                             {% endwith %}
 
+                            <!-- LOGIN FORM -->
                             <form method="POST">
+
+                                <!-- CSRF TOKEN FIX (IMPORTANT) -->
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                <!-- EMAIL -->
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold small text-uppercase text-secondary ls-1">Email Address</label>
+                                    <label class="form-label fw-bold small text-uppercase text-secondary ls-1">
+                                        Email Address
+                                    </label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="far fa-envelope text-muted"></i></span>
-                                        <input type="email" name="email" class="form-control bg-light border-start-0 rounded-end-4 py-3" placeholder="e.g. travel@example.com" required>
+                                        <span class="input-group-text bg-light border-end-0 rounded-start-4">
+                                            <i class="far fa-envelope text-muted"></i>
+                                        </span>
+                                        <input type="email" name="email"
+                                               class="form-control bg-light border-start-0 rounded-end-4 py-3"
+                                               placeholder="e.g. travel@example.com"
+                                               required>
                                     </div>
                                 </div>
 
+                                <!-- PASSWORD -->
                                 <div class="mb-4">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <label class="form-label fw-bold small text-uppercase text-secondary ls-1 mb-0">Password</label>
-                                        <a href="#" class="text-danger small fw-bold text-decoration-none">Forgot?</a>
+                                        <label class="form-label fw-bold small text-uppercase text-secondary ls-1 mb-0">
+                                            Password
+                                        </label>
+                                        <a href="#" class="text-danger small fw-bold text-decoration-none">
+                                            Forgot?
+                                        </a>
                                     </div>
+
                                     <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0 rounded-start-4"><i class="fas fa-lock text-muted"></i></span>
-                                        <input type="password" name="password" class="form-control bg-light border-start-0 rounded-end-4 py-3" placeholder="••••••••" required>
+                                        <span class="input-group-text bg-light border-end-0 rounded-start-4">
+                                            <i class="fas fa-lock text-muted"></i>
+                                        </span>
+                                        <input type="password" name="password"
+                                               class="form-control bg-light border-start-0 rounded-end-4 py-3"
+                                               placeholder="••••••••"
+                                               required>
                                     </div>
                                 </div>
-                                
-                                <button type="submit" class="btn btn-red w-100 btn-lg py-3 fw-bold mb-4 shadow-sm">
+
+                                <!-- LOGIN BUTTON -->
+                                <button type="submit" class="btn btn-danger w-100 btn-lg py-3 fw-bold mb-4">
                                     <i class="fas fa-sign-in-alt me-2"></i> Sign In
                                 </button>
 
+                                <!-- DIVIDER -->
                                 <div class="text-center position-relative my-4">
-                                    <hr class="text-muted opacity-25">
-                                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small fw-bold text-uppercase">or continue with</span>
+                                    <hr>
+                                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                                        or continue with
+                                    </span>
                                 </div>
 
-                                <a href="{{ url_for('google_login') }}" class="btn btn-white w-100 btn-lg py-2 fw-bold border-2 shadow-sm d-flex align-items-center justify-content-center gap-3 text-dark transition-all">
-                                    <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-google-icon-logo-png-transparent-svg-vector-bie-supply-14.png" width="24" alt="Google">
-                                    <span>Google Account</span>
+                                <!-- GOOGLE LOGIN -->
+                                <a href="{{ url_for('google_login') }}"
+                                   class="btn btn-light w-100 btn-lg py-2 fw-bold border d-flex align-items-center justify-content-center gap-3">
+                                    <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-google-icon-logo-png-transparent-svg-vector-bie-supply-14.png"
+                                         width="22">
+                                    Google Account
                                 </a>
+
                             </form>
 
+                            <!-- SIGNUP -->
                             <div class="text-center mt-5 pt-4 border-top">
                                 <p class="mb-0 text-secondary small">New to Traveller Stop?</p>
-                                <a href="{{ url_for('signup') }}" class="text-danger fw-bold text-decoration-none">Create a Free Account</a>
+                                <a href="{{ url_for('signup') }}" class="text-danger fw-bold text-decoration-none">
+                                    Create a Free Account
+                                </a>
                             </div>
+
                         </div>
                     </div>
                 </div>
 
+                <!-- BACK -->
                 <div class="text-center mt-4">
-                    <a href="{{ url_for('index') }}" class="text-secondary text-decoration-none small transition-all hover-danger">
+                    <a href="{{ url_for('index') }}" class="text-secondary text-decoration-none small">
                         <i class="fas fa-arrow-left me-2"></i> Back to Home
                     </a>
                 </div>
@@ -112,7 +160,6 @@
 
 .auth-card {
     border-radius: 2rem;
-    background: #ffffff;
 }
 
 .auth-sidebar {
@@ -122,49 +169,19 @@
 .auth-icon-circle {
     width: 32px;
     height: 32px;
-    background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
+    background: rgba(255,255,255,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
 }
 
 .ls-1 { letter-spacing: 1px; }
 
-.input-group-text {
-    border: 1px solid #e2e8f0;
-}
-
-.form-control {
-    border: 1px solid #e2e8f0;
-}
-
-.btn-white {
-    background: #ffffff;
-    border: 2px solid #e2e8f0;
-}
-
-.btn-white:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-    transform: translateY(-2px);
-}
-
-.transition-all {
-    transition: all 0.3s ease;
-}
-
-.hover-danger:hover {
-    color: var(--primary-red) !important;
-}
-
-.space-y-3 > * + * { margin-top: 1.25rem; }
-
-@media (max-width: 991px) {
-    .auth-card {
-        border-radius: 1.5rem;
-    }
+input:focus {
+    box-shadow: none !important;
+    border-color: #dc3545 !important;
 }
 </style>
+
 {% endblock %}
