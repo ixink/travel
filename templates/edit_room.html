@@ -97,7 +97,7 @@
                         <div class="mb-5">
                             <label class="form-label fw-bold fs-5">Amenities</label>
                             <div class="row g-3">
-                                {% set amenities_list = room.get('amenities', []) %}
+                                {% set amenities_list = room.amenities or [] %}
                                 
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
