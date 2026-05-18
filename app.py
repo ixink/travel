@@ -11,7 +11,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 from sqlalchemy.exc import IntegrityError
 from flask_socketio import SocketIO, emit
-from flask_wtf.csrf import CSRFProtect, CSRFError
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 import threading
@@ -30,23 +29,31 @@ app = Flask(__name__,
             template_folder=os.path.join(BASE_DIR, 'templates'))
 
 # ===================== PRODUCTION SECURITY =====================
+# Website Configuration
+app.config['DOMAIN'] = 'travellerstop.com'
+
 # Use a secure secret key from environment or generate a random one for the session
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 if not app.config['SECRET_KEY']:
     logger.warning("SECRET_KEY not set. Generating a random key for this session.")
     app.config['SECRET_KEY'] = secrets.token_hex(32)
 
-app.config['DEBUG'] = False
-app.config['SESSION_COOKIE_SECURE'] = True
+# Dynadot API Configuration (Add these to your .env)
+app.config['DYNADOT_API_KEY'] = os.getenv('DYNADOT_API_KEY')
+app.config['DYNADOT_SECRET_KEY'] = os.getenv('DYNADOT_SECRET_KEY')
+
+# DEBUG mode based on environment
+app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+
+# Security settings (Secure cookies only if NOT in debug mode)
+app.config['SESSION_COOKIE_SECURE'] = not app.config['DEBUG']
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 604800
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
-app.config['PREFERRED_URL_SCHEME'] = 'https'
+app.config['PREFERRED_URL_SCHEME'] = 'https' if not app.config['DEBUG'] else 'http'
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
-
-csrf = CSRFProtect(app)
 
 @app.before_request
 def ensure_https():
@@ -54,16 +61,13 @@ def ensure_https():
         url = request.url.replace("http://", "https://", 1)
         return redirect(url, code=301)
 
-@app.errorhandler(CSRFError)
-def handle_csrf_error(e):
-    return jsonify({"status": "failed", "msg": "CSRF token missing or invalid. Please refresh."}), 400
-
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
 if not db_url:
-    logger.warning("DATABASE_URL not set. Using SQLite.")
-    db_url = f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'travellerstop.db')}"
-elif db_url.startswith("postgres://"):
+    raise RuntimeError("DATABASE_URL not set. Production database is required.")
+
+# Fix for Heroku-style postgres URLs
+if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
@@ -83,7 +87,7 @@ google = oauth.register(
     client_kwargs={'scope': 'openid email profile'}
 )
 
-# ===================== MODELS (SMS & Email Payment Removed) =====================
+# ===================== MODELS =====================
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -491,8 +495,6 @@ def pay():
         return jsonify({"status": "failed", "msg": "Server error"})
 
 # ===================== AUTH & OTHER ROUTES =====================
-# (All remaining routes are included below)
-
 @app.route('/cancel-booking/<int:booking_id>', methods=['POST'])
 def cancel_booking(booking_id):
     if 'user_id' not in session: return jsonify({"success": False}), 401
@@ -731,18 +733,23 @@ def cancellation_policy(): return render_template('cancellation_policy.html')
 def init_db():
     with app.app_context():
         db.create_all()
-        if not User.query.filter_by(email='admin@travellerstop.com').first():
+        
+        # Initial Admin Creation via Environment Variables
+        admin_email = os.getenv('ADMIN_EMAIL', 'admin@travellerstop.com')
+        admin_pass = os.getenv('ADMIN_PASSWORD', 'admin123')
+        
+        if not User.query.filter_by(email=admin_email).first():
             admin = User(
-                username='admin',
-                email='admin@travellerstop.com',
-                password=generate_password_hash('admin123'),
+                username='Admin',
+                email=admin_email,
+                password=generate_password_hash(admin_pass),
                 is_admin=True,
                 role='admin',
                 nid_verified=True
             )
             db.session.add(admin)
             db.session.commit()
-            logger.info("✅ Admin user created.")
+            logger.info(f"✅ Admin user created: {admin_email}")
 
 if __name__ == '__main__':
     init_db()
