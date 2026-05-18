@@ -6,7 +6,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
-from PIL import Image
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 from flask_socketio import SocketIO, emit
@@ -28,28 +27,21 @@ app = Flask(__name__,
             template_folder=os.path.join(BASE_DIR, 'templates'))
 
 # ===================== SECURITY =====================
-app.config['DOMAIN'] = os.getenv('DOMAIN', 'travellerstop.com')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or secrets.token_hex(32)
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
 app.config['SESSION_COOKIE_SECURE'] = not app.config['DEBUG']
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 604800
-app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15MB
 app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
-@app.before_request
-def ensure_https():
-    if not app.debug and request.headers.get('X-Forwarded-Proto') == 'http':
-        url = request.url.replace("http://", "https://", 1)
-        return redirect(url, code=301)
-
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
 if not db_url:
-    raise RuntimeError("DATABASE_URL not set. Production database (PostgreSQL) is required.")
+    raise RuntimeError("DATABASE_URL not set.")
 
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -184,45 +176,34 @@ def is_profile_complete(user):
     required = ['location', 'phone', 'profession', 'qualification', 'nid']
     return all(bool(getattr(user, field)) for field in required) and user.nid_verified
 
+# ===================== SIMPLE IMAGE SAVE (No Resize) =====================
 def save_uploaded_file(file, folder_type):
     if not file or not file.filename:
         return None
 
     ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
-    if ext not in {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'}:
+    if ext not in {'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'}:
         return None
 
     try:
         filename = secure_filename(file.filename)
         unique_name = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
         subfolder = 'profile_pics' if folder_type == 'profile' else 'rooms'
+        
         folder = os.path.join(BASE_DIR, 'static', 'uploads', subfolder)
         os.makedirs(folder, exist_ok=True)
 
         full_path = os.path.join(folder, unique_name)
         url_path = f"uploads/{subfolder}/{unique_name}"
 
-        with Image.open(file) as img:
-            if img.mode in ("RGBA", "P"):
-                img = img.convert("RGB")
-            max_size = (1200, 800) if folder_type == 'room' else (500, 500)
-            img.thumbnail(max_size, Image.Resampling.LANCZOS)
-            img.save(full_path, "JPEG", optimize=True, quality=85)
-
+        file.save(full_path)   # Direct save - No PIL processing
         return url_path
+
     except Exception as e:
         logger.error(f"Image save error: {e}")
         return None
 
-def is_strong_password(password):
-    if len(password) < 8: return False
-    return all(re.search(r, password) for r in [r"[a-z]", r"[A-Z]", r"[0-9]", r"[!@#$%^&*(),.?\":{}|<>]"])
-
-def is_allowed_email(email):
-    allowed = {'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'protonmail.com', 'me.com'}
-    return email.split('@')[-1].lower() in allowed
-
-# ===================== TEMPLATE & SECURITY =====================
+# ===================== TEMPLATE FILTERS =====================
 @app.template_filter('datetimeformat')
 def datetimeformat(value, fmt='%Y-%m-%d'):
     if not value: return ""
@@ -252,23 +233,7 @@ def add_security_headers(response):
     }
     for k, v in headers.items():
         response.headers[k] = v
-
-    csp = ("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://kit.fontawesome.com https://cdnjs.cloudflare.com 'unsafe-inline'; "
-           "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
-           "img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; "
-           "connect-src 'self' wss: https:; frame-src 'self' https://accounts.google.com; object-src 'none';")
-    response.headers['Content-Security-Policy'] = csp
     return response
-
-# ===================== ERROR HANDLERS =====================
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('index.html', error_msg="Page not found"), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    db.session.rollback()
-    return render_template('index.html', error_msg="Internal server error"), 500
 
 # ===================== MAIN ROUTES =====================
 @app.route('/')
@@ -279,26 +244,10 @@ def index():
 @app.route('/rooms')
 def rooms_page():
     loc = request.args.get('location', '').strip()
-    ci = request.args.get('checkin', '').strip()
-    co = request.args.get('checkout', '').strip()
-
     query = Room.query
     if loc:
         query = query.filter(Room.location.ilike(f"%{loc}%"))
     rooms = query.all()
-
-    if ci and co:
-        filtered = []
-        for r in rooms:
-            overlap = Booking.query.filter(
-                Booking.room_id == r.id,
-                Booking.status.notin_(['cancelled', 'cancel_requested']),
-                or_(and_(Booking.checkin < co, Booking.checkout > ci))
-            ).first()
-            if not overlap:
-                filtered.append(r)
-        rooms = filtered
-
     return render_template('rooms.html', rooms=rooms, location=loc)
 
 @app.route('/room/<int:room_id>')
@@ -379,7 +328,6 @@ def delete_room(room_id):
         flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('profile'))
 
-# ===================== BOOKING & PAYMENT =====================
 @app.route('/book/<int:room_id>', methods=['POST'])
 def book_room(room_id):
     if 'user_id' not in session: return redirect(url_for('login'))
@@ -418,7 +366,7 @@ def book_room(room_id):
         )
         db.session.add(booking)
         db.session.commit()
-        flash('Booking created! Complete payment.', 'success')
+        flash('Booking created successfully!', 'success')
         return redirect(url_for('payment_page', booking_id=booking.id))
     except Exception as e:
         db.session.rollback()
@@ -444,7 +392,7 @@ def pay():
         name = request.form.get('name', 'User')
         sender = request.form.get('sender', '')
 
-        if not trx: return jsonify({"status": "failed", "msg": "Transaction ID required"})
+        if not trx: return jsonify({"status": "failed", "msg": "Transaction ID is required"})
         if Payment.query.filter_by(trxid=trx).first():
             return jsonify({"status": "failed", "msg": "TRXID already used"})
 
@@ -452,11 +400,10 @@ def pay():
         if not booking: return jsonify({"status": "failed", "msg": "Booking not found"})
 
         p = Payment(booking_id=bid, user_id=session['user_id'], name=name,
-                    method=method, amount=amt, sender=sender, trxid=trx)
+                    method=method, amount=amt, sender=sender, trxid=trx, status='PENDING')
         db.session.add(p)
         db.session.commit()
-        socketio.emit('payment_status_update', {'booking_id': bid, 'status': 'PENDING'}, broadcast=True)
-        return jsonify({"status": "success", "msg": "Payment submitted. Waiting for confirmation."})
+        return jsonify({"status": "success", "msg": "Payment submitted successfully."})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Payment error: {e}")
@@ -475,7 +422,7 @@ def cancel_booking(booking_id):
         db.session.rollback()
         return jsonify({"success": False, "message": "Database error"})
 
-# ===================== AUTH =====================
+# ===================== AUTH ROUTES =====================
 @app.route('/login/google')
 def google_login():
     return google.authorize_redirect(url_for('google_authorize', _external=True))
@@ -487,12 +434,12 @@ def google_authorize():
         info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
         email = info.get('email')
         if not email:
-            flash("Could not get email from Google.", "warning")
+            flash("Could not retrieve email.", "warning")
             return redirect(url_for('login'))
 
         user = User.query.filter_by(google_id=info.get('sub')).first()
         if not user:
-            user = User.query.filter_by(email=email).first()
+            user = get_user_by_email(email)
             if user:
                 user.google_id = info.get('sub')
             else:
@@ -558,7 +505,7 @@ def login():
             session['username'] = u.username
             session['is_admin'] = u.is_admin
             return redirect(url_for('admin' if u.is_admin else 'profile'))
-        flash('Invalid credentials.', 'danger')
+        flash('Invalid email or password.', 'danger')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -588,34 +535,22 @@ def update_profile():
         return jsonify({"success": False, "message": "User not found."}), 404
 
     try:
-        logger.info(f"Profile update started for user {user.id}")
-
         # Text fields
-        fields = ['phone', 'location', 'profession', 'qualification', 'nid']
-        for field in fields:
+        for field in ['phone', 'location', 'profession', 'qualification', 'nid']:
             if field in request.form:
                 value = request.form.get(field, '').strip()
                 setattr(user, field, value if value else None)
 
-        # Profile Picture
+        # Profile Picture - Direct save (No resize)
         file = request.files.get('profile_pic')
         if file and file.filename:
             uploaded_image = save_uploaded_file(file, 'profile')
             if uploaded_image:
-                # Delete old image if exists
-                if user.profile_pic and not user.profile_pic.startswith('http'):
-                    try:
-                        old_path = os.path.join(BASE_DIR, 'static', user.profile_pic)
-                        if os.path.exists(old_path):
-                            os.remove(old_path)
-                    except:
-                        pass
                 user.profile_pic = uploaded_image
             else:
                 return jsonify({"success": False, "message": "Invalid image format."}), 400
 
         db.session.commit()
-        logger.info(f"Profile updated successfully for user {user.id}")
 
         return jsonify({
             "success": True,
@@ -625,10 +560,10 @@ def update_profile():
 
     except Exception as e:
         db.session.rollback()
-        logger.error(f"UPDATE PROFILE ERROR (User {user.id}): {str(e)}", exc_info=True)
+        logger.error(f"Profile Update Error: {e}")
         return jsonify({"success": False, "message": "Server error. Please try again."}), 500
 
-# ===================== ADMIN =====================
+# ===================== ADMIN ROUTES =====================
 @app.route('/admin')
 def admin():
     if not session.get('is_admin'): return redirect(url_for('index'))
@@ -704,15 +639,6 @@ def admin_coupons():
             flash(f'Error: {str(e)}', 'danger')
     return render_template('admin_coupons.html', coupons=Coupon.query.all())
 
-@app.route('/admin/export-users')
-def export_users():
-    if not session.get('is_admin'): return redirect(url_for('index'))
-    def generate():
-        yield 'ID,Username,Email,Phone,Location,NID,Verified,Blocked,Joined\n'
-        for u in User.query.all():
-            yield f"{u.id},{u.username},{u.email},{u.phone or ''},{u.location or ''},{u.nid or ''},{u.nid_verified},{u.blocked},{u.created_at}\n"
-    return Response(generate(), mimetype='text/csv', headers={"Content-Disposition": "attachment; filename=users.csv"})
-
 # ===================== STATIC PAGES =====================
 @app.route('/about')
 def about(): return render_template('about_us.html')
@@ -748,5 +674,3 @@ def init_db():
 if __name__ == '__main__':
     init_db()
     socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=app.config['DEBUG'])
-else:
-    init_db()
