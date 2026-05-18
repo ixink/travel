@@ -67,9 +67,6 @@
                             <!-- FORM -->
                             <form method="POST">
 
-                                <!-- ✅ CSRF TOKEN (REQUIRED IF YOU ENABLE FLASK-WTF) -->
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
                                 <div class="form-floating mb-3">
                                     <input type="text" name="username" class="form-control"
                                            id="username" placeholder="Full Name" required>
