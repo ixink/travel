@@ -70,19 +70,89 @@ p {
 ========================================================= */
 
 .navbar {
-    background: linear-gradient(135deg, rgba(70, 0, 8, 0.95), rgba(230, 57, 70, 0.92));
-    backdrop-filter: blur(18px);
-    padding: 0.75rem 0;
+    background: linear-gradient(135deg, rgba(20, 0, 0, 0.98), rgba(160, 10, 20, 0.96));
+    backdrop-filter: blur(20px);
+    padding: 0.6rem 0;
     position: sticky;
     top: 0;
     z-index: 1200;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    box-shadow: 0 4px 25px rgba(0,0,0,0.4);
     transition: var(--transition);
 }
 
+.nav-link {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    opacity: 0.9;
+}
+
+.nav-link:hover, .nav-link.active {
+    opacity: 1;
+    color: #ffffff !important;
+    text-shadow: 0 0 15px rgba(255,255,255,0.6);
+}
+
+.nav-link.active {
+    border-bottom: 2px solid #ffffff;
+}
+
+i {
+    font-style: normal;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Ensure Icons are always visible */
+.fas, .far, .fab {
+    color: inherit;
+}
+
 .navbar.scrolled {
-    padding: 0.55rem 0;
-    background: rgba(40, 0, 0, 0.95);
+    padding: 0.4rem 0;
+    background: rgba(30, 0, 0, 0.98);
+}
+
+/* =========================================================
+   RESPONSIVE HEADINGS & MOBILE UI
+========================================================= */
+
+@media (max-width: 991px) {
+    h1, .display-3 { font-size: 2rem !important; }
+    h2, .display-4 { font-size: 1.6rem !important; }
+    h3 { font-size: 1.3rem !important; }
+    .lead { font-size: 0.9rem !important; }
+    
+    .hero {
+        padding: 100px 0 60px;
+    }
+}
+
+@media (max-width: 576px) {
+    h1, .display-3 { font-size: 1.5rem !important; }
+    h2, .display-4 { font-size: 1.3rem !important; }
+    h3 { font-size: 1.1rem !important; }
+    h4 { font-size: 1rem !important; }
+    
+    .card-title { font-size: 1.1rem !important; }
+    .price { font-size: 1.2rem !important; }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+    
+    .search-btn-circle {
+        background: #000000 !important; /* High contrast black for mobile search icon */
+        color: #ffffff !important;
+        border-radius: 15px !important;
+        height: 50px !important;
+    }
+    
+    .search-btn-circle i {
+        font-size: 1.3rem !important;
+    }
 }
 
 /* =========================================================
