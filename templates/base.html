@@ -47,17 +47,17 @@
                         </span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'index' %}active text-danger{% endif %}" 
+                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'index' %}active{% endif %}" 
                            href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'rooms_page' %}active text-danger{% endif %}" 
+                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'rooms_page' %}active{% endif %}" 
                            href="{{ url_for('rooms_page') }}">Explore</a>
                     </li>
                     
                     {% if current_user %}
                     <li class="nav-item">
-                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'profile' %}active text-danger{% endif %}" 
+                        <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'profile' %}active{% endif %}" 
                            href="{{ url_for('profile') }}">Profile</a>
                     </li>
                     <li class="nav-item d-none d-lg-block">
