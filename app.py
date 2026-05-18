@@ -519,17 +519,24 @@ def google_login():
 def google_authorize():
     try:
         token = google.authorize_access_token()
-        user_info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
+        user_info = token.get('userinfo')
+        if not user_info:
+            user_info = google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
         
+        email = user_info.get('email')
+        if not email:
+            flash("Could not retrieve email from Google.", "warning")
+            return redirect(url_for('login'))
+
         user = User.query.filter_by(google_id=user_info.get('sub')).first()
         if not user:
-            user = User.query.filter_by(email=user_info['email']).first()
+            user = User.query.filter_by(email=email).first()
             if user:
                 user.google_id = user_info.get('sub')
             else:
                 user = User(
-                    username=user_info.get('name', user_info['email'].split('@')[0]),
-                    email=user_info['email'],
+                    username=user_info.get('name', email.split('@')[0]),
+                    email=email,
                     google_id=user_info.get('sub'),
                     profile_pic=user_info.get('picture', ''),
                     role='traveler'
@@ -545,10 +552,10 @@ def google_authorize():
         session['user_id'] = user.id
         session['username'] = user.username
         session['is_admin'] = user.is_admin
-        return redirect(url_for('admin' if user.is_admin else 'index'))
+        return redirect(url_for('admin' if user.is_admin else 'profile'))
     except Exception as e:
         logger.error(f"Google Auth Error: {e}")
-        flash("Google authentication failed.", "danger")
+        flash("Google authentication failed. Please try manual login.", "warning")
         return redirect(url_for('login'))
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -593,7 +600,7 @@ def login():
             session['user_id'] = u.id
             session['username'] = u.username
             session['is_admin'] = u.is_admin
-            return redirect(url_for('admin' if u.is_admin else 'index'))
+            return redirect(url_for('admin' if u.is_admin else 'profile'))
         flash('Invalid email or password.', 'danger')
     return render_template('login.html')
 
