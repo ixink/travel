@@ -44,6 +44,35 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 
 # ===================== CONFIGURATION =====================
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'traveller-stop-v7-2026-premium')
+
+# Security Headers & Cookies
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=604800, # 1 week
+)
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    # Content Security Policy - Allow Google Auth & common CDNs
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://kit.fontawesome.com https://cdnjs.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://use.fontawesome.com; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' https://fonts.gstatic.com https://use.fontawesome.com; "
+        "connect-src 'self' https://ka-f.fontawesome.com; "
+        "frame-src 'self' https://accounts.google.com; "
+        "object-src 'none';"
+    )
+    response.headers['Content-Security-Policy'] = csp
+    return response
+
 # Strictly use PostgreSQL
 db_url = os.getenv('DATABASE_URL')
 if not db_url:
