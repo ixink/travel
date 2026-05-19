@@ -6,16 +6,18 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
+from PIL import Image
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
+from sqlalchemy.exc import IntegrityError
 from flask_socketio import SocketIO, emit
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
+import threading
 import secrets
 
-# ===================== LOAD ENVIRONMENT VARIABLES =====================
+# ===================== CONFIGURATION =====================
 load_dotenv()
-
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 logging.basicConfig(level=logging.INFO)
@@ -25,8 +27,9 @@ app = Flask(__name__,
             static_folder=os.path.join(BASE_DIR, 'static'),
             template_folder=os.path.join(BASE_DIR, 'templates'))
 
-# ===================== CONFIGURATION FROM .env =====================
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+# ===================== PRODUCTION SECURITY =====================
+app.config['DOMAIN'] = os.getenv('DOMAIN', 'travellerstop.com')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or secrets.token_hex(32)
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
 app.config['SESSION_COOKIE_SECURE'] = not app.config['DEBUG']
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -34,17 +37,18 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 604800
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
 app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
-app.config['DOMAIN'] = os.getenv('DOMAIN', 'travellerstop.com')
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
+@app.before_request
+def ensure_https():
+    if not app.debug and request.headers.get('X-Forwarded-Proto') == 'http':
+        return redirect(request.url.replace("http://", "https://", 1), code=301)
+
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
-if not db_url:
-    raise RuntimeError("DATABASE_URL is not set in .env file!")
-
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+if not db_url: raise RuntimeError("DATABASE_URL not set.")
+if db_url.startswith("postgres://"): db_url = db_url.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -52,7 +56,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
-
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -81,7 +84,6 @@ class User(db.Model):
     nid_verified = db.Column(db.Boolean, default=False)
     blocked = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     rooms = db.relationship('Room', backref='owner', lazy=True, cascade="all, delete-orphan")
     bookings = db.relationship('Booking', backref='user', lazy=True)
 
@@ -98,7 +100,6 @@ class Room(db.Model):
     available_to = db.Column(db.String(50))
     amenities = db.Column(db.JSON)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     bookings = db.relationship('Booking', backref='room', lazy=True, cascade="all, delete-orphan")
 
 class Booking(db.Model):
@@ -115,6 +116,7 @@ class Booking(db.Model):
     status = db.Column(db.String(20), default='pending_payment')
     payment_status = db.Column(db.String(20), default='unpaid')
     booked_at = db.Column(db.DateTime, default=datetime.utcnow)
+    payments = db.relationship('Payment', backref='booking', lazy=True)
 
 class Payment(db.Model):
     __tablename__ = 'payments'
@@ -139,98 +141,56 @@ class Coupon(db.Model):
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# ===================== SOCKETIO =====================
+# ===================== SOCKETIO & HELPERS =====================
 online_users_count = 0
 counter_lock = threading.Lock()
 
 @socketio.on('connect')
 def handle_connect():
     global online_users_count
-    with counter_lock:
-        online_users_count += 1
+    with counter_lock: online_users_count += 1
     emit('update_online_users', {'count': max(1, online_users_count)}, broadcast=True)
 
 @socketio.on('disconnect')
 def handle_disconnect():
     global online_users_count
-    with counter_lock:
-        online_users_count = max(0, online_users_count - 1)
+    with counter_lock: online_users_count = max(0, online_users_count - 1)
     emit('update_online_users', {'count': max(1, online_users_count)}, broadcast=True)
 
-# ===================== HELPERS =====================
-def get_user_by_email(email):
-    if not email: return None
-    return User.query.filter(User.email.ilike(email.strip())).first()
-
 def get_user_by_id(user_id):
-    if not user_id: return None
-    try:
-        return db.session.get(User, int(user_id))
-    except:
-        return None
-
-def is_profile_complete(user):
-    if not user: return False
-    required = ['location', 'phone', 'profession', 'qualification', 'nid']
-    return all(bool(getattr(user, field)) for field in required) and user.nid_verified
-
-def is_strong_password(password):
-    if len(password) < 8: return False
-    return all(re.search(r, password) for r in [r"[a-z]", r"[A-Z]", r"[0-9]", r"[!@#$%^&*(),.?\":{}|<>]"])
-
-def is_allowed_email(email):
-    allowed = {'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'protonmail.com', 'me.com'}
-    return email.split('@')[-1].lower() in allowed
+    try: return db.session.get(User, int(user_id)) if user_id else None
+    except: return None
 
 def save_uploaded_file(file, folder_type):
-    if not file or not file.filename:
-        return None
-    ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
-    if ext not in {'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'}:
-        return None
+    if not file or not file.filename: return None
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    if ext not in {'png', 'jpg', 'jpeg', 'webp'}: return None
     try:
-        filename = secure_filename(file.filename)
-        unique_name = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
-        subfolder = 'profile_pics' if folder_type == 'profile' else 'rooms'
-        folder = os.path.join(BASE_DIR, 'static', 'uploads', subfolder)
+        unique_name = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{secure_filename(file.filename)}"
+        sub = 'profile_pics' if folder_type == 'profile' else 'rooms'
+        folder = os.path.join(BASE_DIR, 'static', 'uploads', sub)
         os.makedirs(folder, exist_ok=True)
         full_path = os.path.join(folder, unique_name)
-        file.save(full_path)
-        return f"uploads/{subfolder}/{unique_name}"
-    except Exception as e:
-        logger.error(f"Image save error: {e}")
-        return None
+        with Image.open(file) as img:
+            if img.mode in ("RGBA", "P"): img = img.convert("RGB")
+            img.thumbnail((800, 800) if folder_type == 'room' else (400, 400), Image.Resampling.LANCZOS)
+            img.save(full_path, "JPEG", optimize=True, quality=85)
+        return f"uploads/{sub}/{unique_name}"
+    except Exception as e: logger.error(f"Save error: {e}"); return None
 
-# ===================== TEMPLATE & SECURITY =====================
-@app.template_filter('datetimeformat')
-def datetimeformat(value, fmt='%Y-%m-%d'):
-    if not value: return ""
-    if isinstance(value, str):
-        try: value = datetime.fromisoformat(value)
-        except: return value
-    return value.strftime(fmt)
-
+# ===================== TEMPLATES & CONTEXT =====================
 @app.context_processor
 def inject_global_data():
-    user = get_user_by_id(session.get('user_id'))
+    u = get_user_by_id(session.get('user_id'))
     return {
-        'current_user': user,
-        'profile_complete': is_profile_complete(user),
-        'online_users': max(1, online_users_count),
+        'current_user': u,
         'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or "https://images.unsplash.com/photo-1522771739844-649f6d175d97")
     }
 
 @app.after_request
 def add_security_headers(response):
-    headers = {
-        'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
-        'X-XSS-Protection': '1; mode=block',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-        'Referrer-Policy': 'strict-origin-when-cross-origin'
-    }
-    for k, v in headers.items():
-        response.headers[k] = v
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
 
 # ===================== MAIN ROUTES =====================
@@ -242,345 +202,178 @@ def index():
 @app.route('/rooms')
 def rooms_page():
     loc = request.args.get('location', '').strip()
+    ci, co = request.args.get('checkin'), request.args.get('checkout')
     query = Room.query
-    if loc:
-        query = query.filter(Room.location.ilike(f"%{loc}%"))
+    if loc: query = query.filter(Room.location.ilike(f"%{loc}%"))
     rooms = query.all()
+    if ci and co:
+        rooms = [r for r in rooms if not Booking.query.filter(Booking.room_id == r.id, Booking.status.notin_(['cancelled']), or_(and_(Booking.checkin < co, Booking.checkout > ci))).first()]
     return render_template('rooms.html', rooms=rooms, location=loc)
 
 @app.route('/room/<int:room_id>')
 def room_detail(room_id):
     room = db.session.get(Room, room_id)
-    if not room: return redirect(url_for('rooms_page'))
-    return render_template('room_detail.html', room=room)
+    return render_template('room_detail.html', room=room) if room else redirect(url_for('rooms_page'))
 
 @app.route('/post-room', methods=['GET', 'POST'])
 def post_room():
     if 'user_id' not in session: return redirect(url_for('login'))
-    user = get_user_by_id(session['user_id'])
-    if not user or not is_profile_complete(user):
-        flash('Please complete your profile first.', 'warning')
-        return redirect(url_for('profile'))
-
+    u = get_user_by_id(session['user_id'])
+    if not u.nid or not u.nid_verified:
+        flash('NID verification required to host properties.', 'warning'); return redirect(url_for('profile'))
     if request.method == 'POST':
         try:
             img = save_uploaded_file(request.files.get('room_image'), 'room')
-            room = Room(
-                title=request.form['title'],
-                description=request.form['description'],
-                location=request.form['location'],
-                price_per_night=float(request.form['price']),
-                image_url=img,
-                owner_id=user.id,
-                available_from=request.form.get('available_from'),
-                available_to=request.form.get('available_to'),
-                amenities=request.form.getlist('amenities')
-            )
-            db.session.add(room)
-            db.session.commit()
-            flash('Room posted successfully!', 'success')
-            return redirect(url_for('profile'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error: {str(e)}', 'danger')
+            room = Room(title=request.form['title'], description=request.form['description'], location=request.form['location'], price_per_night=float(request.form['price']), image_url=img, owner_id=u.id, amenities=request.form.getlist('amenities'))
+            db.session.add(room); db.session.commit(); flash('Listing created!', 'success'); return redirect(url_for('profile'))
+        except Exception as e: db.session.rollback(); flash(f'Error: {str(e)}', 'danger')
     return render_template('post_room.html')
 
 @app.route('/edit-room/<int:room_id>', methods=['GET', 'POST'])
 def edit_room(room_id):
-    if 'user_id' not in session: return redirect(url_for('login'))
     room = db.session.get(Room, room_id)
-    if not room or room.owner_id != session['user_id']:
-        return redirect(url_for('profile'))
+    if not room or room.owner_id != session.get('user_id'): return redirect(url_for('profile'))
     if request.method == 'POST':
         try:
-            for f in ['title', 'description', 'location', 'available_from', 'available_to']:
-                setattr(room, f, request.form.get(f))
+            for f in ['title', 'description', 'location']: setattr(room, f, request.form.get(f))
             room.price_per_night = float(request.form['price'])
-            room.amenities = request.form.getlist('amenities')
             img = save_uploaded_file(request.files.get('room_image'), 'room')
             if img: room.image_url = img
-            db.session.commit()
-            flash('Room updated successfully!', 'success')
-            return redirect(url_for('profile'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error: {str(e)}', 'danger')
+            db.session.commit(); flash('Updated!', 'success'); return redirect(url_for('profile'))
+        except: db.session.rollback(); flash('Error updating room.', 'danger')
     return render_template('edit_room.html', room=room)
 
 @app.route('/delete-room/<int:room_id>', methods=['POST'])
 def delete_room(room_id):
-    if 'user_id' not in session: return redirect(url_for('login'))
     room = db.session.get(Room, room_id)
-    if not room or room.owner_id != session['user_id']:
-        return redirect(url_for('profile'))
-    try:
-        if room.image_url and not room.image_url.startswith('http'):
-            try:
-                os.remove(os.path.join(BASE_DIR, 'static', room.image_url))
-            except: pass
-        db.session.delete(room)
-        db.session.commit()
-        flash('Room deleted!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error: {str(e)}', 'danger')
+    if room and room.owner_id == session.get('user_id'):
+        db.session.delete(room); db.session.commit(); flash('Deleted.', 'success')
     return redirect(url_for('profile'))
 
 @app.route('/book/<int:room_id>', methods=['POST'])
 def book_room(room_id):
     if 'user_id' not in session: return redirect(url_for('login'))
-    user = get_user_by_id(session['user_id'])
-    if not user or not is_profile_complete(user):
-        flash('Please complete your profile first.', 'warning')
-        return redirect(url_for('profile'))
-
-    ci = request.form.get('checkin')
-    co = request.form.get('checkout')
+    u = get_user_by_id(session['user_id'])
+    if not u.nid or not u.nid_verified:
+        flash('Please verify your NID to book stays.', 'warning'); return redirect(url_for('profile'))
+    ci, co = request.form.get('checkin'), request.form.get('checkout')
     try:
         nights = (datetime.strptime(co, '%Y-%m-%d') - datetime.strptime(ci, '%Y-%m-%d')).days
-    except:
-        flash('Invalid date format.', 'danger')
-        return redirect(url_for('room_detail', room_id=room_id))
-
-    room = db.session.get(Room, room_id)
-    if not room or nights <= 0:
-        flash('Invalid booking.', 'danger')
-        return redirect(url_for('room_detail', room_id=room_id))
-
-    total = room.price_per_night * nights
-    coupon_code = request.form.get('coupon_code', '').strip().upper()
-    discount = 0
-    if coupon_code:
-        cp = Coupon.query.filter_by(code=coupon_code, active=True).first()
-        if cp and cp.used < cp.max_uses:
-            discount = (total * cp.discount_percent / 100)
-            cp.used += 1
-
-    try:
-        booking = Booking(
-            room_id=room_id, user_id=user.id, checkin=ci, checkout=co,
-            original_amount=total, total_amount=total - discount,
-            discount=discount, coupon_used=coupon_code if discount > 0 else None
-        )
-        db.session.add(booking)
-        db.session.commit()
-        flash('Booking created successfully!', 'success')
-        return redirect(url_for('payment_page', booking_id=booking.id))
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Booking failed: {str(e)}', 'danger')
-        return redirect(url_for('room_detail', room_id=room_id))
-
-@app.route('/payment/<int:booking_id>')
-def payment_page(booking_id):
-    b = db.session.get(Booking, booking_id)
-    if not b or b.user_id != session.get('user_id'):
-        return redirect(url_for('profile'))
-    return render_template('payment.html', booking=b)
-
-@app.route('/pay', methods=['POST'])
-def pay():
-    if 'user_id' not in session:
-        return jsonify({"status": "failed", "msg": "Session expired"}), 401
-    try:
-        bid = int(request.form.get('booking_id', 0))
-        trx = request.form.get('trxid', '').strip()
-        amt = float(request.form.get('amount', 0))
-        method = request.form.get('method', 'manual')
-        name = request.form.get('name', 'User')
-        sender = request.form.get('sender', '')
-
-        if not trx: return jsonify({"status": "failed", "msg": "Transaction ID is required"})
-        if Payment.query.filter_by(trxid=trx).first():
-            return jsonify({"status": "failed", "msg": "TRXID already used"})
-
-        booking = db.session.get(Booking, bid)
-        if not booking: return jsonify({"status": "failed", "msg": "Booking not found"})
-
-        p = Payment(booking_id=bid, user_id=session['user_id'], name=name,
-                    method=method, amount=amt, sender=sender, trxid=trx, status='PENDING')
-        db.session.add(p)
-        db.session.commit()
-        return jsonify({"status": "success", "msg": "Payment submitted successfully."})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Payment error: {e}")
-        return jsonify({"status": "failed", "msg": "Server error"})
-
-@app.route('/cancel-booking/<int:booking_id>', methods=['POST'])
-def cancel_booking(booking_id):
-    if 'user_id' not in session: return jsonify({"success": False}), 401
-    b = db.session.get(Booking, booking_id)
-    if not b or b.user_id != session['user_id']: return jsonify({"success": False}), 403
-    try:
-        b.status = 'cancel_requested' if b.payment_status == 'paid' else 'cancelled'
-        db.session.commit()
-        return jsonify({"success": True, "message": "Cancellation request submitted."})
-    except:
-        db.session.rollback()
-        return jsonify({"success": False, "message": "Database error"})
+        room = db.session.get(Room, room_id)
+        if not room or nights <= 0: raise ValueError()
+        total = room.price_per_night * nights
+        booking = Booking(room_id=room_id, user_id=u.id, checkin=ci, checkout=co, original_amount=total, total_amount=total)
+        db.session.add(booking); db.session.commit(); return redirect(url_for('payment_page', booking_id=booking.id))
+    except: flash('Booking failed.', 'danger'); return redirect(url_for('room_detail', room_id=room_id))
 
 # ===================== AUTH ROUTES =====================
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        u = User.query.filter_by(email=request.form.get('email').lower()).first()
+        if u and u.password and check_password_hash(u.password, request.form.get('password')):
+            if u.blocked: flash('Account blocked.', 'danger'); return redirect(url_for('login'))
+            session.clear(); session['user_id'], session['username'], session['is_admin'] = u.id, u.username, u.is_admin
+            return redirect(url_for('profile'))
+        flash('Invalid credentials.', 'danger')
+    return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        try:
+            email = request.form.get('email').strip().lower()
+            if User.query.filter_by(email=email).first(): flash('Email exists.', 'danger'); return redirect(url_for('signup'))
+            u = User(username=request.form.get('username').strip(), email=email, password=generate_password_hash(request.form.get('password')))
+            db.session.add(u); db.session.commit(); flash('Account created!', 'success'); return redirect(url_for('login'))
+        except: flash('Signup failed.', 'danger')
+    return render_template('signup.html')
+
 @app.route('/login/google')
-def google_login():
-    return google.authorize_redirect(url_for('google_authorize', _external=True))
+def google_login(): return google.authorize_redirect(url_for('google_authorize', _external=True))
 
 @app.route('/login/google/authorize')
 def google_authorize():
     try:
         token = google.authorize_access_token()
         info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
-        email = info.get('email')
-        if not email:
-            flash("Could not retrieve email from Google.", "warning")
-            return redirect(url_for('login'))
-
-        user = User.query.filter_by(google_id=info.get('sub')).first()
-        if not user:
-            user = get_user_by_email(email)
-            if user:
-                user.google_id = info.get('sub')
-            else:
-                user = User(username=info.get('name', email.split('@')[0]), email=email,
-                           google_id=info.get('sub'), role='traveler')
-                db.session.add(user)
-            db.session.commit()
-
-        if user.blocked:
-            flash('Account blocked.', 'danger')
-            return redirect(url_for('login'))
-
-        session.clear()
-        session['user_id'] = user.id
-        session['username'] = user.username
-        session['is_admin'] = user.is_admin
-        return redirect(url_for('admin' if user.is_admin else 'profile'))
-    except Exception as e:
-        logger.error(f"Google Auth Error: {e}")
-        flash("Google login failed.", "warning")
-        return redirect(url_for('login'))
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-
-        if not is_allowed_email(email):
-            flash('Please use a valid email address.', 'danger')
-            return redirect(url_for('signup'))
-        if get_user_by_email(email):
-            flash('Email already registered!', 'danger')
-            return redirect(url_for('signup'))
-        if not is_strong_password(password):
-            flash('Password too weak!', 'danger')
-            return redirect(url_for('signup'))
-
-        try:
-            u = User(username=username, email=email, password=generate_password_hash(password))
+        u = User.query.filter_by(email=info['email']).first()
+        if not u:
+            u = User(username=info.get('name', info['email'].split('@')[0]), email=info['email'], google_id=info.get('sub'), profile_pic=info.get('picture', ''))
             db.session.add(u)
-            db.session.commit()
-            flash('Account created! Please login.', 'success')
-            return redirect(url_for('login'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Signup failed: {str(e)}', 'danger')
-    return render_template('signup.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
-        u = get_user_by_email(email)
-        if u and u.password and check_password_hash(u.password, password):
-            if u.blocked:
-                flash('Account blocked.', 'danger')
-                return redirect(url_for('login'))
-            session.clear()
-            session['user_id'] = u.id
-            session['username'] = u.username
-            session['is_admin'] = u.is_admin
-            return redirect(url_for('admin' if u.is_admin else 'profile'))
-        flash('Invalid email or password.', 'danger')
-    return render_template('login.html')
+        else: u.google_id = info.get('sub')
+        db.session.commit(); session.clear(); session['user_id'], session['username'], session['is_admin'] = u.id, u.username, u.is_admin
+        return redirect(url_for('profile'))
+    except: flash("Google login failed.", "warning"); return redirect(url_for('login'))
 
 @app.route('/logout')
-def logout():
-    session.clear()
-    flash('Logged out successfully.', 'info')
-    return redirect(url_for('index'))
+def logout(): session.clear(); flash('Logged out.', 'info'); return redirect(url_for('index'))
 
-# ===================== PROFILE =====================
+# ===================== PROFILE & API =====================
 @app.route('/profile')
 def profile():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    user = get_user_by_id(session.get('user_id'))
-    if not user:
-        session.clear()
-        return redirect(url_for('login'))
-    return render_template('profile.html', user=user, my_rooms=user.rooms, my_bookings=user.bookings)
+    u = get_user_by_id(session.get('user_id'))
+    if not u: return redirect(url_for('login'))
+    return render_template('profile.html', user=u, my_rooms=u.rooms, my_bookings=u.bookings)
 
 @app.route('/update-profile', methods=['POST'])
 def update_profile():
-    if 'user_id' not in session:
-        return jsonify({"success": False, "message": "Please login first."}), 401
-
-    user = get_user_by_id(session.get('user_id'))
-    if not user:
-        return jsonify({"success": False, "message": "User not found."}), 404
-
+    u = get_user_by_id(session.get('user_id'))
+    if not u: return jsonify({"success": False, "message": "Unauthorized"}), 401
     try:
-        for field in ['phone', 'location', 'profession', 'qualification', 'nid']:
-            if field in request.form:
-                value = request.form.get(field, '').strip()
-                setattr(user, field, value if value else None)
-
+        for f in ['phone', 'location', 'profession', 'qualification', 'nid']:
+            if f in request.form: setattr(u, f, request.form[f].strip() or None)
         file = request.files.get('profile_pic')
-        if file and file.filename:
-            uploaded_image = save_uploaded_file(file, 'profile')
-            if uploaded_image:
-                user.profile_pic = uploaded_image
-
+        if file:
+            path = save_uploaded_file(file, 'profile')
+            if path: u.profile_pic = path
         db.session.commit()
-        return jsonify({
-            "success": True,
-            "message": "Profile updated successfully!",
-            "profile_pic": url_for('static', filename=user.profile_pic) if user.profile_pic else None
-        })
+        return jsonify({"success": True, "message": "Profile updated!"})
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Profile Update Error: {e}")
-        return jsonify({"success": False, "message": "Server error. Please try again."}), 500
+        return jsonify({"success": False, "message": "Save failed. Try again."})
+
+# ===================== PAYMENT & CANCEL =====================
+@app.route('/payment/<int:booking_id>')
+def payment_page(booking_id):
+    b = db.session.get(Booking, booking_id)
+    if not b or b.user_id != session.get('user_id'): return redirect(url_for('profile'))
+    return render_template('payment.html', booking=b)
+
+@app.route('/pay', methods=['POST'])
+def pay():
+    if 'user_id' not in session: return jsonify({"status": "failed"}), 401
+    try:
+        p = Payment(booking_id=int(request.form.get('booking_id')), user_id=session['user_id'], amount=float(request.form.get('amount')), trxid=request.form.get('trxid'), method=request.form.get('method', 'manual'), status='PENDING')
+        db.session.add(p); db.session.commit(); return jsonify({"status": "success"})
+    except: return jsonify({"status": "failed"})
+
+@app.route('/cancel-booking/<int:booking_id>', methods=['POST'])
+def cancel_booking(booking_id):
+    b = db.session.get(Booking, booking_id)
+    if b and b.user_id == session.get('user_id'):
+        b.status = 'cancel_requested' if b.payment_status == 'paid' else 'cancelled'
+        db.session.commit(); return jsonify({"success": True})
+    return jsonify({"success": False})
 
 # ===================== ADMIN ROUTES =====================
 @app.route('/admin')
 def admin():
     if not session.get('is_admin'): return redirect(url_for('index'))
-    return render_template('admin.html',
-                         users=User.query.all(),
-                         rooms=Room.query.all(),
-                         bookings=Booking.query.order_by(Booking.booked_at.desc()).all(),
-                         payments=Payment.query.order_by(Payment.time.desc()).all())
+    return render_template('admin.html', users=User.query.all(), rooms=Room.query.all(), bookings=Booking.query.order_by(Booking.booked_at.desc()).all(), payments=Payment.query.order_by(Payment.time.desc()).all())
 
 @app.route('/admin/block-user/<int:uid>')
 def block_user(uid):
-    if not session.get('is_admin'): return redirect(url_for('index'))
-    u = db.session.get(User, uid)
-    if u:
-        u.blocked = not u.blocked
-        db.session.commit()
+    if session.get('is_admin'):
+        u = db.session.get(User, uid)
+        if u: u.blocked = not u.blocked; db.session.commit()
     return redirect(url_for('admin'))
 
 @app.route('/admin/verify-nid/<int:uid>')
 def verify_nid(uid):
-    if not session.get('is_admin'): return redirect(url_for('index'))
-    u = db.session.get(User, uid)
-    if u:
-        u.nid_verified = True
-        db.session.commit()
+    if session.get('is_admin'):
+        u = db.session.get(User, uid)
+        if u: u.nid_verified = True; db.session.commit()
     return redirect(url_for('admin'))
 
 @app.route('/admin/confirm-payment/<int:pid>')
@@ -590,28 +383,7 @@ def confirm_payment(pid):
     if p:
         p.status = 'CONFIRMED'
         b = db.session.get(Booking, p.booking_id)
-        if b:
-            b.payment_status = 'paid'
-            b.status = 'confirmed'
-        db.session.commit()
-    return redirect(url_for('admin'))
-
-@app.route('/admin/manual-confirm-booking/<int:bid>')
-def admin_manual_confirm(bid):
-    if not session.get('is_admin'): return redirect(url_for('index'))
-    b = db.session.get(Booking, bid)
-    if b:
-        b.payment_status = 'paid'
-        b.status = 'confirmed'
-        db.session.commit()
-    return redirect(url_for('admin'))
-
-@app.route('/admin/approve-cancellation/<int:bid>')
-def admin_approve_cancellation(bid):
-    if not session.get('is_admin'): return redirect(url_for('index'))
-    b = db.session.get(Booking, bid)
-    if b and b.status == 'cancel_requested':
-        b.status = 'cancelled'
+        if b: b.payment_status = 'paid'; b.status = 'confirmed'
         db.session.commit()
     return redirect(url_for('admin'))
 
@@ -620,49 +392,28 @@ def admin_coupons():
     if not session.get('is_admin'): return redirect(url_for('index'))
     if request.method == 'POST':
         try:
-            c = Coupon(code=request.form['code'].upper(),
-                      discount_percent=int(request.form['discount']),
-                      max_uses=int(request.form['max_uses']))
-            db.session.add(c)
-            db.session.commit()
-            flash('Coupon created!', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error: {str(e)}', 'danger')
+            c = Coupon(code=request.form['code'].upper(), discount_percent=int(request.form['discount']), max_uses=int(request.form['max_uses']))
+            db.session.add(c); db.session.commit()
+        except Exception as e: db.session.rollback(); flash(f"Error: {str(e)}", "danger")
     return render_template('admin_coupons.html', coupons=Coupon.query.all())
 
 # ===================== STATIC PAGES =====================
 @app.route('/about')
 def about(): return render_template('about_us.html')
-@app.route('/services')
-def services(): return render_template('our_services.html')
 @app.route('/contact')
 def contact(): return render_template('contact_us.html')
-@app.route('/help')
-def help_center(): return render_template('help_center.html')
-@app.route('/safety-tips')
-def safety_tips(): return render_template('safe_tips.html')
 @app.route('/terms')
 def terms(): return render_template('terms_of_service.html')
-@app.route('/privacy')
-def privacy(): return render_template('privacy_policy.html')
-@app.route('/cancellation-policy')
-def cancellation_policy(): return render_template('cancellation_policy.html')
 
 # ===================== INIT =====================
 def init_db():
     with app.app_context():
         db.create_all()
-        admin_email = os.getenv('ADMIN_EMAIL')
-        admin_pass = os.getenv('ADMIN_PASSWORD')
-        if admin_email and not User.query.filter_by(email=admin_email).first():
-            admin = User(username='Admin', email=admin_email,
-                        password=generate_password_hash(admin_pass),
-                        is_admin=True, role='admin', nid_verified=True)
-            db.session.add(admin)
+        admin_email = os.getenv('ADMIN_EMAIL', 'admin@travellerstop.com')
+        if not User.query.filter_by(email=admin_email).first():
+            db.session.add(User(username='Admin', email=admin_email, password=generate_password_hash('admin123'), is_admin=True, nid_verified=True))
             db.session.commit()
-            logger.info(f"✅ Admin created: {admin_email}")
 
 if __name__ == '__main__':
-    init_db()
-    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=app.config['DEBUG'])
+    init_db(); socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
+else: init_db()
