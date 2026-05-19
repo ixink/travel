@@ -52,7 +52,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
 
-# ===================== THREADING LOCK (Fixed) =====================
+# ===================== THREADING LOCK =====================
 counter_lock = threading.Lock()
 
 # ===================== SOCKETIO =====================
@@ -62,6 +62,7 @@ socketio = SocketIO(app,
                     ping_timeout=60,
                     ping_interval=25)
 
+# ===================== GOOGLE OAUTH =====================
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -223,6 +224,108 @@ def add_security_headers(response):
     for k, v in headers.items():
         response.headers[k] = v
     return response
+
+# ===================== GOOGLE AUTH =====================
+@app.route('/login/google')
+def google_login():
+    return google.authorize_redirect(url_for('google_callback', _external=True))
+
+@app.route('/login/google/callback')
+def google_callback():
+    try:
+        token = google.authorize_access_token()
+        info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
+        
+        email = info.get('email')
+        if not email:
+            flash("Could not retrieve email from Google.", "danger")
+            return redirect(url_for('login'))
+
+        user = User.query.filter_by(google_id=info.get('sub')).first()
+
+        if not user:
+            user = get_user_by_email(email)
+            if user:
+                user.google_id = info.get('sub')
+            else:
+                user = User(
+                    username=info.get('name', email.split('@')[0]),
+                    email=email,
+                    google_id=info.get('sub'),
+                    role='traveler'
+                )
+                db.session.add(user)
+            db.session.commit()
+
+        if user.blocked:
+            flash('Your account has been blocked.', 'danger')
+            return redirect(url_for('login'))
+
+        session.clear()
+        session['user_id'] = user.id
+        session['username'] = user.username
+        session['is_admin'] = user.is_admin
+
+        flash('Successfully logged in with Google!', 'success')
+        return redirect(url_for('admin' if user.is_admin else 'profile'))
+
+    except Exception as e:
+        logger.error(f"Google Callback Error: {e}")
+        flash("Google login failed. Please try again.", "danger")
+        return redirect(url_for('login'))
+
+# ===================== AUTH ROUTES =====================
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        if not is_allowed_email(email):
+            flash('Please use a valid email address.', 'danger')
+            return redirect(url_for('signup'))
+        if get_user_by_email(email):
+            flash('Email already registered!', 'danger')
+            return redirect(url_for('signup'))
+        if not is_strong_password(password):
+            flash('Password too weak!', 'danger')
+            return redirect(url_for('signup'))
+
+        try:
+            u = User(username=username, email=email, password=generate_password_hash(password))
+            db.session.add(u)
+            db.session.commit()
+            flash('Account created! Please login.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Signup failed: {str(e)}', 'danger')
+    return render_template('signup.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        u = get_user_by_email(email)
+        if u and u.password and check_password_hash(u.password, password):
+            if u.blocked:
+                flash('Account blocked.', 'danger')
+                return redirect(url_for('login'))
+            session.clear()
+            session['user_id'] = u.id
+            session['username'] = u.username
+            session['is_admin'] = u.is_admin
+            return redirect(url_for('admin' if u.is_admin else 'profile'))
+        flash('Invalid email or password.', 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Logged out successfully.', 'info')
+    return redirect(url_for('index'))
 
 # ===================== MAIN ROUTES =====================
 @app.route('/')
@@ -410,98 +513,6 @@ def cancel_booking(booking_id):
     except:
         db.session.rollback()
         return jsonify({"success": False, "message": "Database error"})
-
-# ===================== AUTH =====================
-@app.route('/login/google')
-def google_login():
-    return google.authorize_redirect(url_for('google_authorize', _external=True))
-
-@app.route('/login/google/authorize')
-def google_authorize():
-    try:
-        token = google.authorize_access_token()
-        info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
-        email = info.get('email')
-        if not email:
-            flash("Could not retrieve email.", "warning")
-            return redirect(url_for('login'))
-
-        user = User.query.filter_by(google_id=info.get('sub')).first()
-        if not user:
-            user = get_user_by_email(email)
-            if user:
-                user.google_id = info.get('sub')
-            else:
-                user = User(username=info.get('name', email.split('@')[0]), email=email,
-                           google_id=info.get('sub'), role='traveler')
-                db.session.add(user)
-            db.session.commit()
-
-        if user.blocked:
-            flash('Account blocked.', 'danger')
-            return redirect(url_for('login'))
-
-        session.clear()
-        session['user_id'] = user.id
-        session['username'] = user.username
-        session['is_admin'] = user.is_admin
-        return redirect(url_for('admin' if user.is_admin else 'profile'))
-    except Exception as e:
-        logger.error(f"Google Auth Error: {e}")
-        flash("Google login failed.", "warning")
-        return redirect(url_for('login'))
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-
-        if not is_allowed_email(email):
-            flash('Please use a valid email address.', 'danger')
-            return redirect(url_for('signup'))
-        if get_user_by_email(email):
-            flash('Email already registered!', 'danger')
-            return redirect(url_for('signup'))
-        if not is_strong_password(password):
-            flash('Password too weak!', 'danger')
-            return redirect(url_for('signup'))
-
-        try:
-            u = User(username=username, email=email, password=generate_password_hash(password))
-            db.session.add(u)
-            db.session.commit()
-            flash('Account created! Please login.', 'success')
-            return redirect(url_for('login'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Signup failed: {str(e)}', 'danger')
-    return render_template('signup.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
-        u = get_user_by_email(email)
-        if u and u.password and check_password_hash(u.password, password):
-            if u.blocked:
-                flash('Account blocked.', 'danger')
-                return redirect(url_for('login'))
-            session.clear()
-            session['user_id'] = u.id
-            session['username'] = u.username
-            session['is_admin'] = u.is_admin
-            return redirect(url_for('admin' if u.is_admin else 'profile'))
-        flash('Invalid email or password.', 'danger')
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash('Logged out successfully.', 'info')
-    return redirect(url_for('index'))
 
 # ===================== PROFILE =====================
 @app.route('/profile')
