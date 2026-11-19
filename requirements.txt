@@ -1,11 +1,10 @@
 Flask
 Flask-SQLAlchemy
-Flask-SocketIO
+Flask-WTF
 SQLAlchemy
 psycopg2-binary
 Authlib
 Werkzeug
-eventlet
 gevent
 Pillow
 python-dotenv

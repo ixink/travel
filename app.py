@@ -1,18 +1,23 @@
 import os
 import re
 import logging
-import threading
+
+import requests
 from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, abort
+from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO
+from flask_wtf.csrf import generate_csrf, validate_csrf
+from wtforms.validators import ValidationError
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 import secrets
+
+from uddoktapay import checkout_url, gateway_request, payment_amount
 
 # ===================== CONFIGURATION =====================
 load_dotenv()
@@ -38,6 +43,10 @@ app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
+app.config['UDDOKTAPAY_API_URL'] = os.getenv('UDDOKTAPAY_API_URL', 'https://travellerstop.paymently.io/api')
+app.config['UDDOKTAPAY_API_KEY'] = os.getenv('UDDOKTAPAY_API_KEY')
+app.config['UDDOKTAPAY_SITE_URL'] = os.getenv('UDDOKTAPAY_SITE_URL', 'https://travellerstop.com').rstrip('/')
+
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
 if not db_url:
@@ -51,16 +60,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
-
-# ===================== THREADING LOCK =====================
-counter_lock = threading.Lock()
-
-# ===================== SOCKETIO =====================
-socketio = SocketIO(app, 
-                    cors_allowed_origins="*", 
-                    async_mode='eventlet',
-                    ping_timeout=60,
-                    ping_interval=25)
 
 # ===================== GOOGLE OAUTH =====================
 oauth = OAuth(app)
@@ -208,7 +207,6 @@ def inject_global_data():
     return {
         'current_user': user,
         'profile_complete': is_profile_complete(user),
-        'online_users': 1,
         'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or "https://images.unsplash.com/photo-1522771739844-649f6d175d97")
     }
 
@@ -470,29 +468,157 @@ def payment_page(booking_id):
     b = db.session.get(Booking, booking_id)
     if not b or b.user_id != session.get('user_id'):
         return redirect(url_for('profile'))
-    return render_template('payment.html', booking=b)
+    return render_template(
+        'payment.html', booking=b, payment_token=generate_csrf(),
+        uddoktapay_enabled=bool(app.config['UDDOKTAPAY_API_KEY']),
+    )
+
+def uddoktapay_request(endpoint, payload):
+    return gateway_request(
+        app.config['UDDOKTAPAY_API_URL'], app.config['UDDOKTAPAY_API_KEY'], endpoint, payload
+    )
+
+
+@app.post('/payment/<int:booking_id>/uddoktapay')
+def uddoktapay_checkout(booking_id):
+    booking = db.session.get(Booking, booking_id)
+    if not booking or booking.user_id != session.get('user_id'):
+        abort(404)
+    try:
+        validate_csrf(request.form.get('csrf_token'))
+    except ValidationError:
+        abort(400)
+
+    amount = payment_amount(booking.total_amount)
+    if not app.config['UDDOKTAPAY_API_KEY'] or amount is None or (
+        booking.payment_status == 'paid' or booking.status != 'pending_payment'
+    ):
+        flash('Online checkout is unavailable for this booking.', 'warning')
+        return redirect(url_for('payment_page', booking_id=booking_id), code=303)
+
+    site = app.config['UDDOKTAPAY_SITE_URL']
+    payload = {
+        'full_name': booking.user.username,
+        'email': booking.user.email,
+        'amount': format(amount, '.2f'),
+        'metadata': {'travellerstop_booking_id': str(booking.id)},
+        'redirect_url': site + url_for('uddoktapay_return'),
+        'cancel_url': site + url_for('payment_page', booking_id=booking.id),
+        'webhook_url': site + url_for('uddoktapay_webhook'),
+        'return_type': 'GET',
+    }
+    try:
+        gateway = uddoktapay_request('checkout-v2', payload)
+        return redirect(checkout_url(gateway, app.config['UDDOKTAPAY_API_URL']), code=303)
+    except (requests.RequestException, ValueError):
+        logger.warning('UddoktaPay checkout could not be started for booking %s', booking_id)
+        flash('Could not open UddoktaPay. Please try again in a moment.', 'warning')
+        return redirect(url_for('payment_page', booking_id=booking_id), code=303)
+
+
+def verify_uddoktapay_invoice(invoice_id):
+    if not isinstance(invoice_id, str) or not invoice_id.strip() or len(invoice_id) > 80:
+        abort(400)
+    if not app.config['UDDOKTAPAY_API_KEY']:
+        abort(503)
+    try:
+        payment = uddoktapay_request('verify-payment', {'invoice_id': invoice_id})
+    except (requests.RequestException, ValueError):
+        abort(502)
+
+    if payment.get('status') != 'COMPLETED':
+        abort(409)
+    metadata = payment.get('metadata')
+    if not isinstance(metadata, dict):
+        abort(422)
+    try:
+        booking_id = int(metadata['travellerstop_booking_id'])
+    except (KeyError, TypeError, ValueError, OverflowError):
+        abort(422)
+    paid_amount = payment_amount(payment.get('amount'))
+    if paid_amount is None:
+        abort(422)
+
+    booking = db.session.get(Booking, booking_id, with_for_update=True)
+    if not booking or payment_amount(booking.total_amount) != paid_amount:
+        abort(422)
+
+    reference = f'uddoktapay:{invoice_id}'
+    existing = Payment.query.filter_by(trxid=reference).first()
+    if existing:
+        if existing.booking_id != booking.id or existing.method != 'uddoktapay':
+            abort(409)
+        return booking
+
+    requires_review = booking.payment_status == 'paid' or booking.status != 'pending_payment'
+    db.session.add(Payment(
+        booking_id=booking.id, user_id=booking.user_id, name=booking.user.username,
+        method='uddoktapay', amount=float(paid_amount), trxid=reference,
+        status='REVIEW_REQUIRED' if requires_review else 'CONFIRMED',
+    ))
+    if not requires_review:
+        booking.payment_status = 'paid'
+        booking.status = 'confirmed'
+    db.session.commit()
+    return booking
+
+
+@app.get('/payment/uddoktapay/return')
+def uddoktapay_return():
+    try:
+        booking = verify_uddoktapay_invoice(request.args.get('invoice_id'))
+    except HTTPException:
+        flash('Payment verification is pending or unavailable. Check your bookings before retrying.', 'warning')
+        return redirect(url_for('profile'))
+    if booking.user_id != session.get('user_id'):
+        return redirect(url_for('profile'))
+    if booking.payment_status == 'paid':
+        flash('Payment received. Check your booking status below.', 'success')
+    else:
+        flash('Payment received and awaiting review.', 'info')
+    return redirect(url_for('profile'))
+
+
+@app.post('/payment/uddoktapay/webhook')
+def uddoktapay_webhook():
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        payload = request.form
+    verify_uddoktapay_invoice(payload.get('invoice_id'))
+    return jsonify({'status': 'success'})
+
 
 @app.route('/pay', methods=['POST'])
 def pay():
     if 'user_id' not in session:
         return jsonify({"status": "failed", "msg": "Session expired"}), 401
     try:
+        validate_csrf(request.form.get('csrf_token'))
+    except ValidationError:
+        return jsonify({'status': 'failed', 'msg': 'Please reload the payment page and try again.'}), 400
+
+    try:
         bid = int(request.form.get('booking_id', 0))
         trx = request.form.get('trxid', '').strip()
-        amt = float(request.form.get('amount', 0))
         method = request.form.get('method', 'manual')
         name = request.form.get('name', 'User')
         sender = request.form.get('sender', '')
 
+        if method == 'uddoktapay' or trx.lower().startswith('uddoktapay:'):
+            return jsonify({'status': 'failed', 'msg': 'Use the UddoktaPay checkout button.'}), 400
         if not trx: return jsonify({"status": "failed", "msg": "Transaction ID is required"})
         if Payment.query.filter_by(trxid=trx).first():
             return jsonify({"status": "failed", "msg": "TRXID already used"})
 
         booking = db.session.get(Booking, bid)
-        if not booking: return jsonify({"status": "failed", "msg": "Booking not found"})
+        if not booking or booking.user_id != session['user_id']:
+            return jsonify({"status": "failed", "msg": "Booking not found"}), 404
+
+        if booking.payment_status == 'paid':
+            return jsonify({'status': 'failed', 'msg': 'This booking is already paid.'}), 409
 
         p = Payment(booking_id=bid, user_id=session['user_id'], name=name,
-                    method=method, amount=amt, sender=sender, trxid=trx, status='PENDING')
+                    method=method, amount=booking.total_amount, sender=sender, trxid=trx, status='PENDING')
         db.session.add(p)
         db.session.commit()
         return jsonify({"status": "success", "msg": "Payment submitted successfully."})
@@ -504,7 +630,7 @@ def pay():
 @app.route('/cancel-booking/<int:booking_id>', methods=['POST'])
 def cancel_booking(booking_id):
     if 'user_id' not in session: return jsonify({"success": False}), 401
-    b = db.session.get(Booking, booking_id)
+    b = db.session.get(Booking, booking_id, with_for_update=True)
     if not b or b.user_id != session['user_id']: return jsonify({"success": False}), 403
     try:
         b.status = 'cancel_requested' if b.payment_status == 'paid' else 'cancelled'
@@ -589,13 +715,13 @@ def verify_nid(uid):
 def confirm_payment(pid):
     if not session.get('is_admin'): return redirect(url_for('index'))
     p = db.session.get(Payment, pid)
-    if p:
-        p.status = 'CONFIRMED'
-        b = db.session.get(Booking, p.booking_id)
-        if b:
+    if p and p.status == 'PENDING' and p.method != 'uddoktapay':
+        b = db.session.get(Booking, p.booking_id, with_for_update=True)
+        if b and b.payment_status != 'paid' and b.status == 'pending_payment':
+            p.status = 'CONFIRMED'
             b.payment_status = 'paid'
             b.status = 'confirmed'
-        db.session.commit()
+            db.session.commit()
     return redirect(url_for('admin'))
 
 @app.route('/admin/manual-confirm-booking/<int:bid>')
@@ -667,4 +793,4 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)

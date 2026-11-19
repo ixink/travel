@@ -102,9 +102,6 @@
             <div id="section-users" class="d-none">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4>Users Management</h4>
-                    <a href="{{ url_for('export_users') }}" class="btn btn-success">
-                        <i class="fas fa-download"></i> Export All Users (CSV)
-                    </a>
                 </div>
                 <div class="card shadow">
                     <div class="table-responsive">
@@ -230,7 +227,7 @@
                                     </td>
                                     <td>{{ p.time|datetimeformat }}</td>
                                     <td>
-                                        {% if p.status != 'CONFIRMED' %}
+                                        {% if p.status == 'PENDING' and p.method != 'uddoktapay' %}
                                         <a href="{{ url_for('confirm_payment', pid=p.id) }}" 
                                            class="btn btn-sm btn-primary">
                                             Confirm
@@ -407,7 +404,7 @@ function showSection(section) {
     if (target) target.classList.remove('d-none');
 
     // Update active nav
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.admin-sidebar .nav-link').forEach(link => link.classList.remove('active'));
     const activeLink = document.getElementById(`nav-${section}`);
     if (activeLink) activeLink.classList.add('active');
 

@@ -17,6 +17,21 @@
                     <p class="text-secondary">Almost there! Complete your payment to confirm your stay.</p>
                 </div>
 
+                {% if booking.payment_status == 'paid' %}
+                    <div class="alert alert-success" role="status">This booking has been paid.</div>
+                {% elif uddoktapay_enabled and booking.status == 'pending_payment' %}
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h2 class="h5">Pay online with UddoktaPay</h2>
+                            <p>Use the secure checkout to pay ৳{{ '%.2f'|format(booking.total_amount) }}.</p>
+                            <form method="post" action="{{ url_for('uddoktapay_checkout', booking_id=booking.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ payment_token }}">
+                                <button class="btn btn-red" type="submit">Continue to UddoktaPay</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <div class="row g-4">
                     <!-- Instructions -->
                         <div class="card glass-card border-0">
@@ -39,9 +54,8 @@
                                 <h5 class="fw-bold mb-4">How would you like to pay?</h5>
                                 
                                 <form id="paymentForm">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="csrf_token" value="{{ payment_token }}">
                                     <input type="hidden" name="booking_id" value="{{ booking.id }}">
-                                    <input type="hidden" name="amount" value="{{ booking.total_amount }}">
 
                                     <div class="mb-4">
                                         <label class="form-label small text-uppercase fw-bold text-secondary">Select Method</label>
@@ -176,21 +190,18 @@ form.addEventListener('submit', async function(e){
     const result = document.getElementById('paymentResult');
     
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
     
     try {
         const response = await fetch("{{ url_for('pay') }}", {
             method: 'POST',
-            body: new FormData(form),
-            headers: {
-                'X-CSRFToken': '{{ csrf_token() }}'
-            }
+            body: new FormData(form)
         });
         const data = await response.json();
         
         if(data.status === 'success'){
             result.innerHTML = `<div class="alert alert-success rounded-4"><h6 class="fw-bold mb-1">Success!</h6>${data.msg}</div>`;
-            btn.innerHTML = 'Confirmed';
+            btn.innerHTML = 'Submitted';
         } else {
             result.innerHTML = `<div class="alert alert-danger rounded-4"><h6 class="fw-bold mb-1">Failed</h6>${data.msg}</div>`;
             btn.disabled = false;

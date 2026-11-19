@@ -46,7 +46,7 @@ function initSmoothScroll() {
  */
 function highlightActiveNav() {
     const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.nav-link');
+    const navLinks = document.querySelectorAll('#mainNavbar .nav-link');
 
     navLinks.forEach(link => {
         link.classList.remove('active', 'fw-bold');
@@ -80,35 +80,13 @@ function initFlashMessages() {
 }
 
 /**
- * Navbar Scroll Effect
- */
-function initNavbarScroll() {
-    const navbar = document.querySelector('.navbar');
-    if (!navbar) return;
-
-    let lastScroll = 0;
-
-    window.addEventListener('scroll', () => {
-        const currentScroll = window.pageYOffset;
-
-        if (currentScroll > lastScroll && currentScroll > 120) {
-            navbar.style.transform = 'translateY(-100%)';
-        } else {
-            navbar.style.transform = 'translateY(0)';
-        }
-        lastScroll = currentScroll;
-    });
-}
-
-/**
  * Image Error Handler (Fallback)
  */
 function initImageFallback() {
     document.querySelectorAll('img').forEach(img => {
         img.addEventListener('error', function () {
-            this.src = 'https://source.unsplash.com/random/800x600/?room,interior';
-            this.onerror = null; // Prevent infinite loop
-        });
+            this.src = document.body.dataset.imageFallback;
+        }, { once: true });
     });
 }
 
@@ -191,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function () {
     highlightActiveNav();
     initSmoothScroll();
     initFlashMessages();
-    initNavbarScroll();
     initImageFallback();
     initBookingDates();
     initImagePreview();

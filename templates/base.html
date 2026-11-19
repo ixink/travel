@@ -14,15 +14,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ range(1, 9999) | random }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     
     <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
 </head>
-<body>
+<body data-image-fallback="{{ url_for('static', filename='logo.png') }}">
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top transition" id="mainNavbar">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNavbar">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="TS" class="logo-img">
@@ -34,18 +34,13 @@
                     <i class="fas fa-plus me-1"></i> Post Room
                 </a>
                 {% endif %}
-                <button class="navbar-toggler border-0 shadow-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler border-0 shadow-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="fas fa-bars-staggered"></i>
                 </button>
             </div>
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center gap-lg-4 py-4 py-lg-0">
-                    <li class="nav-item">
-                        <span class="nav-link px-0 fw-semibold text-success">
-                            <i class="fas fa-circle me-1 small"></i> <span id="online-count">{{ online_users }}</span> Online
-                        </span>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link px-0 fw-semibold {% if request.endpoint == 'index' %}active{% endif %}" 
                            href="{{ url_for('index') }}">Home</a>
@@ -98,7 +93,7 @@
     </nav>
 
     <!-- Flash Messages -->
-    <div class="container mt-5 pt-4">
+    <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -118,7 +113,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer mt-auto py-5 bg-dark text-white">
+    <footer class="footer mt-auto py-5 text-white">
         <div class="container">
             <div class="row g-4">
                 <!-- Brand Section -->
@@ -126,7 +121,7 @@
                     <div class="footer-brand mb-3">
                         <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="footer-logo mb-3">
                     </div>
-                    <p class="text-secondary mb-4 pe-lg-5">
+                    <p class="footer-muted mb-4 pe-lg-5">
                         Bangladesh's most trusted platform for unique stays and local experiences. We connect travellers with amazing hosts across the country.
                     </p>
                     <div class="social-links d-flex gap-3">
@@ -164,17 +159,17 @@
                 <!-- Newsletter -->
                 <div class="col-lg-4 col-md-6">
                     <h5 class="fw-bold mb-4">Join Our Community</h5>
-                    <p class="text-secondary mb-4">Subscribe to our newsletter for exclusive travel deals and local guides.</p>
+                    <p class="footer-muted mb-4">Subscribe to our newsletter for exclusive travel deals and local guides.</p>
                     <form class="newsletter-form position-relative">
                         <div class="input-group mb-3">
-                            <input type="email" class="form-control bg-transparent border-secondary text-white py-3 ps-4" placeholder="Enter your email" required>
-                            <button class="btn btn-red px-4" type="submit">
+                            <input type="email" class="form-control bg-transparent border-secondary text-white py-3 ps-4" aria-label="Email address" placeholder="Enter your email" required>
+                            <button class="btn btn-red px-4" type="submit" aria-label="Subscribe">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
                     </form>
                     <div class="payment-methods mt-4">
-                        <small class="text-secondary d-block mb-3 text-uppercase fw-bold">Secure Payment Partners</small>
+                        <small class="footer-muted d-block mb-3 text-uppercase fw-bold">Secure Payment Partners</small>
                         <div class="d-flex gap-3 align-items-center opacity-75">
                             <img src="https://freelogopng.com/images/all_img/1656234782bkash-app-logo.png" height="24" alt="bKash">
                             <img src="https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png" height="24" alt="Nagad">
@@ -188,10 +183,10 @@
 
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <p class="text-secondary small mb-0">&copy; 2026 Traveller Stop Ltd. All Rights Reserved.</p>
+                    <p class="footer-muted small mb-0">&copy; 2026 Traveller Stop Ltd. All Rights Reserved.</p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <p class="text-secondary small mb-0">Designed with <i class="fas fa-heart text-danger mx-1"></i> for Bangladesh</p>
+                    <p class="footer-muted small mb-0">Designed with <i class="fas fa-heart text-danger mx-1"></i> for Bangladesh</p>
                 </div>
             </div>
         </div>
@@ -204,18 +199,5 @@
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     
     {% block scripts %}{% endblock %}
-    <!-- Socket.IO -->
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script>
-        const socket = io();
-        socket.on('update_online_users', function(data) {
-            const countElem = document.getElementById('online-count');
-            if (countElem) countElem.innerText = data.count;
-        });
-        socket.on('new_room_posted', function(data) {
-            // Optional: Show a small toast or notification
-            console.log('New room posted:', data);
-        });
-    </script>
 </body>
 </html>

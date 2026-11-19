@@ -23,9 +23,9 @@
     <!-- Filters -->
     <div class="row mb-5 align-items-end">
         <div class="col-lg-8">
-            <form method="GET" class="d-flex gap-3">
+            <form method="GET" class="d-flex flex-column flex-sm-row gap-3">
                 <div class="flex-grow-1">
-                    <input type="text" name="location" class="form-control form-control-lg" 
+                    <input type="text" name="location" aria-label="Location" class="form-control form-control-lg"
                            placeholder="Search by location (Dhaka, Cox's Bazar, Sylhet...)" 
                            value="{{ location|default('') }}">
                 </div>
@@ -53,10 +53,9 @@
                 <div class="position-relative">
                     <img src="{{ get_room_image(room.image_url) }}" 
                          class="card-img-top" 
-                         alt="{{ room.title }}"
-                         style="height: 245px; object-fit: cover;">
+                         alt="{{ room.title }}">
                     
-                    <div class="position-absolute top-3 end-3 bg-white px-3 py-1 rounded-pill shadow-sm">
+                    <div class="position-absolute top-0 end-0 m-3 bg-white px-3 py-1 rounded-pill shadow-sm">
                         <strong class="text-danger fs-5">৳{{ room.price_per_night | int }}</strong>
                         <small class="text-muted">/night</small>
                     </div>
