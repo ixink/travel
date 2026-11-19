@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNearbySearch();
     initFavourites();
     initGallery();
+    initFirstBookingOffer();
 });
 
 function initNearbySearch() {
@@ -273,4 +274,36 @@ function initGallery() {
     image.addEventListener('error', recoverImage);
     setPlaying(playing);
     if (image.complete && !image.naturalWidth) recoverImage();
+}
+
+function initFirstBookingOffer() {
+    const offer = document.querySelector('[data-first-offer]');
+    if (!offer || typeof offer.showModal !== 'function') return;
+    const key = 'traveller-firsthere-seen';
+    try {
+        if (sessionStorage.getItem(key)) return;
+    } catch {
+        // The offer can still be shown once on the current page.
+    }
+
+    function onScroll() {
+        if (window.scrollY < 40) return;
+        window.removeEventListener('scroll', onScroll);
+        window.setTimeout(() => {
+            if (document.hidden || document.querySelector('dialog[open], .modal.show')) return;
+            offer.showModal();
+            try {
+                sessionStorage.setItem(key, '1');
+            } catch {
+                // No persistent browser storage is required.
+            }
+        }, 3000);
+    }
+
+    offer.addEventListener('close', () => {
+        if (offer.returnValue !== 'search') return;
+        const search = document.getElementById('search-location');
+        if (search) search.focus();
+    });
+    window.addEventListener('scroll', onScroll, { passive: true });
 }

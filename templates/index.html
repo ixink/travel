@@ -83,11 +83,22 @@
     <section class="container section-space" aria-labelledby="host-title">
         <div class="host-banner">
             <div>
-                <h2 id="host-title">{{ tr('Have a room to share?', 'অতিথিদের জন্য কক্ষ আছে?') }}</h2>
-                <p>{{ tr('List your place, set your nightly rate, and welcome travellers.', 'আপনার আবাসন যোগ করুন, রাতের ভাড়া ঠিক করুন এবং ভ্রমণকারীদের স্বাগত জানান।') }}</p>
+                <h2 id="host-title">{{ tr('Turn your spare room into extra income.', 'খালি কক্ষ থেকেই বাড়তি আয় করুন।') }}</h2>
+                <p>{{ tr('Set your own nightly rate and earn when travellers book your room.', 'নিজের মতো রাতের ভাড়া ঠিক করুন এবং ভ্রমণকারীরা বুক করলে আয় করুন।') }}</p>
             </div>
             <a class="btn btn-light" href="{{ url_for('post_room') }}">{{ tr('List a room', 'কক্ষ যোগ করুন') }}</a>
         </div>
     </section>
 </div>
+<dialog class="first-offer" data-first-offer aria-labelledby="first-offer-title">
+    <form method="dialog"><button class="btn-close first-offer-close" aria-label="{{ tr('Close offer', 'অফার বন্ধ করুন') }}"></button></form>
+    <p class="first-offer-kicker">{{ tr('Your first stay', 'আপনার প্রথম আবাসন') }}</p>
+    <h2 id="first-offer-title">{{ tr('Get 15% off your first booking', 'প্রথম বুকিংয়ে ১৫% ছাড় পান') }}</h2>
+    <p>{{ tr('Use this promo code at checkout. Save up to ৳200, once per account.', 'পেমেন্টের আগে প্রোমো কোডটি দিন। প্রতি অ্যাকাউন্টে একবার সর্বোচ্চ ২০০ টাকা ছাড়।') }}</p>
+    <strong class="offer-code" translate="no">FIRSTHERE</strong>
+    <div class="first-offer-actions">
+        <form method="dialog"><button class="btn btn-primary" value="search">{{ tr('Find a stay', 'আবাসন খুঁজুন') }}</button></form>
+        <a href="{{ url_for('help_center') }}#firsthere">{{ tr('Terms and conditions apply', 'শর্তাবলি প্রযোজ্য') }}</a>
+    </div>
+</dialog>
 {% endblock %}

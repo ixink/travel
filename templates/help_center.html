@@ -1,97 +1,43 @@
 {% extends 'base.html' %}
-
 {% block title %}{{ tr('Help Center', 'সহায়তা কেন্দ্র') }} | Traveller Stop{% endblock %}
 
 {% block content %}
-
 <section class="info-hero">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-3">{{ tr('Help Center', 'সহায়তা কেন্দ্র') }}</h1>
-        <p class="lead opacity-75">{{ tr('Find answers to your questions and learn how to use Traveller Stop.', 'আপনার প্রশ্নের উত্তর ও ট্রাভেলার স্টপ ব্যবহারের নির্দেশনা খুঁজুন।') }}</p>
+        <h1>{{ tr('How can we help?', 'কীভাবে সাহায্য করতে পারি?') }}</h1>
+        <p>{{ tr('Find answers about booking, payments, hosting, and your account.', 'বুকিং, পেমেন্ট, হোস্টিং ও অ্যাকাউন্ট সম্পর্কে উত্তর খুঁজুন।') }}</p>
     </div>
 </section>
-
-<div class="container mb-5">
-    <div class="info-card">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                    <button class="nav-link active text-start py-3 px-4 rounded-3 mb-2" id="v-pills-booking-tab" data-bs-toggle="pill" data-bs-target="#v-pills-booking" type="button" role="tab">
-                        <i class="fas fa-calendar-alt me-2"></i> {{ tr('Booking & Payments', 'বুকিং ও পেমেন্ট') }}
-                    </button>
-                    <button class="nav-link text-start py-3 px-4 rounded-3 mb-2" id="v-pills-hosting-tab" data-bs-toggle="pill" data-bs-target="#v-pills-hosting" type="button" role="tab">
-                        <i class="fas fa-home me-2"></i> {{ tr('Hosting on TS', 'হোস্টিং') }}
-                    </button>
-                    <button class="nav-link text-start py-3 px-4 rounded-3 mb-2" id="v-pills-account-tab" data-bs-toggle="pill" data-bs-target="#v-pills-account" type="button" role="tab">
-                        <i class="fas fa-user-circle me-2"></i> {{ tr('Account & Profile', 'অ্যাকাউন্ট ও প্রোফাইল') }}
-                    </button>
-                    <button class="nav-link text-start py-3 px-4 rounded-3 mb-2" id="v-pills-safety-tab" data-bs-toggle="pill" data-bs-target="#v-pills-safety" type="button" role="tab">
-                        <i class="fas fa-shield-alt me-2"></i> {{ tr('Safety & Security', 'নিরাপত্তা') }}
-                    </button>
-                </div>
-            </div>
-            
-            <div class="col-md-8">
-                <div class="tab-content" id="v-pills-tabContent">
-                    <!-- Booking & Payments -->
-                    <div class="tab-pane fade show active" id="v-pills-booking" role="tabpanel">
-                        <h3 class="fw-bold mb-4">{{ tr('Booking & Payments', 'বুকিং ও পেমেন্ট') }}</h3>
-                        <div class="accordion accordion-flush" id="bookingAccordion">
-                            <div class="accordion-item border-bottom">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#q1">
-                                        {{ tr('How do I book a room?', 'কীভাবে কক্ষ বুক করব?') }}
-                                    </button>
-                                </h2>
-                                <div id="q1" class="accordion-collapse collapse" data-bs-parent="#bookingAccordion">
-                                    <div class="accordion-body text-muted">
-                                        {{ tr('Find a stay, choose your dates, and select Reserve stay. Complete payment on UddoktaPay to confirm your booking.', 'আবাসন খুঁজে তারিখ বাছুন এবং আবাসন বুক করুন। বুকিং নিশ্চিত করতে উদ্যোক্তাপে পেমেন্ট সম্পন্ন করুন।') }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item border-bottom">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#q2">
-                                        {{ tr('What payment methods do you accept?', 'কোন পেমেন্ট পদ্ধতি ব্যবহার করা যায়?') }}
-                                    </button>
-                                </h2>
-                                <div id="q2" class="accordion-collapse collapse" data-bs-parent="#bookingAccordion">
-                                    <div class="accordion-body text-muted">
-                                        {{ tr('The available payment methods are shown at UddoktaPay checkout.', 'উদ্যোক্তাপে চেকআউটে উপলভ্য পেমেন্ট পদ্ধতি দেখানো হয়।') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hosting -->
-                    <div class="tab-pane fade" id="v-pills-hosting" role="tabpanel">
-                        <h3 class="fw-bold mb-4">{{ tr('Hosting on TS', 'হোস্টিং') }}</h3>
-                        <p class="text-muted">{{ tr('Information for property owners and managers.', 'আবাসনের মালিক ও ব্যবস্থাপকদের জন্য তথ্য।') }}</p>
-                        <!-- Add hosting FAQs here -->
-                    </div>
-
-                    <!-- Account -->
-                    <div class="tab-pane fade" id="v-pills-account" role="tabpanel">
-                        <h3 class="fw-bold mb-4">{{ tr('Account & Profile', 'অ্যাকাউন্ট ও প্রোফাইল') }}</h3>
-                        <p class="text-muted">{{ tr('Manage your personal information and preferences.', 'নিজের তথ্য ও পছন্দ পরিচালনা করুন।') }}</p>
-                    </div>
-
-                    <!-- Safety -->
-                    <div class="tab-pane fade" id="v-pills-safety" role="tabpanel">
-                        <h3 class="fw-bold mb-4">{{ tr('Safety & Security', 'নিরাপত্তা') }}</h3>
-                        <p class="text-muted">{{ tr('Our commitment to your safety during your travels.', 'ভ্রমণে নিরাপদ থাকার জন্য আমাদের পরামর্শ।') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container page-space help-layout">
+    <div class="help-questions">
+        <h2>{{ tr('Booking and payments', 'বুকিং ও পেমেন্ট') }}</h2>
+        <details>
+            <summary>{{ tr('How do I book a room?', 'কীভাবে কক্ষ বুক করব?') }}</summary>
+            <p>{{ tr('Choose your dates, sign in, and verify your profile. Reserve a stay, then pay on UddoktaPay. Check My Bookings to see when your payment is verified.', 'তারিখ বেছে সাইন ইন করে প্রোফাইল যাচাই করুন। আবাসন বুক করে উদ্যোক্তাপে পেমেন্ট করুন। পেমেন্ট যাচাই হয়েছে কি না আমার বুকিংয়ে দেখুন।') }}</p>
+        </details>
+        <details id="firsthere" open>
+            <summary>{{ tr('How does the FIRSTHERE offer work?', 'FIRSTHERE অফারটি কীভাবে কাজ করে?') }}</summary>
+            <p>{{ tr('Enter FIRSTHERE before paying for your first booking. The discount is 15% of the room total, capped at ৳200. It can be applied once per account and cannot be combined with another promo. A cancelled first booking does not make a later booking eligible.', 'প্রথম বুকিংয়ের পেমেন্টের আগে FIRSTHERE দিন। কক্ষভাড়ার ১৫% ছাড়, সর্বোচ্চ ২০০ টাকা। প্রতি অ্যাকাউন্টে একবার ব্যবহার করা যাবে এবং অন্য প্রোমো কোডের সঙ্গে ব্যবহার করা যাবে না। প্রথম বুকিং বাতিল হলেও পরের বুকিংয়ে এই অফার প্রযোজ্য হবে না।') }}</p>
+        </details>
+        <details>
+            <summary>{{ tr('What if my payment is pending?', 'পেমেন্ট অপেক্ষমাণ থাকলে কী করব?') }}</summary>
+            <p>{{ tr('Check My Bookings before retrying. If your payment provider has charged you, contact support with your booking and transaction references.', 'আবার চেষ্টা করার আগে আমার বুকিং দেখুন। টাকা কেটে গেলে বুকিং ও লেনদেনের রেফারেন্সসহ সহায়তা দলের সঙ্গে যোগাযোগ করুন।') }}</p>
+        </details>
+        <h2>{{ tr('Hosting and accounts', 'হোস্টিং ও অ্যাকাউন্ট') }}</h2>
+        <details>
+            <summary>{{ tr('How do I list my room and earn?', 'কক্ষ যোগ করে কীভাবে আয় করব?') }}</summary>
+            <p>{{ tr('Sign in and complete profile verification. Add your room, a photo, the nightly price, and availability. Your listing can then be found in search.', 'সাইন ইন করে প্রোফাইল যাচাই করুন। কক্ষের তথ্য, ছবি, রাতের ভাড়া ও খালি থাকার তারিখ দিন। এরপর ভ্রমণকারীরা অনুসন্ধানে কক্ষটি পাবেন।') }}</p>
+        </details>
+        <details>
+            <summary>{{ tr('I forgot my password. What should I do?', 'পাসওয়ার্ড ভুলে গেলে কী করব?') }}</summary>
+            <p><a href="{{ url_for('forgot_password') }}">{{ tr('Request a password reset', 'পাসওয়ার্ড বদলানোর অনুরোধ করুন') }}</a>. {{ tr('If you use Google sign-in, select Continue with Google.', 'Google দিয়ে সাইন ইন করলে Google দিয়ে এগিয়ে যান বেছে নিন।') }}</p>
+        </details>
     </div>
+    <aside class="help-contact">
+        <h2>{{ tr('Still need help?', 'আরও সহায়তা দরকার?') }}</h2>
+        <a class="btn btn-primary" href="{{ url_for('contact') }}">{{ tr('Contact support', 'সহায়তার জন্য যোগাযোগ করুন') }}</a>
+        <a href="{{ url_for('cancellation_policy') }}">{{ tr('Cancellation and refund policy', 'বাতিল ও অর্থ ফেরত নীতি') }}</a>
+        <a href="{{ url_for('safety_tips') }}">{{ tr('Safety tips', 'নিরাপত্তা পরামর্শ') }}</a>
+    </aside>
 </div>
-
-<style>
-.nav-pills .nav-link { color: var(--ink); background: var(--white); border: 1px solid var(--line); }
-.nav-pills .nav-link.active { background: var(--pine); color: white; border-color: var(--pine); }
-.accordion-button:not(.collapsed) { background-color: transparent; color: var(--pine); box-shadow: none; }
-</style>
-
 {% endblock %}

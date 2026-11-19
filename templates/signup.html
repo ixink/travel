@@ -23,7 +23,7 @@
                 </div>
                 <button class="btn btn-primary" type="submit">{{ tr('Create account', 'অ্যাকাউন্ট খুলুন') }}</button>
             </form>
-            <a class="btn btn-outline-primary w-100 mt-3" href="{{ url_for('google_login', next=destination) }}">{{ tr('Continue with Google', 'Google দিয়ে এগিয়ে যান') }}</a>
+            {% include 'google_button.html' %}
             <p class="mt-3 mb-0">{{ tr('Already have an account?', 'ইতিমধ্যে অ্যাকাউন্ট আছে?') }} <a href="{{ url_for('login', next=destination) }}">{{ tr('Sign in', 'সাইন ইন') }}</a></p>
         </div>
         <div class="auth-sidebar" aria-hidden="true"></div>

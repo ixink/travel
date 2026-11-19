@@ -1,9 +1,38 @@
 <!doctype html>
 <html lang="{{ site_language }}">
+{% set social_profiles = [
+    ('Facebook', 'https://facebook.com/travellerstop'),
+    ('Instagram', 'https://instagram.com/travellerstop'),
+    ('LinkedIn', 'https://bd.linkedin.com/company/travellerstop'),
+    ('Reddit', 'https://www.reddit.com/user/Travellerstop/'),
+    ('Trustpilot', 'https://www.trustpilot.com/review/travellerstop.com')
+] %}
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ tr('Find and book stays across Bangladesh with Traveller Stop.', 'ট্রাভেলার স্টপে বাংলাদেশজুড়ে আবাসন খুঁজুন ও বুক করুন।') }}">
+    {% set public_origin = config['UDDOKTAPAY_SITE_URL'] %}
+    {% if request.endpoint in ('index', 'rooms_page', 'room_detail', 'about', 'services', 'contact', 'help_center', 'safety_tips', 'terms', 'privacy', 'cancellation_policy') and not request.args.get('saved') %}
+        <link rel="canonical" href="{{ public_origin }}{{ request.path }}">
+        <meta property="og:url" content="{{ public_origin }}{{ request.path }}">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Traveller Stop">
+        <meta property="og:title" content="{{ tr('Traveller Stop — Book stays in Bangladesh', 'ট্রাভেলার স্টপ — বাংলাদেশে আবাসন বুক করুন') }}">
+        <meta property="og:description" content="{{ tr('Find and book rooms in Bangladesh. Search by location and dates or explore stays nearby.', 'বাংলাদেশে কক্ষ খুঁজুন ও বুক করুন। অবস্থান, তারিখ বা কাছের আবাসন দিয়ে অনুসন্ধান করুন।') }}">
+        <meta property="og:image" content="{{ public_origin }}{{ theme_url('images/bandarban.webp') }}">
+        <meta property="og:locale" content="{{ 'bn_BD' if site_language == 'bn' else 'en_BD' }}">
+    {% else %}
+        <meta name="robots" content="noindex,follow">
+    {% endif %}
+    {% if request.endpoint in ('index', 'rooms_page', 'room_detail') and not request.args.get('saved') %}
+        <meta name="keywords" content="best hotel nearby, hotel nearby, book hotel online, couple friendly hotel booking, book hotel in Bangladesh, best hotel booking site in Bangladesh, best guest room booking site in Bangladesh, rent a room, couple room book, online hotel booking, room book nearby, trusted hotel booking site, most trusted hotel booking site, traveller stop">
+    {% endif %}
+    {% if request.endpoint == 'index' %}
+        <script type="application/ld+json">{{ {
+            '@context': 'https://schema.org', '@type': 'Organization', 'name': 'Traveller Stop',
+            'url': public_origin, 'sameAs': social_profiles | map(attribute=1) | list
+        } | tojson }}</script>
+    {% endif %}
     <title>{% block title %}{{ tr('Traveller Stop | Stays across Bangladesh', 'ট্রাভেলার স্টপ | বাংলাদেশজুড়ে আবাসন') }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ theme_url('vendor/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ theme_url('vendor/fontawesome/css/fontawesome.min.css') }}">
@@ -38,6 +67,11 @@
                 <div>
                     <a class="site-brand" href="{{ url_for('index') }}">{{ tr('Traveller Stop', 'ট্রাভেলার স্টপ') }}<span>.</span></a>
                     <p>{{ tr('Find a place to stay or list your own room in Bangladesh.', 'বাংলাদেশে থাকার জায়গা খুঁজুন বা আপনার নিজের কক্ষ যোগ করুন।') }}</p>
+                    <ul class="footer-social" aria-label="{{ tr('Traveller Stop on social media', 'সামাজিক মাধ্যমে ট্রাভেলার স্টপ') }}">
+                        {% for name, link in social_profiles %}
+                            <li><a href="{{ link }}">{{ name }}</a></li>
+                        {% endfor %}
+                    </ul>
                 </div>
                 <div>
                     <h2>{{ tr('Traveller Stop', 'ট্রাভেলার স্টপ') }}</h2>

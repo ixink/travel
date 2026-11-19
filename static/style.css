@@ -1,33 +1,33 @@
 :root {
-    --ink: #303b22;
-    --pine: #424f2b;
-    --pine-dark: #303c24;
-    --moss: #556040;
+    --ink: #1c3b31;
+    --pine: #18543d;
+    --pine-dark: #103a2c;
+    --moss: #456256;
     --paper: #f8f5ea;
     --linen: #f0ebdc;
-    --leaf: #e8ecd9;
-    --line: #dedfca;
+    --leaf: #e0eddf;
+    --line: #d4e2d5;
     --surface: #fffaf0;
     --cream: #f9efd8;
     --radius: 1rem;
-    --display-font: Georgia, "Noto Sans Bengali", serif;
-    --text-font: "Noto Sans Bengali", system-ui, sans-serif;
+    --display-font: "DM Sans", "Noto Sans Bengali", system-ui, sans-serif;
+    --text-font: "DM Sans", "Noto Sans Bengali", system-ui, sans-serif;
 
     --bs-body-font-family: var(--text-font);
     --bs-body-bg: var(--paper);
     --bs-body-color: var(--ink);
     --bs-emphasis-color: var(--ink);
-    --bs-emphasis-color-rgb: 48, 59, 34;
-    --bs-black-rgb: 48, 59, 34;
+    --bs-emphasis-color-rgb: 28, 59, 49;
+    --bs-black-rgb: 28, 59, 49;
     --bs-white-rgb: 249, 239, 216;
     --bs-secondary-color: var(--moss);
     --bs-border-color: var(--line);
     --bs-primary: var(--pine);
-    --bs-primary-rgb: 66, 79, 43;
-    --bs-dark-rgb: 48, 60, 36;
+    --bs-primary-rgb: 24, 84, 61;
+    --bs-dark-rgb: 16, 58, 44;
     --bs-light-rgb: 238, 234, 221;
-    --bs-link-color-rgb: 66, 79, 43;
-    --bs-link-hover-color-rgb: 48, 60, 36;
+    --bs-link-color-rgb: 24, 84, 61;
+    --bs-link-hover-color-rgb: 16, 58, 44;
 }
 
 body {
@@ -39,7 +39,7 @@ body {
 
 main { flex: 1; min-width: 0; }
 img { max-width: 100%; }
-h1, h2 { font-family: var(--display-font); line-height: 1.12; }
+h1, h2 { font-family: var(--display-font); font-weight: 750; line-height: 1.12; }
 h1, h2, h3, h4, h5, h6 { overflow-wrap: anywhere; }
 a { text-underline-offset: .2em; }
 
@@ -75,7 +75,7 @@ a { text-underline-offset: .2em; }
     --bs-btn-disabled-color: var(--cream);
     --bs-btn-disabled-bg: var(--pine);
     --bs-btn-disabled-border-color: var(--pine);
-    --bs-btn-focus-shadow-rgb: 66, 79, 43;
+    --bs-btn-focus-shadow-rgb: 24, 84, 61;
 }
 
 .btn-outline-primary {
@@ -87,7 +87,7 @@ a { text-underline-offset: .2em; }
     --bs-btn-active-color: var(--cream);
     --bs-btn-active-bg: var(--pine-dark);
     --bs-btn-active-border-color: var(--pine-dark);
-    --bs-btn-focus-shadow-rgb: 66, 79, 43;
+    --bs-btn-focus-shadow-rgb: 24, 84, 61;
 }
 
 .btn-dark {
@@ -216,7 +216,7 @@ a { text-underline-offset: .2em; }
     display: flex;
     gap: .5rem 1.1rem;
     flex-wrap: wrap;
-    border-top: 1px solid #636d4e;
+    border-top: 1px solid #4d7363;
     margin-top: 1.5rem;
     padding-top: .85rem;
     font-size: .85rem;
@@ -282,8 +282,8 @@ a { text-underline-offset: .2em; }
 .auth-sidebar {
     background:
         radial-gradient(ellipse at 86% 25%, #e7a789 0 10%, transparent 10.5%),
-        radial-gradient(ellipse at 85% 94%, #7b8656 0 40%, transparent 40.5%),
-        radial-gradient(ellipse at 29% 100%, #54643a 0 47%, transparent 47.5%),
+        radial-gradient(ellipse at 85% 94%, #3d8768 0 40%, transparent 40.5%),
+        radial-gradient(ellipse at 29% 100%, #22684e 0 47%, transparent 47.5%),
         var(--pine-dark);
     min-height: 100%;
 }
@@ -402,7 +402,7 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     content: "";
     position: absolute;
     inset: 45% 0 0;
-    background: linear-gradient(transparent, rgba(35, 46, 25, .90));
+    background: linear-gradient(transparent, rgba(11, 48, 35, .90));
     pointer-events: none;
 }
 .journey-gallery figcaption {
@@ -426,7 +426,7 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     height: 2.5rem;
     border: 1px solid #f9efd894;
     border-radius: 50%;
-    background: #303c24ed;
+    background: #103a2ced;
     color: var(--cream);
 }
 .gallery-controls button:hover { background: var(--cream); color: var(--pine-dark); }
@@ -438,7 +438,7 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     border: 1px solid var(--line);
     border-radius: 1.1rem;
     padding: .8rem 1rem .65rem;
-    box-shadow: 0 8px 28px rgba(48, 60, 36, .08);
+    box-shadow: 0 8px 28px rgba(16, 58, 44, .08);
 }
 .search-panel-compact { margin: 0; width: 100%; max-width: 62rem; }
 .travel-search { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(8.75rem, .85fr)) auto; gap: .45rem; align-items: stretch; }
@@ -504,9 +504,9 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     }
     .journey-hero::before { border-radius: 1rem; }
     .journey-copy { padding: .95rem 1rem; }
-    .journey-copy h1 { font-size: clamp(1.65rem, 5.6vw, 2.4rem); letter-spacing: -.035em; margin-bottom: .45rem; }
-    html[lang="bn"] .journey-copy h1 { font-size: clamp(1.55rem, 5.35vw, 2.25rem); }
-    .journey-copy p { font-size: .9rem; line-height: 1.5; }
+    .journey-copy h1 { font-size: clamp(1.45rem, 5.2vw, 2.1rem); letter-spacing: -.035em; margin-bottom: .45rem; }
+    html[lang="bn"] .journey-copy h1 { font-size: clamp(1.35rem, 4.9vw, 2rem); }
+    .journey-copy p { font-size: .86rem; line-height: 1.5; }
     .journey-gallery { margin: 0; min-height: clamp(12rem, 52vw, 18rem); }
     .search-panel { padding: .65rem; }
     .travel-search { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -522,4 +522,62 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
 @media (prefers-reduced-motion: reduce) {
     .destination-card { transition: none; }
     .destination-card:hover { transform: none; }
+}
+
+@font-face {
+    font-family: "DM Sans";
+    src: url("fonts/dm-sans.woff2") format("woff2");
+    font-weight: 100 1000;
+    font-display: swap;
+    unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+.brand-logo img { display: block; width: clamp(7.5rem, 16vw, 10rem); height: 2.65rem; object-fit: contain; object-position: left center; }
+.footer-social { display: flex; flex-wrap: wrap; gap: .35rem .8rem; list-style: none; padding: 0; margin: .75rem 0 0; }
+.footer-social a { color: var(--cream); font-size: .85rem; }
+
+.auth-layout-single { grid-template-columns: minmax(0, 1fr); max-width: 32rem; }
+.auth-intro { color: var(--moss); margin-top: -.65rem; }
+.signin-layout { grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); }
+.signin-sidebar { align-items: end; display: flex; color: var(--cream); padding: 1.75rem; }
+.signin-sidebar p { margin: 0; max-width: 18rem; }
+.password-row { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .25rem 1rem; }
+.password-row a { font-size: .88rem; }
+.google-button { display: flex; align-items: center; justify-content: center; gap: .55rem; margin-top: .75rem; }
+.promo-form { padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--line); }
+
+.help-layout { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(14rem, 1fr); gap: clamp(1rem, 4vw, 3rem); }
+.help-questions h2 { margin-bottom: .7rem; }
+.help-questions details + h2 { margin-top: 1.65rem; }
+.help-questions details { border: 1px solid var(--line); border-radius: .7rem; background: var(--surface); margin-bottom: .5rem; }
+.help-questions summary { font-weight: 680; padding: .7rem .85rem; cursor: pointer; }
+.help-questions details p { padding: 0 .85rem .8rem; margin: 0; color: var(--moss); }
+.help-contact { align-self: start; display: grid; justify-items: start; gap: .65rem; background: var(--leaf); padding: 1rem; border-radius: .9rem; }
+.help-contact h2 { margin-bottom: 0; font-size: 1.25rem; }
+
+.first-offer {
+    width: min(28rem, calc(100% - 1.5rem));
+    max-height: calc(100% - 2rem);
+    padding: clamp(1.2rem, 5vw, 2rem);
+    border: 1px solid var(--line);
+    border-radius: 1.2rem;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 18px 55px #103a2c40;
+}
+.first-offer::backdrop { background: #103a2c88; }
+.first-offer-close { position: absolute; top: .7rem; right: .7rem; }
+.first-offer-kicker { color: var(--moss); font-weight: 680; margin-bottom: .4rem; padding-right: 1rem; }
+.offer-code { display: inline-block; border: 1px dashed var(--pine); border-radius: .45rem; padding: .25rem .65rem; letter-spacing: .1em; background: var(--leaf); }
+.first-offer-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin-top: .9rem; }
+.first-offer-actions a { font-size: .85rem; }
+
+@media (max-width: 767.98px) {
+    .signin-layout, .help-layout { grid-template-columns: minmax(0, 1fr); }
+    .signin-sidebar { display: none; }
+    .auth-form { font-size: .93rem; }
+    .auth-form h1 { font-size: 1.7rem; }
+    .help-questions h2, .first-offer h2 { font-size: 1.45rem; }
+    .section-heading h2, .host-banner h2, .destinations .section-heading h2 { font-size: clamp(1.45rem, 4.5vw, 2rem); }
+    .search-field input, .form-control, .form-select { font-size: 1rem; }
 }

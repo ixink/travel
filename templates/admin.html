@@ -80,7 +80,7 @@
                             <div class="card-body text-center">
                                 <h5 class="text-muted">Pending Bookings</h5>
                                 <h2 class="text-warning fw-bold">
-                                    {{ bookings|selectattr('payment_status', 'equalto', 'unpaid')|list|length }}
+                                    {{ bookings|rejectattr('payment_status', 'equalto', 'paid')|list|length }}
                                 </h2>
                             </div>
                         </div>
@@ -288,7 +288,7 @@
                                         </span>
                                     </td>
                                     <td class="pe-4 text-end">
-                                        {% if b.payment_status == 'unpaid' %}
+                                        {% if b.payment_status != 'paid' and b.status == 'pending_payment' %}
                                         <a href="{{ url_for('admin_manual_confirm', bid=b.id) }}" 
                                            class="btn btn-sm btn-outline-success rounded-pill px-3"
                                            onclick="return confirm('Manually confirm payment for this booking?');">

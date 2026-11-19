@@ -25,13 +25,23 @@
             {% endif %}
         </div>
         <aside class="booking-panel">
+            {% if booking.status == 'pending_payment' and booking.payment_status == 'unpaid' and not under_review and not booking.coupon_used %}
+                <form class="promo-form" method="post" action="{{ url_for('payment_promo', booking_id=booking.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ payment_token }}">
+                    <label class="form-label" for="final-promo">{{ tr('Promo code', 'প্রোমো কোড') }}</label>
+                    <div class="input-group">
+                        <input class="form-control" id="final-promo" name="coupon_code" maxlength="50" autocomplete="off" autocapitalize="characters" required>
+                        <button class="btn btn-outline-primary" type="submit">{{ tr('Apply', 'প্রয়োগ করুন') }}</button>
+                    </div>
+                </form>
+            {% endif %}
             <h2>{{ tr('Booking', 'বুকিং') }} #{{ booking.id }}</h2>
             <dl class="booking-summary">
                 <dt>{{ tr('Check-in', 'চেক-ইন') }}</dt><dd>{{ booking.checkin }}</dd>
                 <dt>{{ tr('Check-out', 'চেক-আউট') }}</dt><dd>{{ booking.checkout }}</dd>
                 {% if booking.discount %}
                     <dt>{{ tr('Original price', 'মূল ভাড়া') }}</dt><dd>৳{{ '%.2f' | format(booking.original_amount) }}</dd>
-                    <dt>{{ tr('Coupon discount', 'কুপন ছাড়') }}</dt><dd>−৳{{ '%.2f' | format(booking.discount) }}</dd>
+                    <dt>{{ tr('Coupon discount', 'কুপন ছাড়') }}{% if booking.coupon_used %} <span class="d-block small">{{ booking.coupon_used }}</span>{% endif %}</dt><dd>−৳{{ '%.2f' | format(booking.discount) }}</dd>
                 {% endif %}
                 <dt>{{ tr('Total', 'মোট') }}</dt><dd><strong>৳{{ '%.2f' | format(booking.total_amount) }}</strong></dd>
             </dl>

@@ -1,6 +1,8 @@
 <nav class="navbar navbar-expand-lg site-nav" aria-label="{{ tr('Main navigation', 'মূল মেনু') }}">
     <div class="container">
-        <a class="navbar-brand site-brand" href="{{ url_for('index') }}">Traveller Stop<span>.</span></a>
+        <a class="navbar-brand brand-logo" href="{{ url_for('index') }}">
+            <img src="https://i.ibb.co.com/yFrp6Jcg/travellerstoplogo.png" alt="Traveller Stop" referrerpolicy="no-referrer" width="156" height="42">
+        </a>
         <form class="language-switch" action="{{ url_for('set_language') }}" method="post">
             <input type="hidden" name="csrf_token" value="{{ language_token() }}">
             <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
