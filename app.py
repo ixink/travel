@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 from flask_wtf.csrf import generate_csrf, validate_csrf
 from wtforms.validators import ValidationError
 from authlib.integrations.flask_client import OAuth
@@ -18,6 +19,7 @@ from dotenv import load_dotenv
 import secrets
 
 from uddoktapay import checkout_url, gateway_request, payment_amount
+from travel_search import district_centre, distance_km, nearby_origin, place_aliases, search_dates
 
 # ===================== CONFIGURATION =====================
 load_dotenv()
@@ -201,11 +203,45 @@ def datetimeformat(value, fmt='%Y-%m-%d'):
         except: return value
     return value.strftime(fmt)
 
+def site_language():
+    return 'bn' if request.cookies.get('travel_language') == 'bn' else 'en'
+
+
+def tr(english, bangla):
+    return bangla if site_language() == 'bn' else english
+
+
+def local_return_path(target):
+    if target and target.startswith('/') and not target.startswith('//') and not re.search(r'[\\\x00-\x20\x7f]', target):
+        return target
+    return None
+
+
+@app.post('/language')
+def set_language():
+    try:
+        validate_csrf(request.form.get('csrf_token'))
+    except ValidationError:
+        abort(400)
+    language = request.form.get('language')
+    if language not in ('en', 'bn'):
+        abort(400)
+
+    target = local_return_path(request.form.get('next'))
+    response = redirect(target or url_for('index'), code=303)
+    response.set_cookie('travel_language', language, max_age=31536000,
+                        secure=request.is_secure, httponly=True, samesite='Lax')
+    return response
+
+
 @app.context_processor
 def inject_global_data():
     user = get_user_by_id(session.get('user_id'))
     return {
         'current_user': user,
+        'site_language': site_language(),
+        'tr': tr,
+        'language_token': generate_csrf,
         'profile_complete': is_profile_complete(user),
         'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or url_for('static', filename='logo.png'))
     }
@@ -226,17 +262,19 @@ def add_security_headers(response):
 # ===================== GOOGLE AUTH =====================
 @app.route('/login/google')
 def google_login():
+    session['login_destination'] = local_return_path(request.args.get('next'))
     return google.authorize_redirect(url_for('google_callback', _external=True))
 
 @app.route('/login/google/callback')
 def google_callback():
+    destination = session.pop('login_destination', None)
     try:
         token = google.authorize_access_token()
         info = token.get('userinfo') or google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
         
         email = info.get('email')
         if not email:
-            flash("Could not retrieve email from Google.", "danger")
+            flash(tr('Could not retrieve email from Google.', 'Google থেকে ইমেইল ঠিকানা পাওয়া যায়নি।'), "danger")
             return redirect(url_for('login'))
 
         user = User.query.filter_by(google_id=info.get('sub')).first()
@@ -256,7 +294,7 @@ def google_callback():
             db.session.commit()
 
         if user.blocked:
-            flash('Your account has been blocked.', 'danger')
+            flash(tr('Your account has been blocked.', 'আপনার অ্যাকাউন্ট বন্ধ করা হয়েছে।'), 'danger')
             return redirect(url_for('login'))
 
         session.clear()
@@ -264,65 +302,68 @@ def google_callback():
         session['username'] = user.username
         session['is_admin'] = user.is_admin
 
-        flash('Successfully logged in with Google!', 'success')
-        return redirect(url_for('admin' if user.is_admin else 'profile'))
+        flash(tr('Successfully logged in with Google!', 'Google দিয়ে সাইন ইন হয়েছে।'), 'success')
+        return redirect(destination or url_for('admin' if user.is_admin else 'profile'))
 
     except Exception as e:
         logger.error(f"Google Callback Error: {e}")
-        flash("Google login failed. Please try again.", "danger")
+        flash(tr('Google login failed. Please try again.', 'Google দিয়ে সাইন ইন করা যায়নি। আবার চেষ্টা করুন।'), "danger")
         return redirect(url_for('login'))
 
 # ===================== AUTH ROUTES =====================
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    destination = local_return_path(request.values.get('next'))
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
 
         if not is_allowed_email(email):
-            flash('Please use a valid email address.', 'danger')
-            return redirect(url_for('signup'))
+            flash(tr('Please use a valid email address.', 'একটি সঠিক ইমেইল ঠিকানা দিন।'), 'danger')
+            return redirect(url_for('signup', next=destination))
         if get_user_by_email(email):
-            flash('Email already registered!', 'danger')
-            return redirect(url_for('signup'))
+            flash(tr('Email already registered!', 'এই ইমেইল ঠিকানায় ইতিমধ্যে অ্যাকাউন্ট আছে।'), 'danger')
+            return redirect(url_for('signup', next=destination))
         if not is_strong_password(password):
-            flash('Password too weak!', 'danger')
-            return redirect(url_for('signup'))
+            flash(tr('Password too weak!', 'আরও শক্তিশালী পাসওয়ার্ড ব্যবহার করুন।'), 'danger')
+            return redirect(url_for('signup', next=destination))
 
         try:
             u = User(username=username, email=email, password=generate_password_hash(password))
             db.session.add(u)
             db.session.commit()
-            flash('Account created! Please login.', 'success')
-            return redirect(url_for('login'))
-        except Exception as e:
+            flash(tr('Account created! Please login.', 'অ্যাকাউন্ট তৈরি হয়েছে। সাইন ইন করুন।'), 'success')
+            return redirect(url_for('login', next=destination))
+        except Exception:
             db.session.rollback()
-            flash(f'Signup failed: {str(e)}', 'danger')
-    return render_template('signup.html')
+            logger.exception('Signup failed')
+            flash(tr('Could not create your account.', 'অ্যাকাউন্ট তৈরি করা যায়নি।'), 'danger')
+    return render_template('signup.html', destination=destination)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    destination = local_return_path(request.values.get('next'))
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         u = get_user_by_email(email)
         if u and u.password and check_password_hash(u.password, password):
             if u.blocked:
-                flash('Account blocked.', 'danger')
-                return redirect(url_for('login'))
+                flash(tr('Account blocked.', 'অ্যাকাউন্ট বন্ধ করা হয়েছে।'), 'danger')
+                return redirect(url_for('login', next=destination))
             session.clear()
             session['user_id'] = u.id
             session['username'] = u.username
             session['is_admin'] = u.is_admin
-            return redirect(url_for('admin' if u.is_admin else 'profile'))
-        flash('Invalid email or password.', 'danger')
-    return render_template('login.html')
+            return redirect(destination or url_for('admin' if u.is_admin else 'profile'))
+        flash(tr('Invalid email or password.', 'ইমেইল বা পাসওয়ার্ড সঠিক নয়।'), 'danger')
+    return render_template('login.html', destination=destination)
 
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Logged out successfully.', 'info')
+    flash(tr('Logged out successfully.', 'সাইন আউট হয়েছে।'), 'info')
     return redirect(url_for('index'))
 
 # ===================== MAIN ROUTES =====================
@@ -331,27 +372,70 @@ def index():
     featured = Room.query.order_by(Room.created_at.desc()).limit(8).all()
     return render_template('index.html', featured_rooms=featured)
 
+def available_rooms(query, checkin, checkout):
+    return query.filter(
+        or_(Room.available_from.is_(None), Room.available_from == '', Room.available_from <= checkin),
+        or_(Room.available_to.is_(None), Room.available_to == '', Room.available_to >= checkout),
+        ~Room.bookings.any(
+            Booking.status.in_(('confirmed', 'cancel_requested'))
+            & (Booking.checkin < checkout) & (Booking.checkout > checkin)
+        ),
+    )
+
+
 @app.route('/rooms')
 def rooms_page():
-    loc = request.args.get('location', '').strip()
-    query = Room.query
-    if loc:
-        query = query.filter(Room.location.ilike(f"%{loc}%"))
+    location = request.args.get('location', '').strip()[:100]
+    checkin = request.args.get('checkin', '')
+    checkout = request.args.get('checkout', '')
+    dates = search_dates(checkin, checkout)
+    nearby = request.args.get('nearby') == '1'
+    origin = nearby_origin(request.args.get('lat'), request.args.get('lng')) if nearby else None
+    saved = request.args.get('saved') == '1'
+    query = Room.query.order_by(Room.created_at.desc(), Room.id.desc())
+
+    if location:
+        query = query.filter(or_(
+            *(Room.location.icontains(alias, autoescape=True) for alias in place_aliases(location)),
+            Room.title.icontains(location, autoescape=True),
+        ))
+    if dates:
+        query = available_rooms(query, *dates)
+
     rooms = query.all()
-    return render_template('rooms.html', rooms=rooms, location=loc)
+    distances = {}
+    if origin:
+        for room in rooms:
+            centre = district_centre(room.location)
+            if centre:
+                distances[room.id] = distance_km(origin, centre)
+        rooms = sorted(
+            (room for room in rooms if room.id in distances and distances[room.id] <= 100),
+            key=lambda room: distances[room.id],
+        )
+
+    return render_template(
+        'rooms.html', rooms=rooms, location=location, checkin=checkin, checkout=checkout,
+        invalid_dates=bool(checkin or checkout) and not dates, nearby=nearby,
+        origin=origin, distances=distances, saved=saved,
+    )
+
 
 @app.route('/room/<int:room_id>')
 def room_detail(room_id):
     room = db.session.get(Room, room_id)
     if not room: return redirect(url_for('rooms_page'))
-    return render_template('room_detail.html', room=room)
+    return render_template(
+        'room_detail.html', room=room,
+        dates=search_dates(request.args.get('checkin'), request.args.get('checkout')),
+    )
 
 @app.route('/post-room', methods=['GET', 'POST'])
 def post_room():
     if 'user_id' not in session: return redirect(url_for('login'))
     user = get_user_by_id(session['user_id'])
     if not user or not is_profile_complete(user):
-        flash('Please complete your profile first.', 'warning')
+        flash(tr('Please complete your profile first.', 'আগে আপনার প্রোফাইল পূরণ করুন।'), 'warning')
         return redirect(url_for('profile'))
 
     if request.method == 'POST':
@@ -370,7 +454,7 @@ def post_room():
             )
             db.session.add(room)
             db.session.commit()
-            flash('Room posted successfully!', 'success')
+            flash(tr('Room posted successfully!', 'কক্ষ যোগ করা হয়েছে।'), 'success')
             return redirect(url_for('profile'))
         except Exception as e:
             db.session.rollback()
@@ -392,7 +476,7 @@ def edit_room(room_id):
             img = save_uploaded_file(request.files.get('room_image'), 'room')
             if img: room.image_url = img
             db.session.commit()
-            flash('Room updated successfully!', 'success')
+            flash(tr('Room updated successfully!', 'কক্ষের তথ্য হালনাগাদ হয়েছে।'), 'success')
             return redirect(url_for('profile'))
         except Exception as e:
             db.session.rollback()
@@ -412,7 +496,7 @@ def delete_room(room_id):
             except: pass
         db.session.delete(room)
         db.session.commit()
-        flash('Room deleted!', 'success')
+        flash(tr('Room deleted!', 'কক্ষ মুছে ফেলা হয়েছে।'), 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'Error: {str(e)}', 'danger')
@@ -423,20 +507,19 @@ def book_room(room_id):
     if 'user_id' not in session: return redirect(url_for('login'))
     user = get_user_by_id(session['user_id'])
     if not user or not is_profile_complete(user):
-        flash('Please complete your profile first.', 'warning')
+        flash(tr('Please complete your profile first.', 'আগে আপনার প্রোফাইল পূরণ করুন।'), 'warning')
         return redirect(url_for('profile'))
 
-    ci = request.form.get('checkin')
-    co = request.form.get('checkout')
-    try:
-        nights = (datetime.strptime(co, '%Y-%m-%d') - datetime.strptime(ci, '%Y-%m-%d')).days
-    except:
-        flash('Invalid date format.', 'danger')
+    dates = search_dates(request.form.get('checkin'), request.form.get('checkout'))
+    if not dates:
+        flash(tr('Choose a check-out date after check-in.', 'চেক-ইনের পরে চেক-আউটের তারিখ বেছে নিন।'), 'warning')
         return redirect(url_for('room_detail', room_id=room_id))
 
-    room = db.session.get(Room, room_id)
-    if not room or nights <= 0:
-        flash('Invalid booking.', 'danger')
+    ci, co = dates
+    nights = (datetime.fromisoformat(co) - datetime.fromisoformat(ci)).days
+    room = available_rooms(Room.query.filter_by(id=room_id), ci, co).first()
+    if not room:
+        flash(tr('This stay is unavailable for those dates.', 'এই তারিখগুলোতে এই আবাসনটি খালি নেই।'), 'warning')
         return redirect(url_for('room_detail', room_id=room_id))
 
     total = room.price_per_night * nights
@@ -456,12 +539,19 @@ def book_room(room_id):
         )
         db.session.add(booking)
         db.session.commit()
-        flash('Booking created successfully!', 'success')
+        flash(tr('Booking created successfully!', 'বুকিং তৈরি হয়েছে।'), 'success')
         return redirect(url_for('payment_page', booking_id=booking.id))
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        flash(f'Booking failed: {str(e)}', 'danger')
+        logger.exception('Booking failed')
+        flash(tr('Could not create your booking.', 'বুকিং তৈরি করা যায়নি।'), 'danger')
         return redirect(url_for('room_detail', room_id=room_id))
+
+def payment_under_review(booking_id):
+    return Payment.query.filter_by(
+        booking_id=booking_id, method='uddoktapay', status='REVIEW_REQUIRED',
+    ).first() is not None
+
 
 @app.route('/payment/<int:booking_id>')
 def payment_page(booking_id):
@@ -471,6 +561,7 @@ def payment_page(booking_id):
     return render_template(
         'payment.html', booking=b, payment_token=generate_csrf(),
         uddoktapay_enabled=bool(app.config['UDDOKTAPAY_API_KEY']),
+        under_review=payment_under_review(booking_id),
     )
 
 def uddoktapay_request(endpoint, payload):
@@ -493,7 +584,16 @@ def uddoktapay_checkout(booking_id):
     if not app.config['UDDOKTAPAY_API_KEY'] or amount is None or (
         booking.payment_status == 'paid' or booking.status != 'pending_payment'
     ):
-        flash('Online checkout is unavailable for this booking.', 'warning')
+        flash(tr('Online checkout is unavailable for this booking.', 'এই বুকিংয়ের জন্য অনলাইন পেমেন্ট পাওয়া যাচ্ছে না।'), 'warning')
+        return redirect(url_for('payment_page', booking_id=booking_id), code=303)
+
+    if payment_under_review(booking_id):
+        return redirect(url_for('payment_page', booking_id=booking_id), code=303)
+    eligible_room = available_rooms(
+        Room.query.filter_by(id=booking.room_id), booking.checkin, booking.checkout
+    ).first()
+    if not eligible_room:
+        flash(tr('This stay is no longer available for those dates.', 'এই তারিখগুলোতে আবাসনটি আর খালি নেই।'), 'warning')
         return redirect(url_for('payment_page', booking_id=booking_id), code=303)
 
     site = app.config['UDDOKTAPAY_SITE_URL']
@@ -512,7 +612,7 @@ def uddoktapay_checkout(booking_id):
         return redirect(checkout_url(gateway, app.config['UDDOKTAPAY_API_URL']), code=303)
     except (requests.RequestException, ValueError):
         logger.warning('UddoktaPay checkout could not be started for booking %s', booking_id)
-        flash('Could not open UddoktaPay. Please try again in a moment.', 'warning')
+        flash(tr('Could not open UddoktaPay. Please try again in a moment.', 'উদ্যোক্তাপে খোলা যায়নি। একটু পরে আবার চেষ্টা করুন।'), 'warning')
         return redirect(url_for('payment_page', booking_id=booking_id), code=303)
 
 
@@ -550,7 +650,14 @@ def verify_uddoktapay_invoice(invoice_id):
             abort(409)
         return booking
 
-    requires_review = booking.payment_status == 'paid' or booking.status != 'pending_payment'
+    # Serialize confirmations for the same room, including invoices for overlapping dates.
+    db.session.get(Room, booking.room_id, with_for_update=True)
+    eligible_room = available_rooms(
+        Room.query.filter_by(id=booking.room_id), booking.checkin, booking.checkout
+    ).first()
+    requires_review = (
+        booking.payment_status == 'paid' or booking.status != 'pending_payment' or eligible_room is None
+    )
     db.session.add(Payment(
         booking_id=booking.id, user_id=booking.user_id, name=booking.user.username,
         method='uddoktapay', amount=float(paid_amount), trxid=reference,
@@ -568,14 +675,14 @@ def uddoktapay_return():
     try:
         booking = verify_uddoktapay_invoice(request.args.get('invoice_id'))
     except HTTPException:
-        flash('Payment verification is pending or unavailable. Check your bookings before retrying.', 'warning')
+        flash(tr('Payment verification is pending or unavailable. Check your bookings before retrying.', 'পেমেন্ট যাচাই অপেক্ষমাণ অথবা করা যাচ্ছে না। আবার চেষ্টা করার আগে আপনার বুকিং দেখুন।'), 'warning')
         return redirect(url_for('profile'))
     if booking.user_id != session.get('user_id'):
         return redirect(url_for('profile'))
     if booking.payment_status == 'paid':
-        flash('Payment received. Check your booking status below.', 'success')
+        flash(tr('Payment received. Check your booking status below.', 'পেমেন্ট পাওয়া গেছে। নিচে বুকিংয়ের অবস্থা দেখুন।'), 'success')
     else:
-        flash('Payment received and awaiting review.', 'info')
+        flash(tr('Payment received and awaiting review.', 'পেমেন্ট পাওয়া গেছে এবং পর্যালোচনার অপেক্ষায় আছে।'), 'info')
     return redirect(url_for('profile'))
 
 
@@ -588,44 +695,13 @@ def uddoktapay_webhook():
     return jsonify({'status': 'success'})
 
 
-@app.route('/pay', methods=['POST'])
+@app.post('/pay')
 def pay():
-    if 'user_id' not in session:
-        return jsonify({"status": "failed", "msg": "Session expired"}), 401
-    try:
-        validate_csrf(request.form.get('csrf_token'))
-    except ValidationError:
-        return jsonify({'status': 'failed', 'msg': 'Please reload the payment page and try again.'}), 400
+    return jsonify({
+        'status': 'failed',
+        'msg': tr('Continue to UddoktaPay from your booking.', 'বুকিং থেকে উদ্যোক্তাপে-তে পেমেন্ট করুন।'),
+    }), 410
 
-    try:
-        bid = int(request.form.get('booking_id', 0))
-        trx = request.form.get('trxid', '').strip()
-        method = request.form.get('method', 'manual')
-        name = request.form.get('name', 'User')
-        sender = request.form.get('sender', '')
-
-        if method == 'uddoktapay' or trx.lower().startswith('uddoktapay:'):
-            return jsonify({'status': 'failed', 'msg': 'Use the UddoktaPay checkout button.'}), 400
-        if not trx: return jsonify({"status": "failed", "msg": "Transaction ID is required"})
-        if Payment.query.filter_by(trxid=trx).first():
-            return jsonify({"status": "failed", "msg": "TRXID already used"})
-
-        booking = db.session.get(Booking, bid)
-        if not booking or booking.user_id != session['user_id']:
-            return jsonify({"status": "failed", "msg": "Booking not found"}), 404
-
-        if booking.payment_status == 'paid':
-            return jsonify({'status': 'failed', 'msg': 'This booking is already paid.'}), 409
-
-        p = Payment(booking_id=bid, user_id=session['user_id'], name=name,
-                    method=method, amount=booking.total_amount, sender=sender, trxid=trx, status='PENDING')
-        db.session.add(p)
-        db.session.commit()
-        return jsonify({"status": "success", "msg": "Payment submitted successfully."})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Payment error: {e}")
-        return jsonify({"status": "failed", "msg": "Server error"})
 
 @app.route('/cancel-booking/<int:booking_id>', methods=['POST'])
 def cancel_booking(booking_id):
@@ -654,11 +730,11 @@ def profile():
 @app.route('/update-profile', methods=['POST'])
 def update_profile():
     if 'user_id' not in session:
-        return jsonify({"success": False, "message": "Please login first."}), 401
+        return jsonify({"success": False, "message": tr('Please login first.', 'আগে সাইন ইন করুন।')}), 401
 
     user = get_user_by_id(session.get('user_id'))
     if not user:
-        return jsonify({"success": False, "message": "User not found."}), 404
+        return jsonify({"success": False, "message": tr('User not found.', 'ব্যবহারকারীকে পাওয়া যায়নি।')}), 404
 
     try:
         for field in ['phone', 'location', 'profession', 'qualification', 'nid']:
@@ -675,13 +751,13 @@ def update_profile():
         db.session.commit()
         return jsonify({
             "success": True,
-            "message": "Profile updated successfully!",
+            "message": tr('Profile updated successfully!', 'প্রোফাইল হালনাগাদ হয়েছে।'),
             "profile_pic": url_for('static', filename=user.profile_pic) if user.profile_pic else None
         })
     except Exception as e:
         db.session.rollback()
         logger.error(f"Profile Update Error: {e}")
-        return jsonify({"success": False, "message": "Server error. Please try again."}), 500
+        return jsonify({"success": False, "message": tr('Server error. Please try again.', 'সার্ভারে সমস্যা হয়েছে। আবার চেষ্টা করুন।')}), 500
 
 # ===================== ADMIN ROUTES =====================
 @app.route('/admin')

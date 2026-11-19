@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}About Us | Traveller Stop{% endblock %}
+{% block title %}{{ tr('About Us', 'আমাদের সম্পর্কে') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 
 <section class="info-hero">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-3">About Traveller Stop</h1>
-        <p class="lead opacity-75">Redefining the way you experience travel in Bangladesh.</p>
+        <h1 class="display-3 fw-bold mb-3">{{ tr('About Traveller Stop', 'ট্রাভেলার স্টপ সম্পর্কে') }}</h1>
+        <p class="lead opacity-75">{{ tr('Redefining the way you experience travel in Bangladesh.', 'বাংলাদেশের ভ্রমণ অভিজ্ঞতা নতুন করে আবিষ্কার করুন।') }}</p>
     </div>
 </section>
 
@@ -15,12 +15,12 @@
     <div class="info-card">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
-                <h2 class="fw-bold mb-4">Our Mission</h2>
+                <h2 class="fw-bold mb-4">{{ tr('Our Mission', 'আমাদের লক্ষ্য') }}</h2>
                 <p>
-                    Traveller Stop is a modern travel and stay booking platform designed to provide travelers with premium accommodations, trusted travel services, and unforgettable experiences across Bangladesh.
+                    {{ tr('Traveller Stop is a modern travel and stay booking platform designed to provide travelers with premium accommodations, trusted travel services, and unforgettable experiences across Bangladesh.', 'ট্রাভেলার স্টপ একটি ভ্রমণ ও আবাসন বুকিং প্ল্যাটফর্ম। বাংলাদেশজুড়ে মানসম্মত আবাসন ও ভ্রমণসেবা খুঁজে পেতে এটি আপনাকে সাহায্য করে।') }}
                 </p>
                 <p>
-                    Founded in 2026, we recognized a gap in the market for a truly premium, reliable, and user-friendly platform that caters specifically to the unique hospitality landscape of our beautiful country. From the bustling streets of Dhaka to the serene beaches of Cox's Bazar, we bring you closer to the heart of Bangladesh.
+                    {{ tr("Founded in 2026, we recognized a gap in the market for a truly premium, reliable, and user-friendly platform that caters specifically to the unique hospitality landscape of our beautiful country. From the bustling streets of Dhaka to the serene beaches of Cox's Bazar, we bring you closer to the heart of Bangladesh.", 'বাংলাদেশের আতিথেয়তার কথা মাথায় রেখে ২০২৬ সালে ট্রাভেলার স্টপ শুরু হয়। ঢাকার ব্যস্ত রাস্তা থেকে কক্সবাজারের শান্ত সমুদ্রসৈকত পর্যন্ত দেশের নানা প্রান্তে থাকার জায়গা খুঁজে নিন।') }}
                 </p>
             </div>
             <div class="col-lg-6">
@@ -35,8 +35,8 @@
 <section class="py-5 bg-white">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">Why Choose Us?</h2>
-            <p class="text-muted">Find stays and connect with local hosts across Bangladesh.</p>
+            <h2 class="fw-bold">{{ tr('Why Choose Us?', 'কেন আমাদের বেছে নেবেন?') }}</h2>
+            <p class="text-muted">{{ tr('Find stays and connect with local hosts across Bangladesh.', 'দেশজুড়ে আবাসন খুঁজুন ও স্থানীয় হোস্টদের সঙ্গে যোগাযোগ করুন।') }}</p>
         </div>
         <div class="row g-4">
             <div class="col-md-4">
@@ -44,8 +44,8 @@
                     <div class="service-icon-box mx-auto">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h4 class="fw-bold">Verified Hosts</h4>
-                    <p class="small text-muted">Every host and room on our platform undergoes a rigorous verification process, including NID checks.</p>
+                    <h4 class="fw-bold">{{ tr('Verified Hosts', 'যাচাইকৃত হোস্ট') }}</h4>
+                    <p class="small text-muted">{{ tr('Every host and room on our platform undergoes a rigorous verification process, including NID checks.', 'হোস্টদের প্রোফাইল ও জাতীয় পরিচয়পত্র যাচাই করা হয়।') }}</p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -53,8 +53,8 @@
                     <div class="service-icon-box mx-auto">
                         <i class="fas fa-headset"></i>
                     </div>
-                    <h4 class="fw-bold">24/7 Support</h4>
-                    <p class="small text-muted">Our dedicated customer service team is always available to assist you with your bookings and inquiries.</p>
+                    <h4 class="fw-bold">{{ tr('24/7 Support', 'ভ্রমণে সহায়তা') }}</h4>
+                    <p class="small text-muted">{{ tr('Our dedicated customer service team is always available to assist you with your bookings and inquiries.', 'বুকিং বা অন্য কোনো প্রশ্নে আমাদের সহায়তা দলের সঙ্গে যোগাযোগ করুন।') }}</p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -62,8 +62,8 @@
                     <div class="service-icon-box mx-auto">
                         <i class="fas fa-credit-card"></i>
                     </div>
-                    <h4 class="fw-bold">Secure Payments</h4>
-                    <p class="small text-muted">Multiple secure payment options including bKash, Nagad, and Binance Pay with manual verification.</p>
+                    <h4 class="fw-bold">{{ tr('Secure Payments', 'নিরাপদ পেমেন্ট') }}</h4>
+                    <p class="small text-muted">{{ tr('Pay through the UddoktaPay checkout using the methods shown there.', 'উদ্যোক্তাপে চেকআউটে দেখানো পেমেন্ট পদ্ধতি ব্যবহার করুন।') }}</p>
                 </div>
             </div>
         </div>

@@ -1,0 +1,30 @@
+{% macro search_form(location='', checkin='', checkout='', compact=false) %}
+<div class="search-panel{% if compact %} search-panel-compact{% endif %}">
+    <form class="travel-search" action="{{ url_for('rooms_page') }}" method="get" role="search">
+        <div class="search-field search-destination">
+            <label for="search-location">{{ tr('Destination', 'গন্তব্য') }}</label>
+            <input id="search-location" name="location" type="search" value="{{ location }}" maxlength="100"
+                   placeholder="{{ tr('City, area, or stay', 'শহর, এলাকা বা আবাসন') }}">
+        </div>
+        <div class="search-field">
+            <label for="search-checkin">{{ tr('Check-in', 'চেক-ইন') }}</label>
+            <input id="search-checkin" name="checkin" type="date" value="{{ checkin }}">
+        </div>
+        <div class="search-field">
+            <label for="search-checkout">{{ tr('Check-out', 'চেক-আউট') }}</label>
+            <input id="search-checkout" name="checkout" type="date" value="{{ checkout }}">
+        </div>
+        <button class="btn btn-primary search-submit" type="submit">
+            <i class="fas fa-search" aria-hidden="true"></i> {{ tr('Search stays', 'আবাসন খুঁজুন') }}
+        </button>
+    </form>
+    <div class="search-tools">
+        <button class="nearby-button" type="button" data-nearby
+                data-loading="{{ tr('Finding your location…', 'আপনার অবস্থান খোঁজা হচ্ছে…') }}"
+                data-error="{{ tr('Location is unavailable. You can still search by city.', 'অবস্থান পাওয়া যায়নি। শহরের নাম দিয়ে খুঁজতে পারেন।') }}">
+            <i class="fas fa-location-crosshairs" aria-hidden="true"></i> {{ tr('Use my location', 'আমার অবস্থান ব্যবহার করুন') }}
+        </button>
+        <span class="nearby-status" role="status"></span>
+    </div>
+</div>
+{% endmacro %}

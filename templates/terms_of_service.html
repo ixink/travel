@@ -1,45 +1,45 @@
 {% extends 'base.html' %}
 
-{% block title %}Terms of Service | Traveller Stop{% endblock %}
+{% block title %}{{ tr('Terms of Service', 'সেবার শর্তাবলি') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 
 <section class="info-hero">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-3">Terms of Service</h1>
-        <p class="lead opacity-75">Please read these terms carefully before using our platform.</p>
+        <h1 class="display-3 fw-bold mb-3">{{ tr('Terms of Service', 'সেবার শর্তাবলি') }}</h1>
+        <p class="lead opacity-75">{{ tr('Please read these terms carefully before using our platform.', 'প্ল্যাটফর্ম ব্যবহারের আগে শর্তাবলি মন দিয়ে পড়ুন।') }}</p>
     </div>
 </section>
 
 <div class="container mb-5">
     <div class="info-card">
         <div class="policy-section">
-            <h4 class="fw-bold">1. Acceptance of Terms</h4>
-            <p class="text-muted small">By accessing or using Traveller Stop, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.</p>
+            <h4 class="fw-bold">{{ tr('1. Acceptance of Terms', '১. শর্তাবলি গ্রহণ') }}</h4>
+            <p class="text-muted small">{{ tr('By accessing or using Traveller Stop, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.', 'ট্রাভেলার স্টপে প্রবেশ বা ব্যবহারের মাধ্যমে আপনি সেবার এই শর্তাবলি ও প্রযোজ্য আইন-কানুন মেনে চলতে সম্মত হন। কোনো শর্তে সম্মত না হলে এই সাইটে প্রবেশ বা ব্যবহার করা যাবে না।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">2. User Accounts</h4>
-            <p class="text-muted small">To access certain features, you must create an account. You are responsible for maintaining the confidentiality of your account and password. You must provide accurate and complete information during registration and keep your account information up-to-date.</p>
+            <h4 class="fw-bold">{{ tr('2. User Accounts', '২. ব্যবহারকারীর অ্যাকাউন্ট') }}</h4>
+            <p class="text-muted small">{{ tr('To access certain features, you must create an account. You are responsible for maintaining the confidentiality of your account and password. You must provide accurate and complete information during registration and keep your account information up-to-date.', 'কিছু সুবিধা ব্যবহারের জন্য অ্যাকাউন্ট খুলতে হবে। অ্যাকাউন্ট ও পাসওয়ার্ডের গোপনীয়তা রক্ষার দায়িত্ব আপনার। নিবন্ধনের সময় সঠিক ও সম্পূর্ণ তথ্য দিতে হবে এবং অ্যাকাউন্টের তথ্য হালনাগাদ রাখতে হবে।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">3. Booking and Payments</h4>
-            <p class="text-muted small">All bookings made through Traveller Stop are subject to availability. Payments must be made through our authorized payment methods. Traveller Stop acts as an intermediary between travellers and hosts.</p>
+            <h4 class="fw-bold">{{ tr('3. Booking and Payments', '৩. বুকিং ও পেমেন্ট') }}</h4>
+            <p class="text-muted small">{{ tr('All bookings made through Traveller Stop are subject to availability. Payments must be made through our authorized payment methods. Traveller Stop acts as an intermediary between travellers and hosts.', 'ট্রাভেলার স্টপের সব বুকিং আবাসন খালি থাকা সাপেক্ষে। অনুমোদিত পদ্ধতিতে পেমেন্ট করতে হবে। ট্রাভেলার স্টপ ভ্রমণকারী ও হোস্টের মধ্যে মধ্যস্থতাকারী হিসেবে কাজ করে।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">4. Cancellations and Refunds</h4>
-            <p class="text-muted small">Cancellations are governed by the specific policy set for each room and our general cancellation policy. Refunds, if applicable, will be processed according to our standard procedures.</p>
+            <h4 class="fw-bold">{{ tr('4. Cancellations and Refunds', '৪. বাতিল ও অর্থ ফেরত') }}</h4>
+            <p class="text-muted small">{{ tr('Cancellations are governed by the specific policy set for each room and our general cancellation policy. Refunds, if applicable, will be processed according to our standard procedures.', 'বাতিলের ক্ষেত্রে সংশ্লিষ্ট কক্ষের নির্দিষ্ট নীতি ও আমাদের সাধারণ বাতিল নীতি প্রযোজ্য। প্রযোজ্য ক্ষেত্রে আমাদের নির্ধারিত প্রক্রিয়ায় অর্থ ফেরত দেওয়া হবে।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">5. User Conduct</h4>
-            <p class="text-muted small">Users agree not to use the platform for any unlawful purpose. Hosts must provide accurate descriptions of their properties. Travellers must respect the properties and rules of the hosts.</p>
+            <h4 class="fw-bold">{{ tr('5. User Conduct', '৫. ব্যবহারকারীর আচরণ') }}</h4>
+            <p class="text-muted small">{{ tr('Users agree not to use the platform for any unlawful purpose. Hosts must provide accurate descriptions of their properties. Travellers must respect the properties and rules of the hosts.', 'ব্যবহারকারীরা কোনো বেআইনি কাজে প্ল্যাটফর্ম ব্যবহার না করতে সম্মত হন। হোস্টদের আবাসনের সঠিক বিবরণ দিতে হবে। ভ্রমণকারীদের আবাসন ও হোস্টের নিয়ম সম্মান করতে হবে।') }}</p>
         </div>
 
         <div class="mt-5 pt-4 border-top">
-            <p class="small text-muted mb-0">Last updated: May 17, 2026</p>
+            <p class="small text-muted mb-0">{{ tr('Last updated: May 17, 2026', 'সর্বশেষ হালনাগাদ: ১৭ মে ২০২৬') }}</p>
         </div>
     </div>
 </div>

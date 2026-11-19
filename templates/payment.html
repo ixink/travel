@@ -1,107 +1,42 @@
 {% extends 'base.html' %}
-{% block title %}Payment | Traveller Stop{% endblock %}
+{% block title %}{{ tr('Payment', 'পেমেন্ট') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 <section class="container page-space">
-    <h1 class="mb-3">Payment</h1>
+    <h1 class="mb-3">{{ tr('Complete your booking', 'বুকিং সম্পন্ন করুন') }}</h1>
     <div class="room-layout">
         <div class="booking-panel">
             {% if booking.payment_status == 'paid' %}
-                <p class="alert alert-success mb-0" role="status">This booking has been paid.</p>
+                <p class="alert alert-success mb-0" role="status">{{ tr('This booking has been paid.', 'এই বুকিংয়ের পেমেন্ট সম্পন্ন হয়েছে।') }}</p>
+            {% elif under_review %}
+                <p class="alert alert-info mb-0" role="status">{{ tr('Your payment was received and is under review.', 'আপনার পেমেন্ট পাওয়া গেছে এবং পর্যালোচনার অপেক্ষায় আছে।') }}</p>
             {% elif booking.status != 'pending_payment' %}
-                <p class="mb-0">Payment is unavailable for this booking.</p>
-            {% else %}
-                {% if uddoktapay_enabled %}
-                    <h2>Pay online</h2>
-                    <form class="mb-4" method="post" action="{{ url_for('uddoktapay_checkout', booking_id=booking.id) }}">
-                        <input type="hidden" name="csrf_token" value="{{ payment_token }}">
-                        <button class="btn btn-primary" type="submit">Continue to UddoktaPay</button>
-                    </form>
-                {% endif %}
-                <h2>Submit a manual payment</h2>
-                <ul>
-                    <li>For bKash, Nagad, Rocket, or Upay, send the total to <strong>01575467289</strong> using Send Money.</li>
-                    <li>For Binance Pay, use Binance ID <strong>801896706</strong> or <strong>rayhan.instructor@gmail.com</strong>.</li>
-                </ul>
-                <form id="payment-form" method="post" action="{{ url_for('pay') }}" class="form-stack">
+                <p class="mb-0">{{ tr('Payment is unavailable for this booking.', 'এই বুকিংয়ের জন্য পেমেন্ট করা যাচ্ছে না।') }}</p>
+            {% elif uddoktapay_enabled %}
+                <h2>{{ tr('Pay with UddoktaPay', 'উদ্যোক্তাপে দিয়ে পেমেন্ট করুন') }}</h2>
+                <p>{{ tr('Choose your payment method on UddoktaPay. Your booking is confirmed after verification.', 'উদ্যোক্তাপে-তে পেমেন্ট পদ্ধতি বেছে নিন। পেমেন্ট যাচাই হলে বুকিং নিশ্চিত হবে।') }}</p>
+                <form method="post" action="{{ url_for('uddoktapay_checkout', booking_id=booking.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ payment_token }}">
-                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
-                    <div>
-                        <label class="form-label" for="payment-method">Payment method</label>
-                        <select id="payment-method" name="method" class="form-select" required>
-                            <option value="">Choose a method</option>
-                            <option value="bkash">bKash</option>
-                            <option value="nagad">Nagad</option>
-                            <option value="rocket">Rocket</option>
-                            <option value="upay">Upay</option>
-                            <option value="binance">Binance Pay</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label" for="payment-name">Your full name</label>
-                        <input id="payment-name" name="name" class="form-control" autocomplete="name" required>
-                    </div>
-                    <div>
-                        <label class="form-label" for="payment-sender">Sender number or ID</label>
-                        <input id="payment-sender" name="sender" class="form-control" required>
-                    </div>
-                    <div>
-                        <label class="form-label" for="payment-transaction">Transaction ID</label>
-                        <input id="payment-transaction" name="trxid" class="form-control" required>
-                    </div>
-                    <button class="btn btn-primary" type="submit">Submit payment</button>
-                    <output id="payment-result" role="status" hidden></output>
+                    <button class="btn btn-primary" type="submit">{{ tr('Continue to UddoktaPay', 'উদ্যোক্তাপে-তে যান') }}</button>
                 </form>
+            {% else %}
+                <h2>{{ tr('Online payment is temporarily unavailable', 'অনলাইন পেমেন্ট সাময়িকভাবে বন্ধ') }}</h2>
+                <p class="mb-0">{{ tr('Your booking is awaiting payment. Try again later or contact support.', 'আপনার বুকিং পেমেন্টের অপেক্ষায় আছে। পরে আবার চেষ্টা করুন অথবা সহায়তার জন্য যোগাযোগ করুন।') }}</p>
             {% endif %}
         </div>
         <aside class="booking-panel">
-            <h2>Booking #{{ booking.id }}</h2>
+            <h2>{{ tr('Booking', 'বুকিং') }} #{{ booking.id }}</h2>
             <dl class="booking-summary">
-                <dt>Check-in</dt><dd>{{ booking.checkin }}</dd>
-                <dt>Check-out</dt><dd>{{ booking.checkout }}</dd>
+                <dt>{{ tr('Check-in', 'চেক-ইন') }}</dt><dd>{{ booking.checkin }}</dd>
+                <dt>{{ tr('Check-out', 'চেক-আউট') }}</dt><dd>{{ booking.checkout }}</dd>
                 {% if booking.discount %}
-                    <dt>Original price</dt><dd>৳{{ '%.2f' | format(booking.original_amount) }}</dd>
-                    <dt>Coupon discount</dt><dd>−৳{{ '%.2f' | format(booking.discount) }}</dd>
+                    <dt>{{ tr('Original price', 'মূল ভাড়া') }}</dt><dd>৳{{ '%.2f' | format(booking.original_amount) }}</dd>
+                    <dt>{{ tr('Coupon discount', 'কুপন ছাড়') }}</dt><dd>−৳{{ '%.2f' | format(booking.discount) }}</dd>
                 {% endif %}
-                <dt>Total</dt><dd><strong>৳{{ '%.2f' | format(booking.total_amount) }}</strong></dd>
+                <dt>{{ tr('Total', 'মোট') }}</dt><dd><strong>৳{{ '%.2f' | format(booking.total_amount) }}</strong></dd>
             </dl>
-            <a href="{{ url_for('profile') }}">Back to your bookings</a>
+            <a href="{{ url_for('profile') }}">{{ tr('Back to your bookings', 'আমার বুকিংয়ে ফিরুন') }}</a>
         </aside>
     </div>
 </section>
-{% endblock %}
-
-{% block scripts %}
-<script>
-const paymentForm = document.getElementById('payment-form');
-
-if (paymentForm) {
-    paymentForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        const button = paymentForm.querySelector('button[type="submit"]');
-        const result = document.getElementById('payment-result');
-        button.disabled = true;
-        button.textContent = 'Submitting…';
-        result.hidden = true;
-
-        let succeeded = false;
-        try {
-            const response = await fetch(paymentForm.action, {
-                method: 'POST',
-                body: new FormData(paymentForm)
-            });
-            const data = await response.json();
-            succeeded = response.ok && data.status === 'success';
-            result.textContent = data.msg;
-        } catch {
-            result.textContent = 'Payment could not be submitted. Please try again.';
-        } finally {
-            result.className = succeeded ? 'alert alert-success mb-0' : 'alert alert-danger mb-0';
-            result.hidden = false;
-            button.disabled = succeeded;
-            button.textContent = succeeded ? 'Submitted' : 'Submit payment';
-        }
-    });
-}
-</script>
 {% endblock %}

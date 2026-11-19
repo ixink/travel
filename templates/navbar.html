@@ -1,33 +1,42 @@
-<nav class="navbar navbar-expand-lg site-nav" aria-label="Main navigation">
+<nav class="navbar navbar-expand-lg site-nav" aria-label="{{ tr('Main navigation', 'মূল মেনু') }}">
     <div class="container">
         <a class="navbar-brand site-brand" href="{{ url_for('index') }}">Traveller Stop<span>.</span></a>
+        <form class="language-switch" action="{{ url_for('set_language') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ language_token() }}">
+            <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+            {% if site_language == 'bn' %}
+                <button type="submit" name="language" value="en" lang="en" aria-label="Switch to English">English</button>
+            {% else %}
+                <button type="submit" name="language" value="bn" lang="bn" aria-label="বাংলায় দেখুন">বাংলা</button>
+            {% endif %}
+        </form>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#site-menu"
-                aria-controls="site-menu" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="site-menu" aria-expanded="false" aria-label="{{ tr('Toggle navigation', 'মেনু খুলুন বা বন্ধ করুন') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="site-menu">
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                 <li class="nav-item">
-                    <a class="nav-link" {% if request.endpoint == 'index' %}aria-current="page"{% endif %}
-                       href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-link" {% if request.endpoint == 'rooms_page' and not request.args.get('saved') %}aria-current="page"{% endif %}
+                       href="{{ url_for('rooms_page') }}">{{ tr('Explore stays', 'আবাসন খুঁজুন') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" {% if request.endpoint == 'rooms_page' %}aria-current="page"{% endif %}
-                       href="{{ url_for('rooms_page') }}">Explore stays</a>
+                    <a class="nav-link" {% if request.endpoint == 'rooms_page' and request.args.get('saved') == '1' %}aria-current="page"{% endif %}
+                       href="{{ url_for('rooms_page', saved=1) }}">{{ tr('Saved stays', 'পছন্দের আবাসন') }}</a>
                 </li>
                 {% if current_user %}
                     <li class="nav-item">
                         <a class="nav-link" {% if request.endpoint == 'profile' %}aria-current="page"{% endif %}
-                           href="{{ url_for('profile') }}">Profile</a>
+                           href="{{ url_for('profile') }}">{{ tr('My profile', 'আমার প্রোফাইল') }}</a>
                     </li>
                     {% if current_user.is_admin %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin') }}">Admin</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin') }}">{{ tr('Admin', 'অ্যাডমিন') }}</a></li>
                     {% endif %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Sign out</a></li>
-                    <li class="nav-item"><a class="btn btn-primary" href="{{ url_for('post_room') }}">List a room</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">{{ tr('Sign out', 'সাইন আউট') }}</a></li>
+                    <li class="nav-item"><a class="btn btn-primary" href="{{ url_for('post_room') }}">{{ tr('List a room', 'কক্ষ যোগ করুন') }}</a></li>
                 {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Sign in</a></li>
-                    <li class="nav-item"><a class="btn btn-primary" href="{{ url_for('signup') }}">Create account</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">{{ tr('Sign in', 'সাইন ইন') }}</a></li>
+                    <li class="nav-item"><a class="btn btn-primary" href="{{ url_for('signup') }}">{{ tr('Create account', 'অ্যাকাউন্ট খুলুন') }}</a></li>
                 {% endif %}
             </ul>
         </div>

@@ -4,25 +4,25 @@
 {% block content %}
 <header class="info-hero">
     <div class="container">
-        <h1>Contact Traveller Stop</h1>
-        <p>Get help with a booking or listing.</p>
+        <h1>{{ tr('Contact Traveller Stop', 'ট্রাভেলার স্টপের সঙ্গে যোগাযোগ') }}</h1>
+        <p>{{ tr('Get help with a booking or listing.', 'বুকিং বা আবাসন নিয়ে সহায়তা নিন।') }}</p>
     </div>
 </header>
-<section class="container section-space" aria-label="Contact options">
+<section class="container section-space" aria-label="{{ tr('Contact options', 'যোগাযোগের উপায়') }}">
     <div class="info-card">
         <div class="row g-4">
             <div class="col-md-4">
-                <h2 class="h4">Email</h2>
+                <h2 class="h4">{{ tr('Email', 'ইমেইল') }}</h2>
                 <a href="mailto:knock.travellerstop@gmail.com">knock.travellerstop@gmail.com</a>
             </div>
             <div class="col-md-4">
-                <h2 class="h4">Phone</h2>
-                <p class="mb-2"><a href="tel:+8801575467289">01575467289</a><br>Thursday–Saturday, 9 am–10 pm</p>
-                <p class="mb-0"><a href="tel:+8801999071721">01999071721</a><br>Monday–Wednesday, 9 am–10 pm</p>
+                <h2 class="h4">{{ tr('Phone', 'ফোন') }}</h2>
+                <p class="mb-2"><a href="tel:+8801575467289">01575467289</a><br>{{ tr('Thursday–Saturday, 9 am–10 pm', 'বৃহস্পতিবার–শনিবার, সকাল ৯টা–রাত ১০টা') }}</p>
+                <p class="mb-0"><a href="tel:+8801999071721">01999071721</a><br>{{ tr('Monday–Wednesday, 9 am–10 pm', 'সোমবার–বুধবার, সকাল ৯টা–রাত ১০টা') }}</p>
             </div>
             <div class="col-md-4">
-                <h2 class="h4">Office</h2>
-                <address class="mb-0">Satarkul, Badda<br>Dhaka 1212, Bangladesh</address>
+                <h2 class="h4">{{ tr('Office', 'অফিস') }}</h2>
+                <address class="mb-0">{{ tr('Satarkul, Badda', 'সাতারকুল, বাড্ডা') }}<br>{{ tr('Dhaka 1212, Bangladesh', 'ঢাকা ১২১২, বাংলাদেশ') }}</address>
             </div>
         </div>
     </div>

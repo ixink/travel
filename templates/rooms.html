@@ -1,41 +1,44 @@
 {% extends 'base.html' %}
 {% from 'room_card.html' import room_card with context %}
+{% from 'search_form.html' import search_form with context %}
 
-{% block title %}Explore Stays | Traveller Stop{% endblock %}
+{% block title %}{{ tr('Explore stays', 'আবাসন খুঁজুন') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 <section class="container page-space">
     <header class="listing-header">
-        <h1>{{ 'Stays in ' ~ location if location else 'Explore stays' }}</h1>
-        <form class="location-search listing-search" action="{{ url_for('rooms_page') }}" method="get" role="search">
-            <div>
-                <label for="room-location">Location</label>
-                <input type="search" id="room-location" name="location" value="{{ location }}" placeholder="Search by city or area">
-            </div>
-            <button type="submit" class="btn btn-primary">Search stays</button>
-        </form>
+        <h1>{% if saved %}{{ tr('Saved stays', 'পছন্দের আবাসন') }}{% elif nearby %}{{ tr('Stays nearby', 'কাছের আবাসন') }}{% else %}{{ tr('Explore stays', 'আবাসন খুঁজুন') }}{% endif %}</h1>
+        {{ search_form(location, checkin, checkout, compact=true) }}
+        {% if invalid_dates %}
+            <p class="search-notice" role="status">{{ tr('Choose both dates with check-out after check-in to filter by availability.', 'খালি আবাসন দেখতে দুটি তারিখ বেছে নিন। চেক-আউট অবশ্যই চেক-ইনের পরে হতে হবে।') }}</p>
+        {% endif %}
+        {% if origin %}
+            <p class="search-notice">{{ tr('Showing stays within about 100 km. Distances use city or district centres and are approximate.', 'প্রায় ১০০ কিলোমিটারের মধ্যে থাকা আবাসন দেখানো হচ্ছে। শহর বা জেলা কেন্দ্র থেকে আনুমানিক দূরত্ব হিসাব করা হয়েছে।') }}</p>
+        {% elif nearby %}
+            <p class="search-notice">{{ tr('Use your location to find nearby stays.', 'কাছের আবাসন খুঁজতে আপনার অবস্থান ব্যবহার করুন।') }}</p>
+        {% endif %}
     </header>
 
-    <div class="section-heading results-heading">
-        <p>{{ rooms | length }} {{ 'stay' if rooms | length == 1 else 'stays' }} found</p>
-        {% if location %}<a href="{{ url_for('rooms_page') }}">Clear location</a>{% endif %}
-    </div>
+    {% if not saved %}
+        <div class="section-heading results-heading">
+            <p>{{ rooms | length }} {{ tr('stay found', 'টি আবাসন পাওয়া গেছে') if rooms | length == 1 else tr('stays found', 'টি আবাসন পাওয়া গেছে') }}</p>
+            {% if location or checkin or checkout or nearby %}<a href="{{ url_for('rooms_page') }}">{{ tr('Clear filters', 'ফিল্টার মুছুন') }}</a>{% endif %}
+        </div>
+    {% endif %}
 
     {% if rooms %}
-        <div class="stay-grid">
+        <div class="stay-grid"{% if saved %} data-saved-grid hidden{% endif %}>
             {% for room in rooms %}
-                {{ room_card(room) }}
+                {{ room_card(room, distances.get(room.id), checkin if not invalid_dates else '', checkout if not invalid_dates else '') }}
             {% endfor %}
         </div>
-    {% else %}
-        <div class="empty-state">
-            <h2>No stays found</h2>
-            {% if location %}
-                <p>Try a different city or area.</p>
-                <a class="btn btn-outline-primary" href="{{ url_for('rooms_page') }}">Show all stays</a>
-            {% else %}
-                <p>Check back as local hosts add their rooms.</p>
-            {% endif %}
+    {% endif %}
+
+    {% if saved or not rooms %}
+        <div class="empty-state"{% if saved and rooms %} data-saved-empty{% endif %}>
+            <h2>{{ tr('No saved stays yet', 'এখনো পছন্দের আবাসন নেই') if saved else tr('No stays found', 'কোনো আবাসন পাওয়া যায়নি') }}</h2>
+            <p>{{ tr('Tap the heart on any stay to save it on this device.', 'এই ডিভাইসে আবাসনটি সংরক্ষণ করতে হৃদয় চিহ্নে চাপ দিন।') if saved else tr('Try another destination or change your dates.', 'অন্য গন্তব্য বা অন্য তারিখ দিয়ে চেষ্টা করুন।') }}</p>
+            <a class="btn btn-outline-primary" href="{{ url_for('rooms_page') }}">{{ tr('Explore all stays', 'সব আবাসন দেখুন') }}</a>
         </div>
     {% endif %}
 </section>

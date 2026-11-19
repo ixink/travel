@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Post Your Room - Traveller Stop{% endblock %}
+{% block title %}{{ tr('Post Your Room', 'কক্ষ যোগ করুন') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 
@@ -10,8 +10,8 @@
             <div class="col-lg-10 col-xl-9">
                 
                 <div class="text-center mb-5">
-                    <h1 class="display-5 fw-bold text-dark mb-2">Host Your Space</h1>
-                    <p class="lead text-secondary">Join our community of hosts and start earning today</p>
+                    <h1 class="display-5 fw-bold text-dark mb-2">{{ tr('Host Your Space', 'আপনার কক্ষ ভাড়ায় দিন') }}</h1>
+                    <p class="lead text-secondary">{{ tr('Join our community of hosts and start earning today', 'হোস্ট হিসেবে যোগ দিন এবং আপনার আবাসন থেকে আয় শুরু করুন') }}</p>
                 </div>
 
                 <div class="card border-0 overflow-hidden">
@@ -19,31 +19,31 @@
                         <!-- Sidebar Info (Desktop Only) -->
                         <div class="col-lg-4 bg-dark text-white p-4 p-lg-5 d-none d-lg-flex flex-column justify-content-center">
                             <div class="mb-5">
-                                <h4 class="fw-bold mb-3">Why host with us?</h4>
+                                <h4 class="fw-bold mb-3">{{ tr('Why host with us?', 'আমাদের সঙ্গে হোস্ট হবেন কেন?') }}</h4>
                                 <div class="d-flex gap-3 mb-4">
                                     <div class="fs-3"><i class="fas fa-shield-alt"></i></div>
                                     <div>
-                                        <h6 class="fw-bold mb-1">Secure Payments</h6>
-                                        <p class="small mb-0">Get paid directly via bKash or Nagad.</p>
+                                        <h6 class="fw-bold mb-1">{{ tr('Secure Payments', 'নিরাপদ পেমেন্ট') }}</h6>
+                                        <p class="small mb-0">{{ tr('Guests pay for bookings through UddoktaPay.', 'অতিথিরা উদ্যোক্তাপে দিয়ে বুকিংয়ের পেমেন্ট করেন।') }}</p>
                                     </div>
                                 </div>
                                 <div class="d-flex gap-3 mb-4">
                                     <div class="fs-3"><i class="fas fa-users"></i></div>
                                     <div>
-                                        <h6 class="fw-bold mb-1">Verified Guests</h6>
-                                        <p class="small mb-0">Hosts interact with NID-verified travellers.</p>
+                                        <h6 class="fw-bold mb-1">{{ tr('Verified Guests', 'যাচাইকৃত অতিথি') }}</h6>
+                                        <p class="small mb-0">{{ tr('Hosts interact with NID-verified travellers.', 'হোস্টরা জাতীয় পরিচয়পত্র যাচাইকৃত ভ্রমণকারীদের সঙ্গে যোগাযোগ করেন।') }}</p>
                                     </div>
                                 </div>
                                 <div class="d-flex gap-3">
                                     <div class="fs-3"><i class="fas fa-chart-line"></i></div>
                                     <div>
-                                        <h6 class="fw-bold mb-1">Easy Management</h6>
-                                        <p class="small mb-0">Simple tools to manage your listings.</p>
+                                        <h6 class="fw-bold mb-1">{{ tr('Easy Management', 'সহজ ব্যবস্থাপনা') }}</h6>
+                                        <p class="small mb-0">{{ tr('Simple tools to manage your listings.', 'আপনার আবাসন পরিচালনার জন্য সহজ সরঞ্জাম।') }}</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-auto pt-4 border-top border-secondary">
-                                <p class="small mb-0 opacity-75">Need help? <a href="{{ url_for('contact') }}" class="text-white fw-bold">Contact Support</a></p>
+                                <p class="small mb-0 opacity-75">{{ tr('Need help?', 'সহায়তা দরকার?') }} <a href="{{ url_for('contact') }}" class="text-white fw-bold">{{ tr('Contact Support', 'সহায়তার জন্য যোগাযোগ') }}</a></p>
                             </div>
                         </div>
 
@@ -51,23 +51,23 @@
                         <div class="col-lg-8 p-4 p-lg-5 bg-white">
                             <form method="POST" enctype="multipart/form-data" id="roomForm">
                                 
-                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">Room Details</h5>
+                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">{{ tr('Room Details', 'কক্ষের বিবরণ') }}</h5>
 
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold small text-uppercase text-secondary">Room Title</label>
+                                    <label class="form-label fw-bold small text-uppercase text-secondary">{{ tr('Room Title', 'কক্ষের নাম') }}</label>
                                     <input type="text" name="title" class="form-control form-control-lg" 
                                            placeholder="e.g. Modern Studio with Balcony in Gulshan" required>
                                 </div>
 
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold small text-uppercase text-secondary">Description</label>
+                                    <label class="form-label fw-bold small text-uppercase text-secondary">{{ tr('Description', 'বিবরণ') }}</label>
                                     <textarea name="description" class="form-control" rows="4" 
                                               placeholder="Tell guests about your place, location, and what makes it special..." required></textarea>
                                 </div>
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold small text-uppercase text-secondary">Location</label>
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">{{ tr('Location', 'অবস্থান') }}</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0"><i class="fas fa-map-marker-alt text-primary"></i></span>
                                             <input type="text" name="location" class="form-control form-control-lg border-start-0 ps-0" 
@@ -75,7 +75,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold small text-uppercase text-secondary">Price / Night (৳)</label>
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">{{ tr('Price / Night (৳)', 'প্রতি রাতের ভাড়া (৳)') }}</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0 fw-bold">৳</span>
                                             <input type="number" name="price" class="form-control form-control-lg border-start-0 ps-0" 
@@ -86,35 +86,35 @@
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold small text-uppercase text-secondary">Available From</label>
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">{{ tr('Available From', 'যে তারিখ থেকে খালি') }}</label>
                                         <input type="date" name="available_from" class="form-control form-control-lg" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold small text-uppercase text-secondary">Available Until</label>
+                                        <label class="form-label fw-bold small text-uppercase text-secondary">{{ tr('Available Until', 'যে তারিখ পর্যন্ত খালি') }}</label>
                                         <input type="date" name="available_to" class="form-control form-control-lg" required>
                                     </div>
                                 </div>
 
-                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2 mt-5">Photos & Amenities</h5>
+                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2 mt-5">{{ tr('Photos & Amenities', 'ছবি ও সুযোগ-সুবিধা') }}</h5>
 
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold small text-uppercase text-secondary">Upload Photo</label>
+                                    <label class="form-label fw-bold small text-uppercase text-secondary">{{ tr('Upload Photo', 'ছবি আপলোড') }}</label>
                                     <div class="upload-zone text-center p-4 border border-2 border-dashed rounded-4 bg-light position-relative">
                                         <input type="file" name="room_image" id="room_image" class="form-control position-absolute inset-0 opacity-0 w-100 h-100 cursor-pointer" accept="image/*" required>
                                         <div id="uploadPlaceholder">
                                             <i class="fas fa-cloud-upload-alt fa-3x text-secondary mb-3"></i>
-                                            <p class="mb-0 fw-bold text-dark">Click or drag photo here</p>
-                                            <p class="small text-muted mb-0">High resolution landscape photos work best</p>
+                                            <p class="mb-0 fw-bold text-dark">{{ tr('Click or drag photo here', 'ছবি বেছে নিন বা এখানে টেনে আনুন') }}</p>
+                                            <p class="small text-muted mb-0">{{ tr('High resolution landscape photos work best', 'উচ্চ রেজোলিউশনের আড়াআড়ি ছবি সবচেয়ে ভালো দেখায়') }}</p>
                                         </div>
                                         <div id="imagePreview" class="d-none">
-                                            <img id="previewImg" alt="Selected room photo" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px;">
-                                            <p class="mt-2 mb-0 text-primary small fw-bold">Click to change photo</p>
+                                            <img id="previewImg" alt="{{ tr('Selected room photo', 'বেছে নেওয়া কক্ষের ছবি') }}" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px;">
+                                            <p class="mt-2 mb-0 text-primary small fw-bold">{{ tr('Click to change photo', 'ছবি বদলাতে চাপ দিন') }}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="mb-5">
-                                    <label class="form-label fw-bold small text-uppercase text-secondary d-block mb-3">Amenities</label>
+                                    <label class="form-label fw-bold small text-uppercase text-secondary d-block mb-3">{{ tr('Amenities', 'সুযোগ-সুবিধা') }}</label>
                                     <div class="row g-2">
                                         {% set all_amenities = [
                                             ('Free WiFi', 'wifi'), ('Air Conditioning', 'wind'), ('Parking', 'car'),

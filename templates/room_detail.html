@@ -1,21 +1,23 @@
 {% extends 'base.html' %}
+{% from 'room_card.html' import favourite_button with context %}
 {% block title %}{{ room.title }} | Traveller Stop{% endblock %}
 
 {% block content %}
 <section class="container page-space">
-    <a href="{{ url_for('rooms_page') }}">Back to all stays</a>
+    <a href="{{ url_for('rooms_page') }}">{{ tr('Back to all stays', 'সব আবাসনে ফিরুন') }}</a>
     <header class="room-heading">
         <h1>{{ room.title }}</h1>
         <p>{{ room.location }}</p>
+        {{ favourite_button(room) }}
     </header>
     <div class="room-layout">
         <div>
             <img src="{{ get_room_image(room.image_url) }}" class="room-photo{% if not room.image_url %} room-photo-placeholder{% endif %}" alt="{{ room.title }}" width="900" height="600">
             <div class="room-copy">
-                <h2>About this stay</h2>
+                <h2>{{ tr('About this stay', 'এই আবাসন সম্পর্কে') }}</h2>
                 <p>{{ room.description }}</p>
                 {% if room.amenities %}
-                    <h2>What this place offers</h2>
+                    <h2>{{ tr('What this place offers', 'যেসব সুবিধা আছে') }}</h2>
                     <ul class="room-amenities">
                         {% for amenity in room.amenities %}
                             <li class="amenity-pill">{{ amenity }}</li>
@@ -25,30 +27,35 @@
             </div>
         </div>
         <aside class="booking-panel" id="booking">
-            <h2>Reserve this stay</h2>
-            <p><strong>৳{{ '%.2f' | format(room.price_per_night) }}</strong> per night</p>
+            <h2>{{ tr('Reserve this stay', 'এই আবাসন বুক করুন') }}</h2>
+            <p><strong>৳{{ '%.2f' | format(room.price_per_night) }}</strong> {{ tr('per night', 'প্রতি রাত') }}</p>
             {% if not current_user %}
-                <a class="btn btn-primary w-100" href="{{ url_for('login') }}">Sign in to reserve</a>
+                <a class="btn btn-primary w-100" href="{{ url_for('login', next=request.full_path.rstrip('?')) }}">{{ tr('Sign in to reserve', 'বুক করতে সাইন ইন করুন') }}</a>
             {% elif not profile_complete %}
-                <p>Complete and verify your profile to reserve.</p>
-                <a class="btn btn-primary w-100" href="{{ url_for('profile') }}">Go to your profile</a>
+                <p>{{ tr('Complete and verify your profile to reserve.', 'বুকিংয়ের জন্য আপনার প্রোফাইল পূরণ ও যাচাই করুন।') }}</p>
+                <a class="btn btn-primary w-100" href="{{ url_for('profile') }}">{{ tr('Go to your profile', 'আমার প্রোফাইলে যান') }}</a>
             {% else %}
                 <form action="{{ url_for('book_room', room_id=room.id) }}" method="post" class="form-stack" id="booking-form">
                     <div class="booking-dates">
                         <div>
-                            <label class="form-label" for="checkin">Check-in</label>
-                            <input class="form-control" id="checkin" type="date" name="checkin" required>
+                            <label class="form-label" for="checkin">{{ tr('Check-in', 'চেক-ইন') }}</label>
+                            <input class="form-control" id="checkin" type="date" name="checkin" value="{{ dates[0] if dates else '' }}" required>
                         </div>
                         <div>
-                            <label class="form-label" for="checkout">Check-out</label>
-                            <input class="form-control" id="checkout" type="date" name="checkout" required>
+                            <label class="form-label" for="checkout">{{ tr('Check-out', 'চেক-আউট') }}</label>
+                            <input class="form-control" id="checkout" type="date" name="checkout" value="{{ dates[1] if dates else '' }}" required>
                         </div>
                     </div>
                     <div>
-                        <label class="form-label" for="coupon-code">Promo code <span class="text-muted">(optional)</span></label>
+                        <label class="form-label" for="coupon-code">{{ tr('Promo code', 'প্রোমো কোড') }} <span class="text-muted">{{ tr('(optional)', '(ঐচ্ছিক)') }}</span></label>
                         <input class="form-control" id="coupon-code" name="coupon_code">
                     </div>
-                    <button class="btn btn-primary" type="submit">Reserve stay</button>
+                    <div class="stay-estimate" data-rate="{{ room.price_per_night }}"
+                         data-singular="{{ tr('night', 'রাত') }}" data-plural="{{ tr('nights', 'রাত') }}" hidden>
+                        <div><span>{{ tr('Estimated total', 'আনুমানিক মোট ভাড়া') }}</span><strong data-estimate-total></strong></div>
+                        <small>{{ tr('Before any promo code', 'প্রোমো কোড প্রয়োগের আগে') }} · <span data-estimate-nights></span></small>
+                    </div>
+                    <button class="btn btn-primary" type="submit">{{ tr('Reserve stay', 'আবাসন বুক করুন') }}</button>
                 </form>
             {% endif %}
         </aside>

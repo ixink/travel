@@ -1,12 +1,23 @@
-{% macro room_card(room) %}
-<article class="stay-card">
-    <a class="stay-image{% if not room.image_url %} stay-image-placeholder{% endif %}" href="{{ url_for('room_detail', room_id=room.id) }}" tabindex="-1" aria-hidden="true">
+{% macro favourite_button(room) %}
+<button class="favourite-button" type="button" data-favourite="{{ room.id }}" aria-pressed="false"
+        aria-label="{{ tr('Save stay', 'পছন্দের তালিকায় রাখুন') }}: {{ room.title }}"
+        data-save-label="{{ tr('Save stay', 'পছন্দের তালিকায় রাখুন') }}: {{ room.title }}"
+        data-remove-label="{{ tr('Remove saved stay', 'পছন্দের তালিকা থেকে সরান') }}: {{ room.title }}">
+    <i class="fas fa-heart" aria-hidden="true"></i>
+</button>
+{% endmacro %}
+
+{% macro room_card(room, distance=none, checkin='', checkout='') %}
+{% set room_url = url_for('room_detail', room_id=room.id, checkin=checkin, checkout=checkout) if checkin and checkout else url_for('room_detail', room_id=room.id) %}
+<article class="stay-card" data-room="{{ room.id }}">
+    <a class="stay-image{% if not room.image_url %} stay-image-placeholder{% endif %}" href="{{ room_url }}" tabindex="-1" aria-hidden="true">
         <img src="{{ get_room_image(room.image_url) }}" alt="" loading="lazy" width="600" height="400">
     </a>
+    {{ favourite_button(room) }}
     <div class="stay-body">
-        <p class="stay-location">{{ room.location }}</p>
-        <h3><a href="{{ url_for('room_detail', room_id=room.id) }}">{{ room.title }}</a></h3>
-        <p class="stay-price"><strong>৳{{ '%.2f' | format(room.price_per_night) }}</strong> per night</p>
+        <p class="stay-location">{{ room.location }}{% if distance is not none %} · {{ tr('about %s km away', 'প্রায় %s কিমি দূরে') | format(distance) }}{% endif %}</p>
+        <h3><a href="{{ room_url }}">{{ room.title }}</a></h3>
+        <p class="stay-price"><strong>৳{{ '%.2f' | format(room.price_per_night) }}</strong> {{ tr('per night', 'প্রতি রাত') }}</p>
     </div>
 </article>
 {% endmacro %}

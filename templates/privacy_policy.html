@@ -1,45 +1,49 @@
 {% extends 'base.html' %}
 
-{% block title %}Privacy Policy | Traveller Stop{% endblock %}
+{% block title %}{{ tr('Privacy Policy', 'গোপনীয়তা নীতি') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 
 <section class="info-hero">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-3">Privacy Policy</h1>
-        <p class="lead opacity-75">Your privacy is important to us. Learn how we handle your data.</p>
+        <h1 class="display-3 fw-bold mb-3">{{ tr('Privacy Policy', 'গোপনীয়তা নীতি') }}</h1>
+        <p class="lead opacity-75">{{ tr('Your privacy is important to us. Learn how we handle your data.', 'আপনার গোপনীয়তা আমাদের কাছে গুরুত্বপূর্ণ। কীভাবে আপনার তথ্য ব্যবহার করি তা জেনে নিন।') }}</p>
     </div>
 </section>
 
 <div class="container mb-5">
     <div class="info-card">
         <div class="policy-section">
-            <h4 class="fw-bold">1. Information We Collect</h4>
-            <p class="text-muted small">We collect information you provide directly to us, such as when you create an account, update your profile, make a booking, or communicate with us. This includes your name, email address, phone number, and NID information for verification purposes.</p>
+            <h4 class="fw-bold">{{ tr('1. Information We Collect', '১. যেসব তথ্য সংগ্রহ করি') }}</h4>
+            <p class="text-muted small">{{ tr('We collect information you provide directly to us, such as when you create an account, update your profile, make a booking, or communicate with us. This includes your name, email address, phone number, and NID information for verification purposes.', 'অ্যাকাউন্ট খোলা, প্রোফাইল হালনাগাদ, বুকিং বা যোগাযোগের সময় আপনি সরাসরি যে তথ্য দেন তা সংগ্রহ করি। এর মধ্যে নাম, ইমেইল ঠিকানা, ফোন নম্বর এবং যাচাইয়ের জন্য জাতীয় পরিচয়পত্রের তথ্য রয়েছে।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">2. How We Use Your Information</h4>
-            <p class="text-muted small">We use the information we collect to provide, maintain, and improve our services, to process your bookings, and to communicate with you about your account and travel experiences.</p>
+            <h4 class="fw-bold">{{ tr('2. How We Use Your Information', '২. আপনার তথ্য যেভাবে ব্যবহার করি') }}</h4>
+            <p class="text-muted small">{{ tr('We use the information we collect to provide, maintain, and improve our services, to process your bookings, and to communicate with you about your account and travel experiences.', 'আমাদের সেবা প্রদান, বজায় রাখা ও উন্নত করা, বুকিং প্রক্রিয়া সম্পন্ন করা এবং অ্যাকাউন্ট ও ভ্রমণ সম্পর্কে আপনার সঙ্গে যোগাযোগের জন্য তথ্য ব্যবহার করি।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">3. Information Sharing</h4>
-            <p class="text-muted small">We share your information with hosts only to the extent necessary to facilitate your bookings. We do not sell your personal information to third parties.</p>
+                    <h4>{{ tr('Nearby search and saved stays', 'কাছের আবাসন ও পছন্দের তালিকা') }}</h4>
+                    <p class="text-muted">{{ tr('Nearby search asks your browser for permission and uses rounded coordinates in the search URL. Your favourites and language preference are stored in your browser.', 'কাছের আবাসন খুঁজতে ব্রাউজার আপনার অনুমতি চায় এবং অনুসন্ধানের লিংকে আনুমানিক স্থানাঙ্ক ব্যবহার করে। পছন্দের আবাসন ও ভাষা আপনার ব্রাউজারে সংরক্ষিত থাকে।') }}</p>
+                </div>
+                <div class="policy-section">
+            <h4 class="fw-bold">{{ tr('3. Information Sharing', '৩. তথ্য শেয়ার') }}</h4>
+            <p class="text-muted small">{{ tr('We share your information with hosts only to the extent necessary to facilitate your bookings. We do not sell your personal information to third parties.', 'বুকিংয়ের জন্য যতটুকু প্রয়োজন, শুধু ততটুকু তথ্য হোস্টদের সঙ্গে শেয়ার করি। আপনার ব্যক্তিগত তথ্য তৃতীয় পক্ষের কাছে বিক্রি করি না।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">4. Data Security</h4>
-            <p class="text-muted small">We take reasonable measures to help protect information about you from loss, theft, misuse, and unauthorized access, disclosure, alteration, and destruction.</p>
+            <h4 class="fw-bold">{{ tr('4. Data Security', '৪. তথ্যের নিরাপত্তা') }}</h4>
+            <p class="text-muted small">{{ tr('We take reasonable measures to help protect information about you from loss, theft, misuse, and unauthorized access, disclosure, alteration, and destruction.', 'তথ্য হারানো, চুরি, অপব্যবহার, অননুমোদিত প্রবেশ, প্রকাশ, পরিবর্তন ও ধ্বংস থেকে আপনার তথ্য রক্ষায় যুক্তিসংগত ব্যবস্থা নিই।') }}</p>
         </div>
 
         <div class="policy-section">
-            <h4 class="fw-bold">5. Your Choices</h4>
-            <p class="text-muted small">You may update or correct your account information at any time by logging into your account. You may also request that we delete your personal information, subject to certain exceptions.</p>
+            <h4 class="fw-bold">{{ tr('5. Your Choices', '৫. আপনার পছন্দ') }}</h4>
+            <p class="text-muted small">{{ tr('You may update or correct your account information at any time by logging into your account. You may also request that we delete your personal information, subject to certain exceptions.', 'অ্যাকাউন্টে সাইন ইন করে যেকোনো সময় তথ্য হালনাগাদ বা সংশোধন করতে পারেন। কিছু ব্যতিক্রম সাপেক্ষে ব্যক্তিগত তথ্য মুছে ফেলার অনুরোধও করতে পারেন।') }}</p>
         </div>
 
         <div class="mt-5 pt-4 border-top">
-            <p class="small text-muted mb-0">Last updated: May 17, 2026</p>
+            <p class="small text-muted mb-0">{{ tr('Last updated: May 17, 2026', 'সর্বশেষ হালনাগাদ: ১৭ মে ২০২৬') }}</p>
         </div>
     </div>
 </div>

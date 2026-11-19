@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ site_language }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Find and book stays across Bangladesh with Traveller Stop.">
-    <title>{% block title %}Traveller Stop | Stays across Bangladesh{% endblock %}</title>
+    <meta name="description" content="{{ tr('Find and book stays across Bangladesh with Traveller Stop.', 'ট্রাভেলার স্টপে বাংলাদেশজুড়ে আবাসন খুঁজুন ও বুক করুন।') }}">
+    <title>{% block title %}{{ tr('Traveller Stop | Stays across Bangladesh', 'ট্রাভেলার স্টপ | বাংলাদেশজুড়ে আবাসন') }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome/css/fontawesome.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome/css/solid.min.css') }}">
@@ -12,7 +12,7 @@
     <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
 </head>
 <body data-image-fallback="{{ url_for('static', filename='logo.png') }}">
-    <a class="visually-hidden-focusable skip-link" href="#main-content">Skip to content</a>
+    <a class="visually-hidden-focusable skip-link" href="#main-content">{{ tr('Skip to content', 'মূল বিষয়বস্তুতে যান') }}</a>
     {% include 'navbar.html' %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -21,7 +21,7 @@
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category if category in ('success', 'danger', 'warning', 'info') else 'info' }} alert-dismissible fade show" role="alert">
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss message"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ tr('Dismiss message', 'বার্তা বন্ধ করুন') }}"></button>
                     </div>
                 {% endfor %}
             </div>
@@ -36,31 +36,31 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <a class="site-brand" href="{{ url_for('index') }}">Traveller Stop<span>.</span></a>
-                    <p>Find a place to stay or list your own room in Bangladesh.</p>
+                    <a class="site-brand" href="{{ url_for('index') }}">{{ tr('Traveller Stop', 'ট্রাভেলার স্টপ') }}<span>.</span></a>
+                    <p>{{ tr('Find a place to stay or list your own room in Bangladesh.', 'বাংলাদেশে থাকার জায়গা খুঁজুন বা আপনার নিজের কক্ষ যোগ করুন।') }}</p>
                 </div>
                 <div>
-                    <h2>Traveller Stop</h2>
+                    <h2>{{ tr('Traveller Stop', 'ট্রাভেলার স্টপ') }}</h2>
                     <ul class="footer-links">
-                        <li><a href="{{ url_for('rooms_page') }}">Explore stays</a></li>
-                        <li><a href="{{ url_for('about') }}">About us</a></li>
-                        <li><a href="{{ url_for('services') }}">Our services</a></li>
-                        <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                        <li><a href="{{ url_for('rooms_page') }}">{{ tr('Explore stays', 'আবাসন খুঁজুন') }}</a></li>
+                        <li><a href="{{ url_for('about') }}">{{ tr('About us', 'আমাদের সম্পর্কে') }}</a></li>
+                        <li><a href="{{ url_for('services') }}">{{ tr('Our services', 'আমাদের সেবা') }}</a></li>
+                        <li><a href="{{ url_for('contact') }}">{{ tr('Contact', 'যোগাযোগ') }}</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h2>Support</h2>
+                    <h2>{{ tr('Support', 'সহায়তা') }}</h2>
                     <ul class="footer-links">
-                        <li><a href="{{ url_for('help_center') }}">Help center</a></li>
-                        <li><a href="{{ url_for('safety_tips') }}">Safety tips</a></li>
-                        <li><a href="{{ url_for('cancellation_policy') }}">Cancellation policy</a></li>
+                        <li><a href="{{ url_for('help_center') }}">{{ tr('Help center', 'সহায়তা কেন্দ্র') }}</a></li>
+                        <li><a href="{{ url_for('safety_tips') }}">{{ tr('Safety tips', 'নিরাপত্তা পরামর্শ') }}</a></li>
+                        <li><a href="{{ url_for('cancellation_policy') }}">{{ tr('Cancellation policy', 'বাতিল নীতি') }}</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
                 <span>&copy; 2026 Traveller Stop</span>
-                <a href="{{ url_for('terms') }}">Terms</a>
-                <a href="{{ url_for('privacy') }}">Privacy</a>
+                <a href="{{ url_for('terms') }}">{{ tr('Terms', 'শর্তাবলি') }}</a>
+                <a href="{{ url_for('privacy') }}">{{ tr('Privacy', 'গোপনীয়তা') }}</a>
             </div>
         </div>
     </footer>

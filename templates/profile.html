@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}My Profile - Traveller Stop{% endblock %}
+{% block title %}{{ tr('My Profile', 'আমার প্রোফাইল') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 <div class="profile-page page-space">
@@ -17,18 +17,18 @@
                         <img id="currentProfilePic"
                              src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else 'https://ui-avatars.com/api/?name=' + user.username|urlencode + '&background=244a38&color=fff' }}"
                              class="profile-avatar shadow"
-                             alt="Profile Picture">
+                             alt="{{ tr('Profile Picture', 'প্রোফাইল ছবি') }}">
 
                         <h3 class="fw-bold mt-3 mb-1" id="displayUsername">{{ user.username }}</h3>
                         <p class="text-muted small mb-3" id="displayEmail">{{ user.email }}</p>
 
                         {% if user.nid_verified %}
                             <span class="badge bg-success rounded-pill px-3 py-2">
-                                <i class="fas fa-check-circle me-1"></i> Verified User
+                                <i class="fas fa-check-circle me-1"></i> {{ tr('Verified User', 'যাচাইকৃত ব্যবহারকারী') }}
                             </span>
                         {% else %}
                             <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-                                <i class="fas fa-exclamation-triangle me-1"></i> Not Verified
+                                <i class="fas fa-exclamation-triangle me-1"></i> {{ tr('Not Verified', 'যাচাই হয়নি') }}
                             </span>
                         {% endif %}
 
@@ -36,25 +36,25 @@
 
                         <div class="text-start">
                             <div class="mb-3">
-                                <small class="text-muted d-block">Phone</small>
-                                <span class="fw-semibold" id="displayPhone">{{ user.phone or 'Not Added' }}</span>
+                                <small class="text-muted d-block">{{ tr('Phone', 'ফোন') }}</small>
+                                <span class="fw-semibold" id="displayPhone">{{ user.phone or tr('Not Added', 'যোগ করা হয়নি') }}</span>
                             </div>
                             <div class="mb-3">
-                                <small class="text-muted d-block">Location</small>
-                                <span class="fw-semibold" id="displayLocation">{{ user.location or 'Not Added' }}</span>
+                                <small class="text-muted d-block">{{ tr('Location', 'অবস্থান') }}</small>
+                                <span class="fw-semibold" id="displayLocation">{{ user.location or tr('Not Added', 'যোগ করা হয়নি') }}</span>
                             </div>
                             <div class="mb-3">
-                                <small class="text-muted d-block">Profession</small>
-                                <span class="fw-semibold" id="displayProfession">{{ user.profession or 'Not Added' }}</span>
+                                <small class="text-muted d-block">{{ tr('Profession', 'পেশা') }}</small>
+                                <span class="fw-semibold" id="displayProfession">{{ user.profession or tr('Not Added', 'যোগ করা হয়নি') }}</span>
                             </div>
                             <div class="mb-3">
-                                <small class="text-muted d-block">Qualification</small>
-                                <span class="fw-semibold" id="displayQualification">{{ user.qualification or 'Not Added' }}</span>
+                                <small class="text-muted d-block">{{ tr('Qualification', 'যোগ্যতা') }}</small>
+                                <span class="fw-semibold" id="displayQualification">{{ user.qualification or tr('Not Added', 'যোগ করা হয়নি') }}</span>
                             </div>
                         </div>
 
                         <button class="btn btn-primary w-100 rounded-3 mt-3" onclick="openProfileModal()">
-                            <i class="fas fa-user-edit me-2"></i> Edit Profile
+                            <i class="fas fa-user-edit me-2"></i> {{ tr('Edit Profile', 'প্রোফাইল সম্পাদনা') }}
                         </button>
 
                     </div>
@@ -66,7 +66,7 @@
 
                 <!-- My Bookings -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold mb-0">My Bookings</h4>
+                    <h4 class="fw-bold mb-0">{{ tr('My Bookings', 'আমার বুকিং') }}</h4>
                 </div>
 
                 <div class="card border-0 shadow-sm rounded-4 mb-5">
@@ -85,7 +85,7 @@
                                         <div class="fw-bold text-primary fs-5">৳{{ booking.total_amount }}</div>
                                         <span class="badge bg-dark rounded-pill mt-1">{{ booking.status | replace('_', ' ') | title }}</span>
                                         {% if booking.status == 'pending_payment' and booking.payment_status != 'paid' %}
-                                            <a class="d-block mt-2" href="{{ url_for('payment_page', booking_id=booking.id) }}">Open payment</a>
+                                            <a class="d-block mt-2" href="{{ url_for('payment_page', booking_id=booking.id) }}">{{ tr('Open payment', 'পেমেন্ট করুন') }}</a>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -93,9 +93,9 @@
                             {% endfor %}
                         {% else %}
                             <div class="text-center py-4">
-                                <h5 class="fw-bold">No Bookings Yet</h5>
+                                <h5 class="fw-bold">{{ tr('No Bookings Yet', 'এখনো কোনো বুকিং নেই') }}</h5>
                                 <a href="{{ url_for('rooms_page') }}" class="btn btn-primary rounded-pill px-4 mt-3">
-                                    Explore Rooms
+                                    {{ tr('Explore Rooms', 'কক্ষ খুঁজুন') }}
                                 </a>
                             </div>
                         {% endif %}
@@ -104,9 +104,9 @@
 
                 <!-- My Listings -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold mb-0">My Listings</h4>
+                    <h4 class="fw-bold mb-0">{{ tr('My Listings', 'আমার আবাসন') }}</h4>
                     <a href="{{ url_for('post_room') }}" class="btn btn-outline-primary rounded-pill">
-                        <i class="fas fa-plus me-1"></i> Add Property
+                        <i class="fas fa-plus me-1"></i> {{ tr('Add Property', 'আবাসন যোগ করুন') }}
                     </a>
                 </div>
 
@@ -124,9 +124,9 @@
                                     </p>
                                     <div class="d-flex gap-2">
                                         <a href="{{ url_for('room_detail', room_id=room.id) }}" 
-                                           class="btn btn-outline-dark btn-sm flex-fill rounded-pill">View</a>
+                                           class="btn btn-outline-dark btn-sm flex-fill rounded-pill">{{ tr('View', 'দেখুন') }}</a>
                                         <a href="{{ url_for('edit_room', room_id=room.id) }}" 
-                                           class="btn btn-primary btn-sm flex-fill rounded-pill">Edit</a>
+                                           class="btn btn-primary btn-sm flex-fill rounded-pill">{{ tr('Edit', 'সম্পাদনা') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -136,9 +136,9 @@
                         <div class="col-12">
                             <div class="card border-0 shadow-sm rounded-4">
                                 <div class="card-body text-center py-4">
-                                    <h5 class="fw-bold">No Listings Yet</h5>
+                                    <h5 class="fw-bold">{{ tr('No Listings Yet', 'এখনো কোনো আবাসন যোগ হয়নি') }}</h5>
                                     <a href="{{ url_for('post_room') }}" class="btn btn-primary rounded-pill px-4 mt-3">
-                                        Become a Host
+                                        {{ tr('Become a Host', 'হোস্ট হোন') }}
                                     </a>
                                 </div>
                             </div>
@@ -157,7 +157,7 @@
         <div class="modal-content border-0 rounded-4 shadow">
 
             <div class="modal-header border-0">
-                <h5 class="fw-bold mb-0">Edit Profile</h5>
+                <h5 class="fw-bold mb-0">{{ tr('Edit Profile', 'প্রোফাইল সম্পাদনা') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
@@ -180,27 +180,27 @@
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Phone Number</label>
+                            <label class="form-label fw-semibold">{{ tr('Phone Number', 'ফোন নম্বর') }}</label>
                             <input type="text" name="phone" value="{{ user.phone or '' }}" class="form-control">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Location</label>
+                            <label class="form-label fw-semibold">{{ tr('Location', 'অবস্থান') }}</label>
                             <input type="text" name="location" value="{{ user.location or '' }}" class="form-control">
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Profession</label>
+                        <label class="form-label fw-semibold">{{ tr('Profession', 'পেশা') }}</label>
                         <input type="text" name="profession" value="{{ user.profession or '' }}" class="form-control">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Qualification</label>
+                        <label class="form-label fw-semibold">{{ tr('Qualification', 'যোগ্যতা') }}</label>
                         <input type="text" name="qualification" value="{{ user.qualification or '' }}" class="form-control">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">NID Number</label>
+                        <label class="form-label fw-semibold">{{ tr('NID Number', 'জাতীয় পরিচয়পত্র নম্বর') }}</label>
                         <input type="text" name="nid" value="{{ user.nid or '' }}" class="form-control">
                     </div>
 
@@ -209,10 +209,10 @@
 
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                    Cancel
+                    {{ tr('Cancel', 'বাতিল') }}
                 </button>
                 <button type="button" class="btn btn-primary rounded-pill px-5" id="saveBtn" onclick="saveProfile()">
-                    <i class="fas fa-save me-2"></i> Save Changes
+                    <i class="fas fa-save me-2"></i> {{ tr('Save Changes', 'পরিবর্তন সংরক্ষণ') }}
                 </button>
             </div>
 

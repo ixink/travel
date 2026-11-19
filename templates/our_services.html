@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Our Services | Traveller Stop{% endblock %}
+{% block title %}{{ tr('Our Services', 'আমাদের সেবা') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 
 <section class="info-hero">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-3">Our Services</h1>
-        <p class="lead opacity-75">Comprehensive solutions for hosts and travellers alike.</p>
+        <h1 class="display-3 fw-bold mb-3">{{ tr('Our Services', 'আমাদের সেবা') }}</h1>
+        <p class="lead opacity-75">{{ tr('Comprehensive solutions for hosts and travellers alike.', 'হোস্ট ও ভ্রমণকারী উভয়ের জন্য সেবা।') }}</p>
     </div>
 </section>
 
@@ -19,12 +19,12 @@
                     <div class="service-icon-box">
                         <i class="fas fa-home"></i>
                     </div>
-                    <h4 class="fw-bold">Premium Room Booking</h4>
-                    <p class="text-muted">Discover and book high-quality rooms, apartments, and guest houses tailored to your needs and budget.</p>
+                    <h4 class="fw-bold">{{ tr('Premium Room Booking', 'আবাসন বুকিং') }}</h4>
+                    <p class="text-muted">{{ tr('Discover and book high-quality rooms, apartments, and guest houses tailored to your needs and budget.', 'আপনার প্রয়োজন ও বাজেট অনুযায়ী কক্ষ, অ্যাপার্টমেন্ট ও অতিথিশালা খুঁজে বুক করুন।') }}</p>
                     <ul class="small text-muted ps-3">
-                        <li>Instant confirmation for many stays</li>
-                        <li>Detailed room amenities and photos</li>
-                        <li>Location-based smart search</li>
+                        <li>{{ tr('Instant confirmation for many stays', 'পেমেন্ট যাচাই হলে বুকিং নিশ্চিত হয়') }}</li>
+                        <li>{{ tr('Detailed room amenities and photos', 'কক্ষের ছবি ও সুবিধার বিবরণ') }}</li>
+                        <li>{{ tr('Location-based smart search', 'অবস্থান অনুযায়ী অনুসন্ধান') }}</li>
                     </ul>
                 </div>
             </div>
@@ -34,12 +34,12 @@
                     <div class="service-icon-box">
                         <i class="fas fa-user-plus"></i>
                     </div>
-                    <h4 class="fw-bold">Hosting Solutions</h4>
-                    <p class="text-muted">Turn your extra space into an income stream. We provide the platform and tools to manage your listings effectively.</p>
+                    <h4 class="fw-bold">{{ tr('Hosting Solutions', 'হোস্টদের জন্য সেবা') }}</h4>
+                    <p class="text-muted">{{ tr('Turn your extra space into an income stream. We provide the platform and tools to manage your listings effectively.', 'অতিরিক্ত কক্ষ ভাড়া দিয়ে আয় করুন। আবাসন পরিচালনার জন্য আমাদের প্ল্যাটফর্মের সরঞ্জাম ব্যবহার করুন।') }}</p>
                     <ul class="small text-muted ps-3">
-                        <li>Easy room listing process</li>
-                        <li>Host dashboard for booking management</li>
-                        <li>Profile and NID verification for trust</li>
+                        <li>{{ tr('Easy room listing process', 'সহজে কক্ষ তালিকাভুক্ত করুন') }}</li>
+                        <li>{{ tr('Host dashboard for booking management', 'বুকিং পরিচালনার জন্য হোস্ট ড্যাশবোর্ড') }}</li>
+                        <li>{{ tr('Profile and NID verification for trust', 'প্রোফাইল ও জাতীয় পরিচয়পত্র যাচাই') }}</li>
                     </ul>
                 </div>
             </div>
@@ -49,12 +49,11 @@
                     <div class="service-icon-box">
                         <i class="fas fa-wallet"></i>
                     </div>
-                    <h4 class="fw-bold">Secure Transactions</h4>
-                    <p class="text-muted">Enjoy peace of mind with our secure payment gateway supporting local and international methods.</p>
+                    <h4 class="fw-bold">{{ tr('Secure Transactions', 'নিরাপদ লেনদেন') }}</h4>
+                    <p class="text-muted">{{ tr('Choose an available payment method at UddoktaPay checkout.', 'উদ্যোক্তাপে চেকআউটে উপলভ্য পেমেন্ট পদ্ধতি বেছে নিন।') }}</p>
                     <ul class="small text-muted ps-3">
-                        <li>bKash, Nagad, Upay, Rocket support</li>
-                        <li>Binance Pay for crypto enthusiasts</li>
-                        <li>Transparent refund and cancellation process</li>
+                        <li>{{ tr('Confirmation after payment verification', 'পেমেন্ট যাচাইয়ের পর নিশ্চিতকরণ') }}</li>
+                        <li>{{ tr('Transparent refund and cancellation process', 'স্বচ্ছ ফেরত ও বাতিল প্রক্রিয়া') }}</li>
                     </ul>
                 </div>
             </div>
@@ -64,8 +63,8 @@
                     <div class="service-icon-box">
                         <i class="fas fa-tags"></i>
                     </div>
-                    <h4 class="fw-bold">Corporate Discounts</h4>
-                    <p class="small text-muted">Special rates for business travellers and long-term stays. We offer customized solutions for corporate partners.</p>
+                    <h4 class="fw-bold">{{ tr('Corporate Discounts', 'প্রতিষ্ঠানের জন্য ছাড়') }}</h4>
+                    <p class="small text-muted">{{ tr('Special rates for business travellers and long-term stays. We offer customized solutions for corporate partners.', 'ব্যবসায়িক ভ্রমণ ও দীর্ঘমেয়াদি থাকার জন্য বিশেষ ভাড়া। প্রতিষ্ঠানের প্রয়োজন অনুযায়ী ব্যবস্থা করা যায়।') }}</p>
                 </div>
             </div>
 
@@ -74,8 +73,8 @@
                     <div class="service-icon-box">
                         <i class="fas fa-route"></i>
                     </div>
-                    <h4 class="fw-bold">Travel Concierge</h4>
-                    <p class="small text-muted">Need help planning your trip? Our experts can provide local recommendations and itinerary suggestions.</p>
+                    <h4 class="fw-bold">{{ tr('Travel Concierge', 'ভ্রমণ পরিকল্পনায় সহায়তা') }}</h4>
+                    <p class="small text-muted">{{ tr('Need help planning your trip? Our experts can provide local recommendations and itinerary suggestions.', 'ভ্রমণ পরিকল্পনায় সহায়তা দরকার? স্থানীয় গন্তব্য ও ভ্রমণসূচির পরামর্শের জন্য যোগাযোগ করুন।') }}</p>
                 </div>
             </div>
 
@@ -84,8 +83,8 @@
                     <div class="service-icon-box">
                         <i class="fas fa-lock"></i>
                     </div>
-                    <h4 class="fw-bold">Safety First Program</h4>
-                    <p class="small text-muted">Comprehensive safety guidelines and emergency support to ensure your stay is worry-free.</p>
+                    <h4 class="fw-bold">{{ tr('Safety First Program', 'নিরাপত্তা সহায়তা') }}</h4>
+                    <p class="small text-muted">{{ tr('Comprehensive safety guidelines and emergency support to ensure your stay is worry-free.', 'নিরাপদে থাকার জন্য নির্দেশনা ও জরুরি সহায়তার তথ্য পান।') }}</p>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Room - Traveller Stop{% endblock %}
+{% block title %}{{ tr('Edit Room', 'কক্ষ সম্পাদনা') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 
@@ -15,14 +15,14 @@
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div>
                             <h2 class="fw-bold text-dark mb-1">
-                                <i class="fas fa-edit me-2"></i> Edit Room
+                                <i class="fas fa-edit me-2"></i> {{ tr('Edit Room', 'কক্ষ সম্পাদনা') }}
                             </h2>
                             <p class="mb-0 text-dark opacity-75">
-                                Update your room information
+                                {{ tr('Update your room information', 'কক্ষের তথ্য হালনাগাদ করুন') }}
                             </p>
                         </div>
                         <a href="{{ url_for('profile') }}" class="btn btn-dark">
-                            <i class="fas fa-arrow-left me-2"></i> Back to Profile
+                            <i class="fas fa-arrow-left me-2"></i> {{ tr('Back to Profile', 'প্রোফাইলে ফিরুন') }}
                         </a>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
 
                         <!-- Current Image -->
                         <div class="mb-5">
-                            <label class="form-label fw-bold">Current Room Image</label>
+                            <label class="form-label fw-bold">{{ tr('Current Room Image', 'কক্ষের বর্তমান ছবি') }}</label>
                             <div class="text-center border rounded-4 p-3 bg-light">
                                 <img src="{{ get_room_image(room.image_url) }}" 
                                      class="img-fluid rounded-3 shadow-sm" 
@@ -45,23 +45,23 @@
                         <!-- Upload New Image -->
                         <div class="mb-5">
                             <label class="form-label fw-bold">
-                                <i class="fas fa-camera me-2"></i> Change Room Image (Optional)
+                                <i class="fas fa-camera me-2"></i> {{ tr('Change Room Image (Optional)', 'কক্ষের ছবি বদলান (ঐচ্ছিক)') }}
                             </label>
                             <input type="file" name="room_image" class="form-control form-control-lg" 
                                    accept="image/*">
-                            <small class="text-muted">Leave empty to keep current image</small>
+                            <small class="text-muted">{{ tr('Leave empty to keep current image', 'বর্তমান ছবি রাখতে খালি রাখুন') }}</small>
                         </div>
 
                         <!-- Title -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Room Title</label>
+                            <label class="form-label fw-bold">{{ tr('Room Title', 'কক্ষের নাম') }}</label>
                             <input type="text" name="title" class="form-control form-control-lg" 
                                    value="{{ room.title }}" placeholder="e.g. Cozy Single Room in Gulshan" required>
                         </div>
 
                         <!-- Description -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Description</label>
+                            <label class="form-label fw-bold">{{ tr('Description', 'বিবরণ') }}</label>
                             <textarea name="description" class="form-control" rows="6" required>
 {{ room.description }}
                             </textarea>
@@ -69,12 +69,12 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold">Location</label>
+                                <label class="form-label fw-bold">{{ tr('Location', 'অবস্থান') }}</label>
                                 <input type="text" name="location" class="form-control form-control-lg" 
                                        value="{{ room.location }}" placeholder="e.g. Gulshan-2, Dhaka" required>
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold">Price per Night (৳)</label>
+                                <label class="form-label fw-bold">{{ tr('Price per Night (৳)', 'প্রতি রাতের ভাড়া (৳)') }}</label>
                                 <input type="number" name="price" class="form-control form-control-lg" 
                                        value="{{ room.price_per_night }}" step="10" min="500" required>
                             </div>
@@ -82,12 +82,12 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold">Available From</label>
+                                <label class="form-label fw-bold">{{ tr('Available From', 'যে তারিখ থেকে খালি') }}</label>
                                 <input type="date" name="available_from" class="form-control form-control-lg" 
                                        value="{{ room.available_from }}">
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold">Available To</label>
+                                <label class="form-label fw-bold">{{ tr('Available To', 'যে তারিখ পর্যন্ত খালি') }}</label>
                                 <input type="date" name="available_to" class="form-control form-control-lg" 
                                        value="{{ room.available_to }}">
                             </div>
@@ -95,7 +95,7 @@
 
                         <!-- Amenities -->
                         <div class="mb-5">
-                            <label class="form-label fw-bold fs-5">Amenities</label>
+                            <label class="form-label fw-bold fs-5">{{ tr('Amenities', 'সুযোগ-সুবিধা') }}</label>
                             <div class="row g-3">
                                 {% set amenities_list = room.amenities or [] %}
                                 
@@ -103,56 +103,56 @@
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Free WiFi" 
                                                {% if 'Free WiFi' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Free WiFi</label>
+                                        <label class="form-check-label">{{ tr('Free WiFi', 'বিনামূল্যে ওয়াই-ফাই') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Air Conditioning" 
                                                {% if 'Air Conditioning' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Air Conditioning</label>
+                                        <label class="form-check-label">{{ tr('Air Conditioning', 'শীতাতপ নিয়ন্ত্রণ') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Parking" 
                                                {% if 'Parking' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Parking</label>
+                                        <label class="form-check-label">{{ tr('Parking', 'পার্কিং') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Television" 
                                                {% if 'Television' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Television</label>
+                                        <label class="form-check-label">{{ tr('Television', 'টেলিভিশন') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Kitchen" 
                                                {% if 'Kitchen' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Kitchen</label>
+                                        <label class="form-check-label">{{ tr('Kitchen', 'রান্নাঘর') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Washing Machine" 
                                                {% if 'Washing Machine' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Washing Machine</label>
+                                        <label class="form-check-label">{{ tr('Washing Machine', 'ওয়াশিং মেশিন') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Balcony" 
                                                {% if 'Balcony' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Balcony</label>
+                                        <label class="form-check-label">{{ tr('Balcony', 'বারান্দা') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="amenities" value="Hot Water" 
                                                {% if 'Hot Water' in amenities_list %}checked{% endif %}>
-                                        <label class="form-check-label">Hot Water</label>
+                                        <label class="form-check-label">{{ tr('Hot Water', 'গরম পানি') }}</label>
                                     </div>
                                 </div>
                             </div>
@@ -165,7 +165,7 @@
                             </button>
                             
                             <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary btn-lg py-3">
-                                Cancel
+                                {{ tr('Cancel', 'বাতিল') }}
                             </a>
                         </div>
 

@@ -1,52 +1,69 @@
 {% extends 'base.html' %}
 {% from 'room_card.html' import room_card with context %}
+{% from 'search_form.html' import search_form with context %}
 
 {% block content %}
-<section class="container home-hero">
-    <div class="hero-copy">
-        <h1>Find your stay<br class="d-none d-xl-inline"> in Bangladesh.</h1>
-        <p>Browse rooms from local hosts, from city stays to quieter escapes.</p>
-        <form class="location-search" action="{{ url_for('rooms_page') }}" method="get" role="search">
-            <div>
-                <label for="home-location">Where are you going?</label>
-                <input id="home-location" name="location" type="search" placeholder="Try Dhaka or Sylhet">
+<div class="travel-home">
+    <section class="container journey-intro">
+        <div class="journey-hero">
+            <img src="{{ url_for('static', filename='images/bandarban.webp') }}"
+                 alt="{{ tr('Illustration of the Sangu River in the Bandarban hills', 'বান্দরবানের পাহাড়ের মাঝে সাঙ্গু নদীর চিত্র') }}"
+                 width="1400" height="933" fetchpriority="high">
+            <div class="journey-copy">
+                <h1>{{ tr('Find your stay in Bangladesh.', 'বাংলাদেশে খুঁজে নিন আপনার ঠিকানা।') }}</h1>
+                <p>{{ tr('Wake up by the sea, in the hills, or in the heart of the city.', 'সমুদ্রের ধারে, পাহাড়ের কোলে কিংবা শহরের প্রাণকেন্দ্রে কাটুক আপনার সকাল।') }}</p>
             </div>
-            <button class="btn btn-primary" type="submit">Search stays</button>
-        </form>
-    </div>
-    <figure class="hero-photo">
-        <img src="{{ url_for('static', filename='images/bandarban.webp') }}"
-             alt="An illustration of the Sangu River winding through forested hills" width="1400" height="933" fetchpriority="high">
-        <figcaption>Bandarban, Bangladesh</figcaption>
-    </figure>
-</section>
+            <p class="journey-caption"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ tr('Sangu River, Bandarban', 'সাঙ্গু নদী, বান্দরবান') }}</p>
+        </div>
+        {{ search_form() }}
+    </section>
 
-<section class="container section-space" aria-labelledby="latest-stays">
-    <div class="section-heading">
-        <h2 id="latest-stays">Latest stays</h2>
-        <a href="{{ url_for('rooms_page') }}">Browse all stays</a>
-    </div>
-    {% if featured_rooms %}
-        <div class="stay-grid">
-            {% for room in featured_rooms %}
-                {{ room_card(room) }}
+    <section class="container section-space destinations" aria-labelledby="destinations-heading">
+        <div class="section-heading">
+            <h2 id="destinations-heading">{{ tr('Where to next?', 'এবার কোথায় যাবেন?') }}</h2>
+            <a href="{{ url_for('rooms_page') }}">{{ tr('Explore all stays', 'সব আবাসন দেখুন') }}</a>
+        </div>
+        <div class="destination-grid">
+            {% for city, name, detail, image in (
+                ('Sylhet', tr('Sylhet', 'সিলেট'), tr('Tea gardens & green hills', 'চা-বাগান ও সবুজ পাহাড়'), 'sylhet'),
+                ("Cox's Bazar", tr("Cox’s Bazar", 'কক্সবাজার'), tr('Sunsets by the coast', 'সমুদ্রতীরে সূর্যাস্ত'), 'coxs-bazar'),
+                ('Rangamati', tr('Rangamati', 'রাঙামাটি'), tr('Lakeside escapes', 'হ্রদের ধারে অবকাশ'), 'rangamati')
+            ) %}
+                <a class="destination-card" href="{{ url_for('rooms_page', location=city) }}">
+                    <img src="{{ url_for('static', filename='images/' ~ image ~ '.webp') }}" alt="" loading="lazy">
+                    <div><h3>{{ name }}</h3><p>{{ detail }}</p></div>
+                </a>
             {% endfor %}
         </div>
-    {% else %}
-        <div class="empty-state">
-            <h3>No rooms listed yet</h3>
-            <p>Check back as local hosts add their rooms.</p>
-        </div>
-    {% endif %}
-</section>
+    </section>
 
-<section class="container section-space" aria-labelledby="host-title">
-    <div class="host-banner">
-        <div>
-            <h2 id="host-title">Have a room to share?</h2>
-            <p>List your place, set your nightly rate, and welcome travellers.</p>
+    <section class="container section-space" aria-labelledby="latest-stays">
+        <div class="section-heading">
+            <h2 id="latest-stays">{{ tr('Latest stays', 'নতুন আবাসন') }}</h2>
+            <a href="{{ url_for('rooms_page') }}">{{ tr('Browse all stays', 'সব আবাসন দেখুন') }}</a>
         </div>
-        <a class="btn btn-light" href="{{ url_for('post_room') }}">List a room</a>
-    </div>
-</section>
+        {% if featured_rooms %}
+            <div class="stay-grid">
+                {% for room in featured_rooms %}
+                    {{ room_card(room) }}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>{{ tr('No stays listed yet', 'এখনো কোনো আবাসন যোগ হয়নি') }}</h3>
+                <p>{{ tr('Check back as local hosts add their rooms.', 'স্থানীয় হোস্টরা নতুন কক্ষ যোগ করলে এখানে দেখতে পাবেন।') }}</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="container section-space" aria-labelledby="host-title">
+        <div class="host-banner">
+            <div>
+                <h2 id="host-title">{{ tr('Have a room to share?', 'অতিথিদের জন্য কক্ষ আছে?') }}</h2>
+                <p>{{ tr('List your place, set your nightly rate, and welcome travellers.', 'আপনার আবাসন যোগ করুন, রাতের ভাড়া ঠিক করুন এবং ভ্রমণকারীদের স্বাগত জানান।') }}</p>
+            </div>
+            <a class="btn btn-light" href="{{ url_for('post_room') }}">{{ tr('List a room', 'কক্ষ যোগ করুন') }}</a>
+        </div>
+    </section>
+</div>
 {% endblock %}

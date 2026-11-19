@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Safety Tips | Traveller Stop{% endblock %}
+{% block title %}{{ tr('Safety Tips', 'নিরাপত্তা পরামর্শ') }} | Traveller Stop{% endblock %}
 
 {% block content %}
 
 <section class="info-hero">
     <div class="container">
-        <h1 class="display-3 fw-bold mb-3">Safety Tips</h1>
-        <p class="lead opacity-75">Your safety is our top priority. Follow these guidelines for a secure stay.</p>
+        <h1 class="display-3 fw-bold mb-3">{{ tr('Safety Tips', 'নিরাপত্তা পরামর্শ') }}</h1>
+        <p class="lead opacity-75">{{ tr('Your safety is our top priority. Follow these guidelines for a secure stay.', 'নিরাপদে থাকার জন্য এই নির্দেশনাগুলো অনুসরণ করুন।') }}</p>
     </div>
 </section>
 
@@ -16,35 +16,35 @@
         <div class="row g-5">
             <div class="col-lg-8">
                 <div class="policy-section">
-                    <h4><i class="fas fa-user-check"></i> Verify Before You Go</h4>
-                    <p class="text-muted">Always check the host's profile and look for the "NID Verified" badge. Read reviews from other travellers to get a sense of the place and the host's hospitality.</p>
+                    <h4><i class="fas fa-user-check"></i> {{ tr('Verify Before You Go', 'যাওয়ার আগে যাচাই করুন') }}</h4>
+                    <p class="text-muted">{{ tr('Always check the host\'s profile and look for the "NID Verified" badge. Read reviews from other travellers to get a sense of the place and the host\'s hospitality.', 'হোস্টের প্রোফাইলে জাতীয় পরিচয়পত্র যাচাইয়ের চিহ্ন দেখুন। আবাসন ও আতিথেয়তা সম্পর্কে ধারণা পেতে অন্য ভ্রমণকারীদের মতামত পড়ুন।') }}</p>
                 </div>
 
                 <div class="policy-section">
-                    <h4><i class="fas fa-comment-dots"></i> Communicate via Platform</h4>
-                    <p class="text-muted">Keep all your communication and payments within the Traveller Stop platform. This allows us to protect your information and provides a record in case any issues arise.</p>
+                    <h4><i class="fas fa-comment-dots"></i> {{ tr('Communicate via Platform', 'প্ল্যাটফর্মে যোগাযোগ করুন') }}</h4>
+                    <p class="text-muted">{{ tr('Keep all your communication and payments within the Traveller Stop platform. This allows us to protect your information and provides a record in case any issues arise.', 'ট্রাভেলার স্টপের মাধ্যমে যোগাযোগ ও পেমেন্ট করুন। এতে আপনার তথ্য সুরক্ষিত থাকে এবং কোনো সমস্যা হলে যোগাযোগের রেকর্ড পাওয়া যায়।') }}</p>
                 </div>
 
                 <div class="policy-section">
-                    <h4><i class="fas fa-home"></i> Inspect the Property</h4>
-                    <p class="text-muted">Upon arrival, take a quick look around the property. Ensure all locks on doors and windows are functional. Locate emergency exits and fire extinguishers.</p>
+                    <h4><i class="fas fa-home"></i> {{ tr('Inspect the Property', 'আবাসন দেখে নিন') }}</h4>
+                    <p class="text-muted">{{ tr('Upon arrival, take a quick look around the property. Ensure all locks on doors and windows are functional. Locate emergency exits and fire extinguishers.', 'পৌঁছে আবাসন ঘুরে দেখুন। দরজা ও জানালার তালা ঠিক আছে কি না দেখে নিন। জরুরি বহির্গমন পথ ও অগ্নিনির্বাপক যন্ত্র কোথায় আছে জেনে নিন।') }}</p>
                 </div>
 
                 <div class="policy-section">
-                    <h4><i class="fas fa-phone-alt"></i> Keep Emergency Contacts Ready</h4>
-                    <p class="text-muted">Have local emergency numbers saved on your phone. In Bangladesh, dial <strong>999</strong> for immediate police, fire, or ambulance services.</p>
+                    <h4><i class="fas fa-phone-alt"></i> {{ tr('Keep Emergency Contacts Ready', 'জরুরি নম্বর হাতের কাছে রাখুন') }}</h4>
+                    <p class="text-muted">{{ tr('Have local emergency numbers saved on your phone. In Bangladesh, dial 999 for immediate police, fire, or ambulance services.', 'স্থানীয় জরুরি নম্বর ফোনে সংরক্ষণ করুন। বাংলাদেশে জরুরি পুলিশ, ফায়ার সার্ভিস বা অ্যাম্বুলেন্সের জন্য ৯৯৯-এ কল করুন।') }}</p>
                 </div>
 
                 <div class="policy-section">
-                    <h4><i class="fas fa-map-marker-alt"></i> Share Your Itinerary</h4>
-                    <p class="text-muted">Always let a friend or family member know where you are staying and provide them with the contact information of the host.</p>
+                    <h4><i class="fas fa-map-marker-alt"></i> {{ tr('Share Your Itinerary', 'ভ্রমণসূচি জানিয়ে রাখুন') }}</h4>
+                    <p class="text-muted">{{ tr('Always let a friend or family member know where you are staying and provide them with the contact information of the host.', 'বন্ধু বা পরিবারের কাউকে আপনার থাকার ঠিকানা ও হোস্টের যোগাযোগের তথ্য জানিয়ে রাখুন।') }}</p>
                 </div>
             </div>
 
             <div class="col-lg-4">
                 <div class="bg-danger-subtle p-4 rounded-4 border border-danger-subtle">
-                    <h5 class="fw-bold text-danger mb-3"><i class="fas fa-exclamation-triangle me-2"></i> Need Help?</h5>
-                    <p class="small text-danger-emphasis">If you feel unsafe at any point during your stay, contact our 24/7 support line immediately at <strong>01575467289</strong>.</p>
+                    <h5 class="fw-bold text-danger mb-3"><i class="fas fa-exclamation-triangle me-2"></i> {{ tr('Need Help?', 'সহায়তা দরকার?') }}</h5>
+                    <p class="small text-danger-emphasis">{{ tr('If you feel unsafe at any point during your stay, contact our 24/7 support line immediately at 01575467289.', 'থাকার সময় নিরাপত্তা নিয়ে সমস্যা হলে ০১৫৭৫৪৬৭২৮৯ নম্বরে আমাদের সহায়তা দলের সঙ্গে যোগাযোগ করুন।') }}</p>
                 </div>
             </div>
         </div>
