@@ -227,7 +227,7 @@
                                     </td>
                                     <td>{{ p.time|datetimeformat }}</td>
                                     <td>
-                                        {% if p.status != 'CONFIRMED' %}
+                                        {% if p.status == 'PENDING' and p.method != 'uddoktapay' %}
                                         <a href="{{ url_for('confirm_payment', pid=p.id) }}" 
                                            class="btn btn-sm btn-primary">
                                             Confirm

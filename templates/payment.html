@@ -17,6 +17,21 @@
                     <p class="text-secondary">Almost there! Complete your payment to confirm your stay.</p>
                 </div>
 
+                {% if booking.payment_status == 'paid' %}
+                    <div class="alert alert-success" role="status">This booking has been paid.</div>
+                {% elif uddoktapay_enabled and booking.status == 'pending_payment' %}
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h2 class="h5">Pay online with UddoktaPay</h2>
+                            <p>Use the secure checkout to pay ৳{{ '%.2f'|format(booking.total_amount) }}.</p>
+                            <form method="post" action="{{ url_for('uddoktapay_checkout', booking_id=booking.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ payment_token }}">
+                                <button class="btn btn-red" type="submit">Continue to UddoktaPay</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <div class="row g-4">
                     <!-- Instructions -->
                         <div class="card glass-card border-0">
