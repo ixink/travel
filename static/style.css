@@ -605,6 +605,14 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     .search-field input, .form-control, .form-select { font-size: 1rem; }
 }
 
+@media (max-width: 991.98px) {
+    .brand-logo { min-width: 0; }
+    .brand-logo img {
+        width: clamp(10rem, 49vw, 14rem);
+        height: clamp(3rem, 9.5vw, 4.4rem);
+    }
+}
+
 @media (max-width: 575.98px) {
     .site-nav .navbar-toggler {
         margin-inline-start: .35rem;
