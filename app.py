@@ -1,7 +1,6 @@
 import os
 import re
 import logging
-import threading
 from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
@@ -9,7 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO
+from flask_wtf.csrf import generate_csrf, validate_csrf
+from wtforms.validators import ValidationError
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 import secrets
@@ -51,16 +51,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
-
-# ===================== THREADING LOCK =====================
-counter_lock = threading.Lock()
-
-# ===================== SOCKETIO =====================
-socketio = SocketIO(app, 
-                    cors_allowed_origins="*", 
-                    async_mode='eventlet',
-                    ping_timeout=60,
-                    ping_interval=25)
 
 # ===================== GOOGLE OAUTH =====================
 oauth = OAuth(app)
@@ -208,7 +198,6 @@ def inject_global_data():
     return {
         'current_user': user,
         'profile_complete': is_profile_complete(user),
-        'online_users': 1,
         'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or "https://images.unsplash.com/photo-1522771739844-649f6d175d97")
     }
 
@@ -470,16 +459,20 @@ def payment_page(booking_id):
     b = db.session.get(Booking, booking_id)
     if not b or b.user_id != session.get('user_id'):
         return redirect(url_for('profile'))
-    return render_template('payment.html', booking=b)
+    return render_template('payment.html', booking=b, payment_token=generate_csrf())
 
 @app.route('/pay', methods=['POST'])
 def pay():
     if 'user_id' not in session:
         return jsonify({"status": "failed", "msg": "Session expired"}), 401
     try:
+        validate_csrf(request.form.get('csrf_token'))
+    except ValidationError:
+        return jsonify({'status': 'failed', 'msg': 'Please reload the payment page and try again.'}), 400
+
+    try:
         bid = int(request.form.get('booking_id', 0))
         trx = request.form.get('trxid', '').strip()
-        amt = float(request.form.get('amount', 0))
         method = request.form.get('method', 'manual')
         name = request.form.get('name', 'User')
         sender = request.form.get('sender', '')
@@ -489,10 +482,11 @@ def pay():
             return jsonify({"status": "failed", "msg": "TRXID already used"})
 
         booking = db.session.get(Booking, bid)
-        if not booking: return jsonify({"status": "failed", "msg": "Booking not found"})
+        if not booking or booking.user_id != session['user_id']:
+            return jsonify({"status": "failed", "msg": "Booking not found"}), 404
 
         p = Payment(booking_id=bid, user_id=session['user_id'], name=name,
-                    method=method, amount=amt, sender=sender, trxid=trx, status='PENDING')
+                    method=method, amount=booking.total_amount, sender=sender, trxid=trx, status='PENDING')
         db.session.add(p)
         db.session.commit()
         return jsonify({"status": "success", "msg": "Payment submitted successfully."})
@@ -667,4 +661,4 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
