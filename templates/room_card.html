@@ -1,0 +1,12 @@
+{% macro room_card(room) %}
+<article class="stay-card">
+    <a class="stay-image{% if not room.image_url %} stay-image-placeholder{% endif %}" href="{{ url_for('room_detail', room_id=room.id) }}" tabindex="-1" aria-hidden="true">
+        <img src="{{ get_room_image(room.image_url) }}" alt="" loading="lazy" width="600" height="400">
+    </a>
+    <div class="stay-body">
+        <p class="stay-location">{{ room.location }}</p>
+        <h3><a href="{{ url_for('room_detail', room_id=room.id) }}">{{ room.title }}</a></h3>
+        <p class="stay-price"><strong>৳{{ '%.2f' | format(room.price_per_night) }}</strong> per night</p>
+    </div>
+</article>
+{% endmacro %}

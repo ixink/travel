@@ -207,7 +207,7 @@ def inject_global_data():
     return {
         'current_user': user,
         'profile_complete': is_profile_complete(user),
-        'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or "https://images.unsplash.com/photo-1522771739844-649f6d175d97")
+        'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or url_for('static', filename='logo.png'))
     }
 
 @app.after_request
@@ -690,6 +690,7 @@ def admin():
     return render_template('admin.html',
                          users=User.query.all(),
                          rooms=Room.query.all(),
+                         coupons=Coupon.query.all(),
                          bookings=Booking.query.order_by(Booking.booked_at.desc()).all(),
                          payments=Payment.query.order_by(Payment.time.desc()).all())
 

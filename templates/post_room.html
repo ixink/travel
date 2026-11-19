@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="bg-premium min-vh-100 py-5">
+<div class="page-space">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10 col-xl-9">
@@ -14,36 +14,36 @@
                     <p class="lead text-secondary">Join our community of hosts and start earning today</p>
                 </div>
 
-                <div class="card glass-card border-0 overflow-hidden">
+                <div class="card border-0 overflow-hidden">
                     <div class="row g-0">
                         <!-- Sidebar Info (Desktop Only) -->
                         <div class="col-lg-4 bg-dark text-white p-4 p-lg-5 d-none d-lg-flex flex-column justify-content-center">
                             <div class="mb-5">
-                                <h4 class="fw-bold text-danger mb-4">Why host with us?</h4>
+                                <h4 class="fw-bold mb-3">Why host with us?</h4>
                                 <div class="d-flex gap-3 mb-4">
                                     <div class="fs-3"><i class="fas fa-shield-alt"></i></div>
                                     <div>
                                         <h6 class="fw-bold mb-1">Secure Payments</h6>
-                                        <p class="small text-secondary mb-0">Get paid directly via bKash or Nagad.</p>
+                                        <p class="small mb-0">Get paid directly via bKash or Nagad.</p>
                                     </div>
                                 </div>
                                 <div class="d-flex gap-3 mb-4">
                                     <div class="fs-3"><i class="fas fa-users"></i></div>
                                     <div>
                                         <h6 class="fw-bold mb-1">Verified Guests</h6>
-                                        <p class="small text-secondary mb-0">Hosts interact with NID-verified travellers.</p>
+                                        <p class="small mb-0">Hosts interact with NID-verified travellers.</p>
                                     </div>
                                 </div>
                                 <div class="d-flex gap-3">
                                     <div class="fs-3"><i class="fas fa-chart-line"></i></div>
                                     <div>
                                         <h6 class="fw-bold mb-1">Easy Management</h6>
-                                        <p class="small text-secondary mb-0">Simple tools to manage your listings.</p>
+                                        <p class="small mb-0">Simple tools to manage your listings.</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-auto pt-4 border-top border-secondary">
-                                <p class="small mb-0 opacity-75">Need help? <a href="#" class="text-white fw-bold">Contact Support</a></p>
+                                <p class="small mb-0 opacity-75">Need help? <a href="{{ url_for('contact') }}" class="text-white fw-bold">Contact Support</a></p>
                             </div>
                         </div>
 
@@ -69,7 +69,7 @@
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold small text-uppercase text-secondary">Location</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-map-marker-alt text-danger"></i></span>
+                                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-map-marker-alt text-primary"></i></span>
                                             <input type="text" name="location" class="form-control form-control-lg border-start-0 ps-0" 
                                                    placeholder="Gulshan, Dhaka" required>
                                         </div>
@@ -107,8 +107,8 @@
                                             <p class="small text-muted mb-0">High resolution landscape photos work best</p>
                                         </div>
                                         <div id="imagePreview" class="d-none">
-                                            <img id="previewImg" src="#" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px;">
-                                            <p class="mt-2 mb-0 text-danger small fw-bold">Click to change photo</p>
+                                            <img id="previewImg" alt="Selected room photo" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px;">
+                                            <p class="mt-2 mb-0 text-primary small fw-bold">Click to change photo</p>
                                         </div>
                                     </div>
                                 </div>
@@ -135,7 +135,7 @@
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-red w-100 py-3 fs-5 fw-bold">
+                                <button type="submit" class="btn btn-primary w-100 py-3 fs-5 fw-bold">
                                     <i class="fas fa-check-circle me-2"></i> List Your Room
                                 </button>
 
@@ -153,15 +153,15 @@
 .transition { transition: all 0.3s; }
 
 .amenity-checkbox input:checked + label {
-    background: #fff5f5;
-    color: var(--primary-red) !important;
-    border: 1px solid var(--primary-red) !important;
+    background: var(--leaf);
+    color: var(--pine) !important;
+    border: 1px solid var(--pine) !important;
     border-radius: 8px;
 }
 
 .upload-zone:hover {
-    border-color: var(--primary-red) !important;
-    background: #fef2f2 !important;
+    border-color: var(--pine) !important;
+    background: var(--leaf) !important;
 }
 </style>
 

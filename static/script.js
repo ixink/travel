@@ -1,204 +1,77 @@
-/* =========================================================
-   TRAVELLER STOP - CUSTOM JAVASCRIPT
-   Modern, Clean, High Performance & Mobile Friendly
-   Updated: May 2026
-========================================================= */
-
-/**
- * Search Functionality
- */
-function searchRooms() {
-    const locationInput = document.querySelector('input[name="location"]');
-    if (!locationInput) return;
-
-    const location = locationInput.value.trim();
-    
-    if (location) {
-        window.location.href = `/rooms?location=${encodeURIComponent(location)}`;
-    } else {
-        window.location.href = '/rooms';
-    }
-}
-
-/**
- * Smooth Scroll for Anchor Links
- */
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                e.preventDefault();
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-}
-
-/**
- * Active Navigation Highlight
- */
-function highlightActiveNav() {
-    const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('#mainNavbar .nav-link');
-
-    navLinks.forEach(link => {
-        link.classList.remove('active', 'fw-bold');
-
-        const linkHref = link.getAttribute('href');
-        
-        if (linkHref === currentPath || 
-            (currentPath === '/' && (linkHref === '/' || linkHref === ''))) {
-            link.classList.add('active', 'fw-bold');
-        }
-    });
-}
-
-/**
- * Auto Hide Flash Messages
- */
-function initFlashMessages() {
-    const alerts = document.querySelectorAll('.alert');
-    
-    alerts.forEach((alert, index) => {
-        setTimeout(() => {
-            alert.style.transition = 'all 0.5s ease-out';
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-20px)';
-            
-            setTimeout(() => {
-                if (alert.parentNode) alert.parentNode.removeChild(alert);
-            }, 600);
-        }, 4500 + (index * 400));
-    });
-}
-
-/**
- * Image Error Handler (Fallback)
- */
 function initImageFallback() {
-    document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', function () {
-            this.src = document.body.dataset.imageFallback;
-        }, { once: true });
-    });
-}
+    const fallback = document.body.dataset.imageFallback;
 
-/**
- * Booking Date Validation
- */
-function initBookingDates() {
-    // Handle specific IDs (Room Detail) and Search Names (Landing Page)
-    const checkins = [document.getElementById('checkin'), document.querySelector('input[name="checkin"]')];
-    const checkouts = [document.getElementById('checkout'), document.querySelector('input[name="checkout"]')];
+    document.querySelectorAll('img').forEach(image => {
+        const replaceImage = () => {
+            if (fallback && image.src !== new URL(fallback, document.baseURI).href) {
+                image.removeAttribute('srcset');
+                image.src = fallback;
+            }
+        };
 
-    const today = new Date().toISOString().split('T')[0];
-
-    checkins.forEach((cin, idx) => {
-        const cout = checkouts[idx];
-        if (cin && cout) {
-            cin.min = today;
-            cin.addEventListener('change', () => {
-                if (cin.value) {
-                    cout.min = cin.value;
-                }
-            });
+        image.addEventListener('error', replaceImage, { once: true });
+        if (image.getAttribute('src') && image.complete && !image.naturalWidth) {
+            replaceImage();
         }
     });
 }
 
-/**
- * Image Preview for File Uploads
- */
-function initImagePreview() {
-    const fileInputs = document.querySelectorAll('input[type="file"]');
-    
-    fileInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            const previewId = this.getAttribute('data-preview');
-            if (!previewId) return;
-
-            const previewContainer = document.getElementById(previewId);
-            if (!previewContainer) return;
-
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewContainer.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded-3" style="max-height: 280px;">`;
-                    previewContainer.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    });
+function toDateInputValue(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return [year, month, day].join('-');
 }
 
-/**
- * Scroll Reveal Animation
- */
-function initScrollReveal() {
-    const revealElements = document.querySelectorAll('.info-card, .policy-section, .service-card, .contact-info-item');
-    
-    const reveal = () => {
-        revealElements.forEach(el => {
-            const elementTop = el.getBoundingClientRect().top;
-            const elementVisible = 150;
-            if (elementTop < window.innerHeight - elementVisible) {
-                el.classList.add('animate', 'slideIn');
-                el.style.opacity = '1';
-            }
-        });
+function initBookingDates() {
+    const checkin = document.getElementById('checkin');
+    const checkout = document.getElementById('checkout');
+    if (!checkin || !checkout) return;
+
+    const today = new Date();
+    checkin.min = toDateInputValue(today);
+
+    const updateCheckout = () => {
+        const earliest = checkin.value ? new Date(checkin.value + 'T00:00:00') : new Date(today);
+        earliest.setDate(earliest.getDate() + 1);
+        checkout.min = toDateInputValue(earliest);
+        if (checkout.value && checkout.value < checkout.min) {
+            checkout.value = '';
+        }
     };
 
-    window.addEventListener('scroll', reveal);
-    reveal(); // Initial check
+    checkin.addEventListener('change', updateCheckout);
+    updateCheckout();
 }
 
-/**
- * Initialize All Features
- */
-document.addEventListener('DOMContentLoaded', function () {
-    
-    highlightActiveNav();
-    initSmoothScroll();
-    initFlashMessages();
+function initImagePreview() {
+    document.querySelectorAll('input[type="file"][data-preview]').forEach(input => {
+        const preview = document.getElementById(input.dataset.preview);
+        if (!preview) return;
+
+        let previewUrl;
+        input.addEventListener('change', () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            const file = input.files[0];
+            if (!file) {
+                preview.replaceChildren();
+                preview.style.display = 'none';
+                return;
+            }
+
+            previewUrl = URL.createObjectURL(file);
+            const image = new Image();
+            image.src = previewUrl;
+            image.alt = 'Selected image preview';
+            image.className = 'img-fluid rounded-3 upload-preview';
+            preview.replaceChildren(image);
+            preview.style.display = 'block';
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     initImageFallback();
     initBookingDates();
     initImagePreview();
-    initScrollReveal();
-
-    // Keyboard Shortcut: Ctrl/Cmd + K → Focus Search
-    document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            const searchInput = document.querySelector('input[name="location"]');
-            if (searchInput) {
-                searchInput.focus();
-                searchInput.select();
-            }
-        }
-    });
-
-    // Console Signature
-    console.log('%c🚀 Traveller Stop Premium Loaded Successfully ✨', 
-                'color: #e63946; font-size: 16px; font-weight: bold; letter-spacing: 1px;');
-
-    // Add scrolled class to navbar on scroll
-    const navbar = document.querySelector('.navbar');
-    if (navbar) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-    }
 });

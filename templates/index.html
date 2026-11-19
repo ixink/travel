@@ -1,175 +1,52 @@
 {% extends 'base.html' %}
-
-{% block title %}Traveller Stop - Your Adventure Starts Here{% endblock %}
+{% from 'room_card.html' import room_card with context %}
 
 {% block content %}
-
-<!-- ULTRA PREMIUM HERO SECTION -->
-<header class="hero d-flex flex-column align-items-center justify-content-center">
-    <div class="container position-relative z-3 text-center">
-        
-        <!-- Hero Text -->
-        <div class="mb-4 mb-lg-5">
-            <h1 class="display-4 fw-bold text-white mb-2">Explore Bangladesh with Confidence</h1>
-            <p class="lead fs-6 mx-auto mb-3" style="max-width: 500px;">
-                The perfect platform for Travellers exploring the beauty of Bangladesh. Book authentic stays from trusted local hosts.
-            </p>
-        </div>
-
-        <!-- UNIFIED SEARCH BAR (PRIORITY #1) -->
-        <div class="d-flex justify-content-center">
-            <form method="GET" action="{{ url_for('rooms_page') }}" class="unified-search-bar">
-                
-                <div class="search-input-group text-start">
-                    <label class="search-label" for="search-location">Location</label>
-                    <input type="text" name="location" id="search-location" class="search-input" placeholder="Destination"
-                           value="{{ request.args.get('location', '') }}" required>
-                </div>
-
-                <div class="search-input-group text-start">
-                    <label class="search-label" for="search-checkin">Check-in</label>
-                    <input type="date" name="checkin" id="search-checkin" class="search-input">
-                </div>
-
-                <div class="search-input-group text-start">
-                    <label class="search-label" for="search-checkout">Check-out</label>
-                    <input type="date" name="checkout" id="search-checkout" class="search-input">
-                </div>
-
-                <button type="submit" class="search-btn-circle ms-auto" aria-label="Search rooms">
-                    <i class="fas fa-search fw-bold"></i>
-                </button>
-            </form>
-        </div>
-
-        <!-- QUICK HOST TEASER (Visible on Mobile) -->
-        <div class="mt-4 mt-lg-5 pt-2">
-            <div class="hero-host-cta d-inline-flex align-items-center gap-2 gap-lg-3 p-1 p-lg-2 ps-3 ps-lg-4 rounded-pill border-white border-opacity-25">
-                <span class="text-white small fw-bold d-none d-sm-inline opacity-75">WANT TO EARN?</span>
-                <a href="{{ url_for('post_room') }}" class="btn btn-red btn-glow-red rounded-pill px-3 px-lg-4 py-2 fw-bold small">
-                    <i class="fas fa-plus-circle me-1"></i> Post Room in 2 min & Earn Money
-                </a>
-            </div>
-        </div>
-
-    </div>
-</header>
-
-<div class="bg-premium py-5">
-    <div class="container py-lg-5">
-
-        <!-- SECTION: FEATURED STAYS -->
-        <div class="d-flex justify-content-between align-items-end mb-5">
+<section class="container home-hero">
+    <div class="hero-copy">
+        <h1>Find your stay<br class="d-none d-xl-inline"> in Bangladesh.</h1>
+        <p>Browse rooms from local hosts, from city stays to quieter escapes.</p>
+        <form class="location-search" action="{{ url_for('rooms_page') }}" method="get" role="search">
             <div>
-                <h6 class="text-danger fw-bold text-uppercase ls-1 mb-2">Featured stays</h6>
-                <h2 class="display-5 fw-bold text-dark mb-0">Latest Stays</h2>
+                <label for="home-location">Where are you going?</label>
+                <input id="home-location" name="location" type="search" placeholder="Try Dhaka or Sylhet">
             </div>
-            <a href="{{ url_for('rooms_page') }}" class="btn btn-red btn-glow-red rounded-pill px-4 d-none d-md-inline-block">
-                View All Stays <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
+            <button class="btn btn-primary" type="submit">Search stays</button>
+        </form>
+    </div>
+    <figure class="hero-photo">
+        <img src="{{ url_for('static', filename='images/bandarban.webp') }}"
+             alt="An illustration of the Sangu River winding through forested hills" width="1400" height="933" fetchpriority="high">
+        <figcaption>Bandarban, Bangladesh</figcaption>
+    </figure>
+</section>
 
-        <div class="row g-4 mb-5">
+<section class="container section-space" aria-labelledby="latest-stays">
+    <div class="section-heading">
+        <h2 id="latest-stays">Latest stays</h2>
+        <a href="{{ url_for('rooms_page') }}">Browse all stays</a>
+    </div>
+    {% if featured_rooms %}
+        <div class="stay-grid">
             {% for room in featured_rooms %}
-            <div class="col-lg-3 col-md-6">
-                <div class="card room-card border-0 shadow-lg overflow-hidden h-100">
-                    
-                    <div class="position-relative">
-                        <img src="{{ get_room_image(room.image_url) }}" 
-                             class="card-img-top" alt="{{ room.title }}">
-                        
-                        <div class="position-absolute top-0 end-0 m-3">
-                            <span class="badge bg-white text-danger fw-bold px-3 py-2 rounded-pill shadow">
-                                ৳{{ room.price_per_night }}
-                            </span>
-                        </div>
-
-                    </div>
-
-                    <div class="card-body p-4 d-flex flex-column">
-                        <h5 class="card-title fw-bold text-dark mb-1 text-truncate">{{ room.title }}</h5>
-                        <p class="text-muted small mb-3">
-                            <i class="fas fa-map-marker-alt text-danger me-1"></i> {{ room.location }}
-                        </p>
-                        
-                        <p class="card-text text-secondary small flex-grow-1">
-                            {{ room.description[:90] }}...
-                        </p>
-
-                        <div class="mt-4 pt-3 border-top d-flex gap-2">
-                            <a href="{{ url_for('room_detail', room_id=room.id) }}" 
-                               class="btn btn-outline-secondary rounded-pill fw-bold flex-fill btn-sm py-2">
-                                Details
-                            </a>
-                            <a href="{{ url_for('room_detail', room_id=room.id) }}" 
-                               class="btn btn-danger rounded-pill fw-bold flex-fill btn-sm py-2 shadow-sm">
-                                Book Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                {{ room_card(room) }}
             {% endfor %}
         </div>
-
-        <div class="text-center d-md-none mb-5">
-            <a href="{{ url_for('rooms_page') }}" class="btn btn-red btn-glow-red rounded-pill px-5">
-                Browse All Rooms
-            </a>
+    {% else %}
+        <div class="empty-state">
+            <h3>No rooms listed yet</h3>
+            <p>Check back as local hosts add their rooms.</p>
         </div>
+    {% endif %}
+</section>
 
-        <!-- SECTION: PREMIUM HOSTING CTA -->
-        <div class="host-banner mt-lg-5">
-            <div class="row align-items-center position-relative z-2">
-                <div class="col-lg-7">
-                    <h6 class="text-danger fw-bold text-uppercase ls-1 mb-3">Earn with us</h6>
-                    <h2 class="display-4 fw-bold mb-4">Post your room and start earning today.</h2>
-                    <p class="lead mb-5 opacity-90">
-                        Join thousands of hosts in Bangladesh. We provide the tools, security, and guests you need to grow your hosting business safely.
-                    </p>
-                    <div class="d-flex flex-wrap gap-3">
-                        <a href="{{ url_for('post_room') }}" class="btn btn-red btn-lg px-5 py-3 rounded-pill fw-bold btn-glow-red">
-                            <i class="fas fa-plus-circle me-2"></i> List Your Room Now
-                        </a>
-                        <a href="{{ url_for('services') }}" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold">
-                            Learn More
-                        </a>
-                    </div>
-                </div>
-            </div>
+<section class="container section-space" aria-labelledby="host-title">
+    <div class="host-banner">
+        <div>
+            <h2 id="host-title">Have a room to share?</h2>
+            <p>List your place, set your nightly rate, and welcome travellers.</p>
         </div>
-
+        <a class="btn btn-light" href="{{ url_for('post_room') }}">List a room</a>
     </div>
-</div>
-
-<!-- SECTION: TESTIMONIALS / STATS -->
-<div class="py-5 bg-white">
-    <div class="container py-lg-5">
-        <div class="row g-4 text-center">
-            <div class="col-md-4">
-                <div class="p-4">
-                    <div class="display-4 fw-bold text-danger mb-2">5,000+</div>
-                    <h5 class="fw-bold">Happy Travellers</h5>
-                    <p class="text-secondary small">Satisfied guests across all districts of Bangladesh.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-4 border-start border-end border-light">
-                    <div class="display-4 fw-bold text-danger mb-2">1,200+</div>
-                    <h5 class="fw-bold">Verified Rooms</h5>
-                    <p class="text-secondary small">Every listing is manually reviewed for quality and safety.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-4">
-                    <div class="display-4 fw-bold text-danger mb-2">৳2M+</div>
-                    <h5 class="fw-bold">Host Earnings</h5>
-                    <p class="text-secondary small">Helping local hosts grow their income through hospitality.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
+</section>
 {% endblock %}

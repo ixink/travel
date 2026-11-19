@@ -1,216 +1,107 @@
-{% extends "base.html" %}
-
-{% block title %}Secure Payment - Traveller Stop{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Payment | Traveller Stop{% endblock %}
 
 {% block content %}
-
-<div class="bg-premium min-vh-100 py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-xl-9 col-lg-10">
-
-                <div class="text-center mb-5">
-                    <div class="d-inline-block p-3 bg-white rounded-circle shadow-sm mb-3">
-                        <i class="fas fa-lock fa-2x text-success"></i>
-                    </div>
-                    <h1 class="fw-bold text-dark">Secure Payment</h1>
-                    <p class="text-secondary">Almost there! Complete your payment to confirm your stay.</p>
-                </div>
-
-                {% if booking.payment_status == 'paid' %}
-                    <div class="alert alert-success" role="status">This booking has been paid.</div>
-                {% elif uddoktapay_enabled and booking.status == 'pending_payment' %}
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-body p-4">
-                            <h2 class="h5">Pay online with UddoktaPay</h2>
-                            <p>Use the secure checkout to pay ৳{{ '%.2f'|format(booking.total_amount) }}.</p>
-                            <form method="post" action="{{ url_for('uddoktapay_checkout', booking_id=booking.id) }}">
-                                <input type="hidden" name="csrf_token" value="{{ payment_token }}">
-                                <button class="btn btn-red" type="submit">Continue to UddoktaPay</button>
-                            </form>
-                        </div>
-                    </div>
+<section class="container page-space">
+    <h1 class="mb-3">Payment</h1>
+    <div class="room-layout">
+        <div class="booking-panel">
+            {% if booking.payment_status == 'paid' %}
+                <p class="alert alert-success mb-0" role="status">This booking has been paid.</p>
+            {% elif booking.status != 'pending_payment' %}
+                <p class="mb-0">Payment is unavailable for this booking.</p>
+            {% else %}
+                {% if uddoktapay_enabled %}
+                    <h2>Pay online</h2>
+                    <form class="mb-4" method="post" action="{{ url_for('uddoktapay_checkout', booking_id=booking.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ payment_token }}">
+                        <button class="btn btn-primary" type="submit">Continue to UddoktaPay</button>
+                    </form>
                 {% endif %}
-
-                <div class="row g-4">
-                    <!-- Instructions -->
-                        <div class="card glass-card border-0">
-                            <div class="card-body p-4">
-                                <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-danger"></i>Important Instructions</h6>
-                                <div id="methodInstructions">
-                                    <ul class="small text-secondary mb-0">
-                                        <li class="mb-2"><strong>Mobile Banking:</strong> Send exact amount to <span class="badge bg-dark">01575467289</span> via bKash, Nagad, Rocket, or Upay (Send Money).</li>
-                                        <li class="mb-2"><strong>Binance Pay:</strong> Send to Binance ID <span class="badge bg-dark">801896706</span> or Email <span class="badge bg-dark">rayhan.instructor@gmail.com</span>.</li>
-                                        <li>Copy and paste the Transaction ID (TRXID) carefully from your confirmation.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    
-                    <!-- Left: Payment Form -->
-                    <div class="col-lg-7">
-                        <div class="card glass-card border-0 mb-4">
-                            <div class="card-body p-4 p-lg-5">
-                                <h5 class="fw-bold mb-4">How would you like to pay?</h5>
-                                
-                                <form id="paymentForm">
-                                    <input type="hidden" name="csrf_token" value="{{ payment_token }}">
-                                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
-
-                                    <div class="mb-4">
-                                        <label class="form-label small text-uppercase fw-bold text-secondary">Select Method</label>
-                                        <div class="row g-2">
-                                            {% set methods = [
-                                                ('bkash', 'bKash', 'https://freelogopng.com/images/all_img/1656234782bkash-app-logo.png'),
-                                                ('nagad', 'Nagad', 'https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png'),
-                                                ('rocket', 'Rocket', 'https://images.seeklogo.com/logo-png/31/1/dutch-bangla-rocket-logo-png_seeklogo-317692.png'),
-                                                ('upay', 'Upay', 'https://images.seeklogo.com/logo-png/64/2/upay-logo-png_seeklogo-642534.png'),
-                                                ('binance', 'Binance', 'https://static.litecart.net/storage/images/addons/binance-pay-1.jpg?_=1702796373')
-                                            ] %}
-                                            {% for id, name, img in methods %}
-                                            <div class="col-4 col-md-2">
-                                                <input type="radio" name="method" value="{{ id }}" id="pay_{{ id }}" class="btn-check" required>
-                                                <label class="btn btn-outline-light p-2 w-100 h-100 d-flex flex-column align-items-center justify-content-center gap-1 border shadow-sm transition" for="pay_{{ id }}">
-                                                    <img src="{{ img }}" height="24" alt="{{ name }}" style="object-fit: contain;">
-                                                    <span style="font-size: 0.7rem;" class="fw-bold text-dark">{{ name }}</span>
-                                                </label>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-3">
-                                        <div class="col-12">
-                                            <div class="form-floating">
-                                                <input type="text" name="name" class="form-control" id="floatName" placeholder="Full Name" required>
-                                                <label for="floatName">Your Full Name</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <input type="text" name="sender" class="form-control" id="floatSender" placeholder="Sender Number" required>
-                                                <label for="floatSender">Sender Number / ID</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <input type="text" name="trxid" class="form-control text-uppercase" id="floatTrx" placeholder="TRXID" required>
-                                                <label for="floatTrx">Transaction ID</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 mt-4">
-                                            <div class="p-3 bg-danger-subtle border border-danger-subtle rounded-3">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <span class="fw-bold text-danger">Total Amount Due</span>
-                                                    <span class="fs-4 fw-bold text-danger">৳{{ booking.total_amount }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-red w-100 py-3 mt-4 fs-5 fw-bold" id="payBtn">
-                                        <i class="fas fa-check-circle me-2"></i> Confirm Payment
-                                    </button>
-                                </form>
-                                <div id="paymentResult" class="mt-4"></div>
-                            </div>
-                        </div>
-
-
+                <h2>Submit a manual payment</h2>
+                <ul>
+                    <li>For bKash, Nagad, Rocket, or Upay, send the total to <strong>01575467289</strong> using Send Money.</li>
+                    <li>For Binance Pay, use Binance ID <strong>801896706</strong> or <strong>rayhan.instructor@gmail.com</strong>.</li>
+                </ul>
+                <form id="payment-form" method="post" action="{{ url_for('pay') }}" class="form-stack">
+                    <input type="hidden" name="csrf_token" value="{{ payment_token }}">
+                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                    <div>
+                        <label class="form-label" for="payment-method">Payment method</label>
+                        <select id="payment-method" name="method" class="form-select" required>
+                            <option value="">Choose a method</option>
+                            <option value="bkash">bKash</option>
+                            <option value="nagad">Nagad</option>
+                            <option value="rocket">Rocket</option>
+                            <option value="upay">Upay</option>
+                            <option value="binance">Binance Pay</option>
+                        </select>
                     </div>
-
-                    <!-- Right: Summary Card -->
-                    <div class="col-lg-5">
-                        <div class="card glass-card border-0 sticky-top" style="top: 100px;">
-                            <div class="card-body p-4">
-                                <h5 class="fw-bold mb-4">Booking Details</h5>
-                                <div class="space-y-3 mb-4">
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-secondary">Booking ID</span>
-                                        <span class="fw-bold">#{{ booking.id }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-secondary">Check-in</span>
-                                        <span class="fw-bold">{{ booking.checkin }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-secondary">Check-out</span>
-                                        <span class="fw-bold">{{ booking.checkout }}</span>
-                                    </div>
-                                    <hr class="opacity-25">
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-secondary">Original Price</span>
-                                        <span>৳{{ booking.original_amount }}</span>
-                                    </div>
-                                    {% if booking.discount > 0 %}
-                                    <div class="d-flex justify-content-between small text-success">
-                                        <span>Coupon Discount</span>
-                                        <span>-৳{{ booking.discount }}</span>
-                                    </div>
-                                    {% endif %}
-                                    <div class="d-flex justify-content-between fs-5 fw-bold text-dark mt-2 pt-2 border-top">
-                                        <span>Total</span>
-                                        <span>৳{{ booking.total_amount }}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="text-center p-3 bg-light rounded-4">
-                                    <p class="small text-muted mb-0">
-                                        <i class="fas fa-headset me-1 text-danger"></i> Need help? Call 01575467289
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        <label class="form-label" for="payment-name">Your full name</label>
+                        <input id="payment-name" name="name" class="form-control" autocomplete="name" required>
                     </div>
-
-                </div>
-            </div>
+                    <div>
+                        <label class="form-label" for="payment-sender">Sender number or ID</label>
+                        <input id="payment-sender" name="sender" class="form-control" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="payment-transaction">Transaction ID</label>
+                        <input id="payment-transaction" name="trxid" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Submit payment</button>
+                    <output id="payment-result" role="status" hidden></output>
+                </form>
+            {% endif %}
         </div>
+        <aside class="booking-panel">
+            <h2>Booking #{{ booking.id }}</h2>
+            <dl class="booking-summary">
+                <dt>Check-in</dt><dd>{{ booking.checkin }}</dd>
+                <dt>Check-out</dt><dd>{{ booking.checkout }}</dd>
+                {% if booking.discount %}
+                    <dt>Original price</dt><dd>৳{{ '%.2f' | format(booking.original_amount) }}</dd>
+                    <dt>Coupon discount</dt><dd>−৳{{ '%.2f' | format(booking.discount) }}</dd>
+                {% endif %}
+                <dt>Total</dt><dd><strong>৳{{ '%.2f' | format(booking.total_amount) }}</strong></dd>
+            </dl>
+            <a href="{{ url_for('profile') }}">Back to your bookings</a>
+        </aside>
     </div>
-</div>
-
-<style>
-.btn-check:checked + .btn-outline-light {
-    background: #fff5f5 !important;
-    border-color: var(--primary-red) !important;
-    transform: translateY(-5px);
-}
-.space-y-3 > * + * { margin-top: 1rem; }
-.bg-danger-subtle { background-color: #fef2f2 !important; }
-</style>
-
+</section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-const form = document.getElementById('paymentForm');
-form.addEventListener('submit', async function(e){
-    e.preventDefault();
-    const btn = document.getElementById('payBtn');
-    const result = document.getElementById('paymentResult');
-    
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
-    
-    try {
-        const response = await fetch("{{ url_for('pay') }}", {
-            method: 'POST',
-            body: new FormData(form)
-        });
-        const data = await response.json();
-        
-        if(data.status === 'success'){
-            result.innerHTML = `<div class="alert alert-success rounded-4"><h6 class="fw-bold mb-1">Success!</h6>${data.msg}</div>`;
-            btn.innerHTML = 'Submitted';
-        } else {
-            result.innerHTML = `<div class="alert alert-danger rounded-4"><h6 class="fw-bold mb-1">Failed</h6>${data.msg}</div>`;
-            btn.disabled = false;
-            btn.innerHTML = 'Confirm Payment';
+const paymentForm = document.getElementById('payment-form');
+
+if (paymentForm) {
+    paymentForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = paymentForm.querySelector('button[type="submit"]');
+        const result = document.getElementById('payment-result');
+        button.disabled = true;
+        button.textContent = 'Submitting…';
+        result.hidden = true;
+
+        let succeeded = false;
+        try {
+            const response = await fetch(paymentForm.action, {
+                method: 'POST',
+                body: new FormData(paymentForm)
+            });
+            const data = await response.json();
+            succeeded = response.ok && data.status === 'success';
+            result.textContent = data.msg;
+        } catch {
+            result.textContent = 'Payment could not be submitted. Please try again.';
+        } finally {
+            result.className = succeeded ? 'alert alert-success mb-0' : 'alert alert-danger mb-0';
+            result.hidden = false;
+            button.disabled = succeeded;
+            button.textContent = succeeded ? 'Submitted' : 'Submit payment';
         }
-    } catch(error) {
-        result.innerHTML = `<div class="alert alert-danger rounded-4">Server Error. Please retry.</div>`;
-        btn.disabled = false;
-    }
-});
+    });
+}
 </script>
 {% endblock %}

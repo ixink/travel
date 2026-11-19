@@ -10,29 +10,29 @@
         <!-- Sidebar / Mobile Nav -->
         <div class="col-lg-3 col-xl-2 bg-dark text-white p-4 admin-sidebar">
             <div class="d-flex align-items-center mb-4 d-none d-lg-flex">
-                <h4 class="mb-0 text-danger fw-bold">
+                <h4 class="mb-0 fw-bold">
                     <i class="fas fa-user-shield me-2"></i> Admin Panel
                 </h4>
             </div>
             
-            <div class="nav flex-column flex-row-mobile gap-2">
+            <div class="nav flex-row-mobile gap-2">
                 <a href="#" onclick="showSection('dashboard')" class="nav-link active" id="nav-dashboard">
-                    <i class="fas fa-tachometer-alt"></i> <span class="d-none d-lg-inline">Dashboard</span>
+                    <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
                 </a>
                 <a href="#" onclick="showSection('bookings')" class="nav-link" id="nav-bookings">
-                    <i class="fas fa-calendar-check"></i> <span class="d-none d-lg-inline">Bookings</span>
+                    <i class="fas fa-calendar-check"></i> <span>Bookings</span>
                 </a>
                 <a href="#" onclick="showSection('users')" class="nav-link" id="nav-users">
-                    <i class="fas fa-users"></i> <span class="d-none d-lg-inline">Users</span>
+                    <i class="fas fa-users"></i> <span>Users</span>
                 </a>
                 <a href="#" onclick="showSection('payments')" class="nav-link" id="nav-payments">
-                    <i class="fas fa-money-bill-wave"></i> <span class="d-none d-lg-inline">Payments</span>
+                    <i class="fas fa-money-bill-wave"></i> <span>Payments</span>
                 </a>
                 <a href="#" onclick="showSection('coupons')" class="nav-link" id="nav-coupons">
-                    <i class="fas fa-tags"></i> <span class="d-none d-lg-inline">Coupons</span>
+                    <i class="fas fa-tags"></i> <span>Coupons</span>
                 </a>
                 <a href="#" onclick="showSection('nid')" class="nav-link" id="nav-nid">
-                    <i class="fas fa-id-card"></i> <span class="d-none d-lg-inline">NID</span>
+                    <i class="fas fa-id-card"></i> <span>NID</span>
                 </a>
             </div>
 
@@ -46,7 +46,7 @@
         <!-- Main Content -->
         <div class="col-lg-9 col-xl-10 p-4">
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
                 <h2 id="page-title" class="fw-bold">Admin Dashboard</h2>
                 <div>
                     <button class="btn btn-outline-secondary me-2" onclick="location.reload()">
