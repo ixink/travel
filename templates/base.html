@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ tr('Find and book stays across Bangladesh with Traveller Stop.', 'ট্রাভেলার স্টপে বাংলাদেশজুড়ে আবাসন খুঁজুন ও বুক করুন।') }}">
     <title>{% block title %}{{ tr('Traveller Stop | Stays across Bangladesh', 'ট্রাভেলার স্টপ | বাংলাদেশজুড়ে আবাসন') }}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome/css/fontawesome.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome/css/solid.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+    <link rel="stylesheet" href="{{ theme_url('vendor/bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_url('vendor/fontawesome/css/fontawesome.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_url('vendor/fontawesome/css/solid.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_url('style.css') }}">
+    <link rel="icon" href="{{ theme_url('logo.png') }}" type="image/png">
 </head>
-<body data-image-fallback="{{ url_for('static', filename='logo.png') }}">
+<body data-image-fallback="{{ theme_url('logo.png') }}">
     <a class="visually-hidden-focusable skip-link" href="#main-content">{{ tr('Skip to content', 'মূল বিষয়বস্তুতে যান') }}</a>
     {% include 'navbar.html' %}
 
@@ -65,8 +65,8 @@
         </div>
     </footer>
 
-    <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ theme_url('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ theme_url('script.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

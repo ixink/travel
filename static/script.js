@@ -1,7 +1,7 @@
 function initImageFallback() {
     const fallback = document.body.dataset.imageFallback;
 
-    document.querySelectorAll('img').forEach(image => {
+    document.querySelectorAll('img:not([data-gallery-image])').forEach(image => {
         const replaceImage = () => {
             if (fallback && image.src !== new URL(fallback, document.baseURI).href) {
                 image.removeAttribute('srcset');
@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initImagePreview();
     initNearbySearch();
     initFavourites();
+    initGallery();
 });
 
 function initNearbySearch() {
@@ -186,4 +187,90 @@ function initFavourites() {
 
     saved = readSaved();
     render();
+}
+
+function initGallery() {
+    const gallery = document.querySelector('[data-gallery]');
+    if (!gallery) return;
+
+    const slides = [...gallery.querySelectorAll('[data-slide]')];
+    if (slides.length < 2) return;
+
+    const image = gallery.querySelector('[data-gallery-image]');
+    const caption = gallery.querySelector('[data-gallery-caption]');
+    const toggle = gallery.querySelector('[data-gallery-toggle]');
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const failedSlides = new Set();
+    let index = 0;
+    let requestedIndex = 0;
+    let requestNumber = 0;
+    let playing = !motion.matches;
+    let timer;
+
+    function schedule() {
+        clearTimeout(timer);
+        if (playing && !document.hidden && !gallery.matches(':hover, :focus-within')) {
+            timer = setTimeout(() => move(1), 6500);
+        }
+    }
+
+    function setPlaying(value) {
+        playing = value;
+        toggle.setAttribute('aria-label', gallery.dataset[value ? 'pause' : 'play']);
+        toggle.firstElementChild.className = value ? 'fas fa-pause' : 'fas fa-play';
+        schedule();
+    }
+
+    async function move(direction) {
+        clearTimeout(timer);
+        const sequence = ++requestNumber;
+        let next = requestedIndex;
+        for (let count = 0; count < slides.length; count++) {
+            next = (next + direction + slides.length) % slides.length;
+            if (next === index || failedSlides.has(next)) continue;
+            requestedIndex = next;
+            const slide = slides[next];
+            const preload = new Image();
+            preload.src = slide.dataset.src;
+            try {
+                await preload.decode();
+            } catch {
+                failedSlides.add(next);
+                if (sequence !== requestNumber) return;
+                continue;
+            }
+
+            if (sequence !== requestNumber) return;
+            index = next;
+            image.src = slide.dataset.src;
+            image.alt = slide.dataset.alt;
+            caption.textContent = slide.dataset.caption;
+            if (!motion.matches) {
+                image.animate([{ opacity: .55 }, { opacity: 1 }], { duration: 360 });
+            }
+            schedule();
+            return;
+        }
+        requestedIndex = index;
+        setPlaying(false);
+    }
+
+    gallery.querySelector('[data-gallery-controls]').hidden = false;
+    gallery.querySelector('[data-gallery-prev]').addEventListener('click', () => move(-1));
+    gallery.querySelector('[data-gallery-next]').addEventListener('click', () => move(1));
+    toggle.addEventListener('click', () => setPlaying(!playing));
+    for (const event of ['mouseenter', 'mouseleave', 'focusin', 'focusout']) {
+        gallery.addEventListener(event, () => setTimeout(schedule, 0));
+    }
+    document.addEventListener('visibilitychange', schedule);
+    motion.addEventListener('change', event => {
+        if (event.matches) setPlaying(false);
+    });
+    const recoverImage = () => {
+        failedSlides.add(index);
+        move(1);
+    };
+    image.addEventListener('error', recoverImage);
+    setPlaying(playing);
+    if (image.complete && !image.naturalWidth) recoverImage();
 }

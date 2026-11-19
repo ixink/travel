@@ -3,35 +3,59 @@
 {% from 'search_form.html' import search_form with context %}
 
 {% block content %}
+{% set landscapes = [
+    ('bandarban', tr('Sangu River, Bandarban', 'সাঙ্গু নদী, বান্দরবান'), tr('Illustration of the Sangu River winding through the Bandarban hills', 'বান্দরবানের পাহাড়ের মাঝে সাঙ্গু নদীর চিত্র')),
+    ('sylhet', tr('Tea country, Sylhet', 'চা-বাগান, সিলেট'), tr('Illustration of the green tea gardens of Sylhet', 'সিলেটের সবুজ চা-বাগানের চিত্র')),
+    ('coxs-bazar', tr('The coast, Cox’s Bazar', 'সমুদ্রতীর, কক্সবাজার'), tr('Illustration of the coast at Cox’s Bazar', 'কক্সবাজারের সমুদ্রতীরের চিত্র')),
+    ('rangamati', tr('Kaptai Lake, Rangamati', 'কাপ্তাই হ্রদ, রাঙামাটি'), tr('Illustration of the hills around Kaptai Lake', 'কাপ্তাই হ্রদের চারপাশের পাহাড়ের চিত্র'))
+] %}
 <div class="travel-home">
-    <section class="container journey-intro">
+    <section class="container journey-intro" aria-labelledby="home-title">
         <div class="journey-hero">
-            <img src="{{ url_for('static', filename='images/bandarban.webp') }}"
-                 alt="{{ tr('Illustration of the Sangu River in the Bandarban hills', 'বান্দরবানের পাহাড়ের মাঝে সাঙ্গু নদীর চিত্র') }}"
-                 width="1400" height="933" fetchpriority="high">
             <div class="journey-copy">
-                <h1>{{ tr('Find your stay in Bangladesh.', 'বাংলাদেশে খুঁজে নিন আপনার ঠিকানা।') }}</h1>
-                <p>{{ tr('Wake up by the sea, in the hills, or in the heart of the city.', 'সমুদ্রের ধারে, পাহাড়ের কোলে কিংবা শহরের প্রাণকেন্দ্রে কাটুক আপনার সকাল।') }}</p>
+                <h1 id="home-title">{{ tr('Find your stay in Bangladesh.', 'বাংলাদেশে খুঁজে নিন আপনার ঠিকানা।') }}</h1>
+                <p>{{ tr('A quiet morning in the hills or a weekend by the sea. Find a place to stay and make the trip yours.', 'পাহাড়ে শান্ত সকাল কিংবা সমুদ্রের ধারে ছুটি। থাকার জায়গা খুঁজুন, ভ্রমণটা হোক আপনার মতো।') }}</p>
+                <a href="#stay-search" class="hero-search-link">{{ tr('Find a stay', 'আবাসন খুঁজুন') }} <i class="fas fa-arrow-down" aria-hidden="true"></i></a>
             </div>
-            <p class="journey-caption"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ tr('Sangu River, Bandarban', 'সাঙ্গু নদী, বান্দরবান') }}</p>
+
+            <figure class="journey-gallery" data-gallery
+                    data-pause="{{ tr('Pause slideshow', 'ছবির প্রদর্শন থামান') }}"
+                    data-play="{{ tr('Play slideshow', 'ছবির প্রদর্শন চালু করুন') }}">
+                {% set first = landscapes[0] %}
+                <img data-gallery-image src="{{ theme_url('images/' ~ first[0] ~ '.webp') }}"
+                     alt="{{ first[2] }}" width="1400" height="933" fetchpriority="high">
+                {% for image, caption, alt in landscapes %}
+                    <span data-slide data-src="{{ theme_url('images/' ~ image ~ '.webp') }}" data-caption="{{ caption }}" data-alt="{{ alt }}" hidden></span>
+                {% endfor %}
+                <figcaption>
+                    <span class="gallery-place"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> <span data-gallery-caption>{{ first[1] }}</span></span>
+                    <span class="gallery-controls" data-gallery-controls hidden>
+                        <button type="button" data-gallery-prev aria-label="{{ tr('Previous image', 'আগের ছবি') }}"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                        <button type="button" data-gallery-toggle aria-label="{{ tr('Pause slideshow', 'ছবির প্রদর্শন থামান') }}"><i class="fas fa-pause" aria-hidden="true"></i></button>
+                        <button type="button" data-gallery-next aria-label="{{ tr('Next image', 'পরের ছবি') }}"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                    </span>
+                </figcaption>
+            </figure>
         </div>
-        {{ search_form() }}
+        <div id="stay-search">{{ search_form() }}</div>
     </section>
 
     <section class="container section-space destinations" aria-labelledby="destinations-heading">
         <div class="section-heading">
-            <h2 id="destinations-heading">{{ tr('Where to next?', 'এবার কোথায় যাবেন?') }}</h2>
+            <h2 id="destinations-heading">{{ tr('What’s your kind of getaway?', 'কেমন ভ্রমণ চান?') }}</h2>
             <a href="{{ url_for('rooms_page') }}">{{ tr('Explore all stays', 'সব আবাসন দেখুন') }}</a>
         </div>
         <div class="destination-grid">
-            {% for city, name, detail, image in (
-                ('Sylhet', tr('Sylhet', 'সিলেট'), tr('Tea gardens & green hills', 'চা-বাগান ও সবুজ পাহাড়'), 'sylhet'),
-                ("Cox's Bazar", tr("Cox’s Bazar", 'কক্সবাজার'), tr('Sunsets by the coast', 'সমুদ্রতীরে সূর্যাস্ত'), 'coxs-bazar'),
-                ('Rangamati', tr('Rangamati', 'রাঙামাটি'), tr('Lakeside escapes', 'হ্রদের ধারে অবকাশ'), 'rangamati')
+            {% for city, title, name, icon in (
+                ('Bandarban', tr('Hill escapes', 'পাহাড়ে অবকাশ'), tr('Bandarban', 'বান্দরবান'), 'mountain'),
+                ('Sylhet', tr('Tea country', 'চা-বাগানের দেশ'), tr('Sylhet', 'সিলেট'), 'leaf'),
+                ("Cox's Bazar", tr('By the sea', 'সমুদ্রের ধারে'), tr('Cox’s Bazar', 'কক্সবাজার'), 'water'),
+                ('Rangamati', tr('Lake retreats', 'হ্রদের পাশে'), tr('Rangamati', 'রাঙামাটি'), 'ship')
             ) %}
                 <a class="destination-card" href="{{ url_for('rooms_page', location=city) }}">
-                    <img src="{{ url_for('static', filename='images/' ~ image ~ '.webp') }}" alt="" loading="lazy">
-                    <div><h3>{{ name }}</h3><p>{{ detail }}</p></div>
+                    <i class="fas fa-{{ icon }} destination-icon" aria-hidden="true"></i>
+                    <span><strong>{{ title }}</strong><small>{{ name }}</small></span>
+                    <i class="fas fa-arrow-right destination-arrow" aria-hidden="true"></i>
                 </a>
             {% endfor %}
         </div>

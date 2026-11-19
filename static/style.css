@@ -1,13 +1,13 @@
 :root {
-    --ink: #172c24;
-    --pine: #205642;
-    --pine-dark: #12382d;
-    --moss: #4f6558;
-    --paper: #faf8ef;
-    --linen: #eeeadd;
-    --leaf: #e2eadb;
-    --line: #d3dbcb;
-    --white: #fffdf7;
+    --ink: #1b2938;
+    --pine: #233e70;
+    --pine-dark: #182b4e;
+    --moss: #566373;
+    --paper: #f9f8f5;
+    --linen: #f1eee7;
+    --leaf: #e8edf7;
+    --line: #dce2eb;
+    --white: #fffefb;
     --radius: 1rem;
     --display-font: Georgia, "Noto Sans Bengali", serif;
     --text-font: "Noto Sans Bengali", system-ui, sans-serif;
@@ -18,11 +18,11 @@
     --bs-secondary-color: var(--moss);
     --bs-border-color: var(--line);
     --bs-primary: var(--pine);
-    --bs-primary-rgb: 32, 86, 66;
-    --bs-dark-rgb: 18, 56, 45;
+    --bs-primary-rgb: 35, 62, 112;
+    --bs-dark-rgb: 24, 43, 78;
     --bs-light-rgb: 238, 234, 221;
-    --bs-link-color-rgb: 32, 86, 66;
-    --bs-link-hover-color-rgb: 18, 56, 45;
+    --bs-link-color-rgb: 35, 62, 112;
+    --bs-link-hover-color-rgb: 24, 43, 78;
 }
 
 body {
@@ -69,7 +69,7 @@ a { text-underline-offset: .2em; }
     --bs-btn-active-border-color: var(--pine-dark);
     --bs-btn-disabled-bg: var(--pine);
     --bs-btn-disabled-border-color: var(--pine);
-    --bs-btn-focus-shadow-rgb: 32, 86, 66;
+    --bs-btn-focus-shadow-rgb: 35, 62, 112;
 }
 
 .btn-outline-primary {
@@ -81,7 +81,7 @@ a { text-underline-offset: .2em; }
     --bs-btn-active-color: white;
     --bs-btn-active-bg: var(--pine-dark);
     --bs-btn-active-border-color: var(--pine-dark);
-    --bs-btn-focus-shadow-rgb: 32, 86, 66;
+    --bs-btn-focus-shadow-rgb: 35, 62, 112;
 }
 
 .site-nav {
@@ -97,7 +97,7 @@ a { text-underline-offset: .2em; }
     text-decoration: none;
 }
 
-.site-brand span { color: #90713e; }
+.site-brand span { color: #a83e20; }
 .site-nav .nav-link { color: var(--moss); font-weight: 600; }
 .site-nav .nav-link:hover,
 .site-nav .nav-link[aria-current="page"] { color: var(--pine-dark); text-decoration: underline; }
@@ -173,14 +173,14 @@ a { text-underline-offset: .2em; }
     color: white;
 }
 
-.host-banner p { margin: .5rem 0 0; color: #e2eadb; }
+.host-banner p { margin: .5rem 0 0; color: #e8edf7; }
 .host-banner .btn { padding: .65rem 1.1rem; }
 .listing-header { margin-bottom: 1.5rem; }
 .listing-header h1 { font-size: clamp(2.4rem, 5vw, 4.3rem); letter-spacing: -.05em; margin-bottom: 1rem; }
 
 .site-footer { background: var(--pine-dark); color: var(--white); padding-block: 2rem 1rem; }
 .site-footer .site-brand { color: var(--white); }
-.site-footer .site-brand span { color: #e6c586; }
+.site-footer .site-brand span { color: #f4a77d; }
 .site-footer p { max-width: 19rem; margin: .6rem 0 0; color: var(--leaf); }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem; }
 .footer-grid h2 { font: 700 1rem/1.35 var(--text-font); }
@@ -192,7 +192,7 @@ a { text-underline-offset: .2em; }
     display: flex;
     gap: .5rem 1.1rem;
     flex-wrap: wrap;
-    border-top: 1px solid #496458;
+    border-top: 1px solid #51617d;
     margin-top: 1.5rem;
     padding-top: .85rem;
     font-size: .85rem;
@@ -256,7 +256,11 @@ a { text-underline-offset: .2em; }
 .auth-form { padding: clamp(1.15rem, 5vw, 2.75rem); }
 .auth-form h1 { font-size: clamp(2rem, 3vw, 2.85rem); margin-bottom: 1.25rem; }
 .auth-sidebar {
-    background: var(--leaf) url("images/bandarban.webp") center / cover;
+    background:
+        radial-gradient(ellipse at 86% 25%, #e7a789 0 10%, transparent 10.5%),
+        radial-gradient(ellipse at 85% 94%, #536e9e 0 40%, transparent 40.5%),
+        radial-gradient(ellipse at 29% 100%, #395586 0 47%, transparent 47.5%),
+        var(--pine-dark);
     min-height: 100%;
 }
 .form-stack { display: grid; gap: 1rem; }
@@ -331,45 +335,82 @@ html[lang="bn"] h1, html[lang="bn"] h2 { font-weight: 700; letter-spacing: 0; li
     .language-switch { order: 1; margin-left: .75rem; }
 }
 
-.journey-intro { padding-top: .35rem; padding-bottom: clamp(1.75rem, 5vw, 4rem); }
+/* One landscape in view at a time. The controls sit on the same layer as its caption. */
+.journey-intro { padding-top: clamp(.75rem, 2vw, 1.4rem); padding-bottom: clamp(2rem, 5vw, 4rem); }
 .journey-hero {
+    display: grid;
+    grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+    background: linear-gradient(145deg, #f6eadf, #f7f5ef 68%);
+    border: 1px solid #e9e3dc;
+    border-radius: 1.6rem;
+}
+.journey-copy { align-self: center; min-width: 0; padding: clamp(1.4rem, 4vw, 3.75rem); }
+.journey-copy h1 { font-size: clamp(2.75rem, 5.5vw, 5.1rem); letter-spacing: -.06em; margin-bottom: .9rem; text-wrap: balance; }
+html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); line-height: 1.24; }
+.journey-copy p { font-size: clamp(1rem, 1.75vw, 1.2rem); max-width: 26rem; margin: 0 0 1.25rem; color: var(--moss); }
+.hero-search-link { display: inline-flex; align-items: center; gap: .65rem; color: var(--pine); font-weight: 750; }
+.hero-search-link i { font-size: .8rem; }
+#stay-search { scroll-margin-top: 1.25rem; }
+
+.journey-gallery {
     position: relative;
     isolation: isolate;
-    min-height: clamp(22rem, 48vw, 38rem);
-    display: flex;
-    align-items: center;
+    margin: .65rem .65rem .65rem 0;
+    min-height: clamp(20rem, 36vw, 32rem);
     overflow: hidden;
-    border-radius: 1.35rem;
-    background-color: var(--pine-dark);
-    color: #fffaf0;
+    border-radius: 1.15rem;
+    background: var(--pine-dark);
 }
-.journey-hero img, .journey-hero::after {
+.journey-gallery > img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    object-position: center 55%;
 }
-.journey-hero img { object-fit: cover; object-position: 53% 56%; z-index: -2; }
-.journey-hero::after {
+.journey-gallery::after {
     content: "";
-    background: linear-gradient(90deg, rgba(9, 33, 24, .89) 0%, rgba(9, 33, 24, .63) 40%, rgba(9, 33, 24, .06) 100%),
-                linear-gradient(0deg, rgba(9, 33, 24, .48), transparent 38%);
-    z-index: -1;
+    position: absolute;
+    inset: 45% 0 0;
+    background: linear-gradient(transparent, rgba(14, 28, 43, .85));
+    pointer-events: none;
 }
-.journey-copy { padding: 2rem clamp(1.1rem, 6vw, 5.25rem) 4.5rem; max-width: 48rem; }
-.journey-copy h1 { font-size: clamp(2.45rem, 6.5vw, 6.3rem); letter-spacing: -.055em; margin-bottom: .75rem; }
-.journey-copy p { font-size: clamp(1rem, 2vw, 1.25rem); max-width: 28rem; margin: 0; color: #f4f2e7; }
-.journey-caption { position: absolute; right: 1.25rem; bottom: 2.6rem; margin: 0; color: #fffdf7; font-size: .82rem; }
+.journey-gallery figcaption {
+    position: absolute;
+    z-index: 1;
+    inset: auto .75rem .75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .35rem .75rem;
+    flex-wrap: wrap;
+    color: white;
+}
+.gallery-place { display: inline-flex; gap: .4rem; align-items: baseline; font-size: .86rem; }
+.gallery-controls { display: flex; gap: .3rem; }
+.gallery-controls[hidden] { display: none; }
+.gallery-controls button {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid #ffffff7a;
+    border-radius: 50%;
+    background: #172d45d9;
+    color: white;
+}
+.gallery-controls button:hover { background: white; color: var(--pine-dark); }
 
 .search-panel {
     position: relative;
-    margin: -2rem auto 0;
-    width: calc(100% - clamp(1rem, 9vw, 8rem));
+    margin: .85rem auto 0;
+    width: 100%;
     background: var(--white);
     border: 1px solid var(--line);
     border-radius: 1.1rem;
     padding: .8rem 1rem .65rem;
-    box-shadow: 0 16px 34px rgba(18, 56, 45, .11);
+    box-shadow: 0 8px 28px rgba(24, 43, 78, .08);
 }
 .search-panel-compact { margin: 0; width: 100%; max-width: 62rem; }
 .travel-search { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(8.75rem, .85fr)) auto; gap: .45rem; align-items: stretch; }
@@ -383,29 +424,26 @@ html[lang="bn"] h1, html[lang="bn"] h2 { font-weight: 700; letter-spacing: 0; li
 .nearby-status, .search-notice { color: var(--moss); font-size: .9rem; }
 .search-notice { margin: .85rem 0 0; }
 .destinations .section-heading h2 { font-size: clamp(1.9rem, 4.5vw, 3.8rem); }
-.destination-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(.65rem, 2vw, 1.4rem); }
+/* Destination shortcuts use colour and type in place of another photo grid. */
+.destination-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
 .destination-card {
-    position: relative;
-    isolation: isolate;
-    width: 100%;
-    min-height: 14rem;
-    aspect-ratio: 1.42;
     display: flex;
-    align-items: end;
-    overflow: hidden;
-    padding: clamp(.8rem, 2.5vw, 1.6rem);
-    border-radius: var(--radius);
-    background: var(--pine);
-    color: white;
+    align-items: center;
+    gap: .65rem;
+    min-width: 0;
+    padding: .95rem;
+    border: 1px solid var(--line);
+    border-radius: .95rem;
+    background: var(--white);
+    color: var(--ink);
     text-decoration: none;
+    transition: border-color .2s, background .2s, transform .2s;
 }
-.destination-card img, .destination-card::after { position: absolute; inset: 0; width: 100%; height: 100%; }
-.destination-card img { object-fit: cover; object-position: center 58%; z-index: -2; transition: transform .28s ease; }
-.destination-card::after { content: ""; background: linear-gradient(0deg, rgba(11, 33, 24, .88), transparent 76%); z-index: -1; }
-.destination-card:hover { color: white; }
-.destination-card:hover img { transform: scale(1.04); }
-.destination-card h3 { font-family: var(--display-font); font-size: clamp(1.25rem, 2.6vw, 2.15rem); margin: 0; }
-.destination-card p { font-size: .88rem; margin: .12rem 0 0; color: #f8f4e9; }
+.destination-card:hover { background: var(--leaf); color: var(--ink); border-color: #9aaac8; transform: translateY(-2px); }
+.destination-card strong, .destination-card small { display: block; overflow-wrap: anywhere; }
+.destination-card small { color: var(--moss); }
+.destination-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; flex: none; color: #7b412d; border-radius: .7rem; background: #fae5d9; }
+.destination-arrow { margin-inline-start: auto; font-size: .75rem; color: var(--pine); }
 
 .stay-card, .room-heading { position: relative; }
 .room-heading { padding-inline-end: 3.2rem; }
@@ -426,21 +464,28 @@ html[lang="bn"] h1, html[lang="bn"] h2 { font-weight: 700; letter-spacing: 0; li
 .favourite-button[aria-pressed="true"] { color: #a53644; background: #fff5f1; }
 [data-saved-grid][hidden], [data-room][hidden] { display: none; }
 
+@media (max-width: 991.98px) {
+    .destination-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 767.98px) {
-    .journey-hero { min-height: 21rem; }
-    .journey-caption { right: .8rem; bottom: 2.25rem; }
-    .journey-copy { padding-bottom: 4rem; }
-    .search-panel { width: calc(100% - 1rem); padding: .65rem; }
-    .search-panel-compact { width: 100%; }
+    .journey-hero { grid-template-columns: minmax(0, 1fr); }
+    .journey-copy { padding: 1.35rem 1rem; }
+    .journey-copy h1 { font-size: clamp(2.3rem, 8.2vw, 3.5rem); }
+    html[lang="bn"] .journey-copy h1 { font-size: clamp(2.02rem, 7.3vw, 2.95rem); }
+    .journey-copy p { margin-bottom: .75rem; }
+    .journey-gallery { margin: 0 .45rem .45rem; min-height: clamp(12.25rem, 52vw, 18rem); }
+    .search-panel { padding: .65rem; }
     .travel-search { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .search-destination, .search-submit { grid-column: 1 / -1; }
     .search-field { background: var(--paper); border: 0; border-radius: .45rem; }
     .search-submit { padding-block: .6rem; }
-    .destination-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .destination-card { min-height: 9.5rem; }
-    .destination-card:first-child { grid-column: 1 / -1; aspect-ratio: 2.4; }
+    .destination-card { padding: .65rem; gap: .45rem; }
+    .destination-icon { width: 1.9rem; height: 1.9rem; font-size: .8rem; }
+    .destination-arrow { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .destination-card img { transition: none; }
+    .destination-card { transition: none; }
+    .destination-card:hover { transform: none; }
 }

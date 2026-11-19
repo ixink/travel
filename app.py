@@ -4,8 +4,11 @@ import logging
 
 import requests
 from datetime import datetime
+from functools import lru_cache
+from hashlib import sha256
+from pathlib import Path
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, abort, send_from_directory
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -234,6 +237,40 @@ def set_language():
     return response
 
 
+THEME_FILES = {
+    'style.css',
+    'script.js',
+    'logo.png',
+    'images/bandarban.webp',
+    'images/sylhet.webp',
+    'images/coxs-bazar.webp',
+    'images/rangamati.webp',
+    'fonts/noto-sans-bengali.woff2',
+    'vendor/bootstrap/bootstrap.min.css',
+    'vendor/bootstrap/bootstrap.bundle.min.js',
+    'vendor/fontawesome/css/fontawesome.min.css',
+    'vendor/fontawesome/css/solid.min.css',
+    'vendor/fontawesome/webfonts/fa-solid-900.woff2',
+    'vendor/fontawesome/webfonts/fa-solid-900.ttf',
+}
+
+
+@app.get('/theme-assets/<path:filename>')
+def theme_asset(filename):
+    if filename not in THEME_FILES:
+        abort(404)
+    return send_from_directory(app.static_folder, filename)
+
+
+@lru_cache(maxsize=len(THEME_FILES))
+def theme_version(filename):
+    return sha256((Path(app.static_folder) / filename).read_bytes()).hexdigest()[:12]
+
+
+def theme_url(filename):
+    return url_for('theme_asset', filename=filename, v=theme_version(filename))
+
+
 @app.context_processor
 def inject_global_data():
     user = get_user_by_id(session.get('user_id'))
@@ -241,9 +278,10 @@ def inject_global_data():
         'current_user': user,
         'site_language': site_language(),
         'tr': tr,
+        'theme_url': theme_url,
         'language_token': generate_csrf,
         'profile_complete': is_profile_complete(user),
-        'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or url_for('static', filename='logo.png'))
+        'get_room_image': lambda img: url_for('static', filename=img) if img and not img.startswith('http') else (img or theme_url('logo.png'))
     }
 
 @app.after_request
