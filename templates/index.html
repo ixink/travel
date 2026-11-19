@@ -15,8 +15,9 @@
             <div class="journey-copy">
                 <h1 id="home-title">{{ tr('Find your stay in Bangladesh.', 'বাংলাদেশে খুঁজে নিন আপনার ঠিকানা।') }}</h1>
                 <p>{{ tr('A quiet morning in the hills or a weekend by the sea. Find a place to stay and make the trip yours.', 'পাহাড়ে শান্ত সকাল কিংবা সমুদ্রের ধারে ছুটি। থাকার জায়গা খুঁজুন, ভ্রমণটা হোক আপনার মতো।') }}</p>
-                <a href="#stay-search" class="hero-search-link">{{ tr('Find a stay', 'আবাসন খুঁজুন') }} <i class="fas fa-arrow-down" aria-hidden="true"></i></a>
             </div>
+
+            <div class="journey-search">{{ search_form() }}</div>
 
             <figure class="journey-gallery" data-gallery
                     data-pause="{{ tr('Pause slideshow', 'ছবির প্রদর্শন থামান') }}"
@@ -37,7 +38,6 @@
                 </figcaption>
             </figure>
         </div>
-        <div id="stay-search">{{ search_form() }}</div>
     </section>
 
     <section class="container section-space destinations" aria-labelledby="destinations-heading">
