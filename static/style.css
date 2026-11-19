@@ -1,12 +1,12 @@
 :root {
-    --ink: #1c3b31;
-    --pine: #18543d;
-    --pine-dark: #103a2c;
-    --moss: #456256;
-    --paper: #f8f5ea;
-    --linen: #f0ebdc;
-    --leaf: #e0eddf;
-    --line: #d4e2d5;
+    --ink: #42291f;
+    --pine: #943b28;
+    --pine-dark: #672c22;
+    --moss: #6e5045;
+    --paper: #faf4e9;
+    --linen: #f3e8d7;
+    --leaf: #f7e7db;
+    --line: #e8d6c6;
     --surface: #fffaf0;
     --cream: #f9efd8;
     --radius: 1rem;
@@ -17,17 +17,17 @@
     --bs-body-bg: var(--paper);
     --bs-body-color: var(--ink);
     --bs-emphasis-color: var(--ink);
-    --bs-emphasis-color-rgb: 28, 59, 49;
-    --bs-black-rgb: 28, 59, 49;
+    --bs-emphasis-color-rgb: 66, 41, 31;
+    --bs-black-rgb: 66, 41, 31;
     --bs-white-rgb: 249, 239, 216;
     --bs-secondary-color: var(--moss);
     --bs-border-color: var(--line);
     --bs-primary: var(--pine);
-    --bs-primary-rgb: 24, 84, 61;
-    --bs-dark-rgb: 16, 58, 44;
+    --bs-primary-rgb: 148, 59, 40;
+    --bs-dark-rgb: 103, 44, 34;
     --bs-light-rgb: 238, 234, 221;
-    --bs-link-color-rgb: 24, 84, 61;
-    --bs-link-hover-color-rgb: 16, 58, 44;
+    --bs-link-color-rgb: 148, 59, 40;
+    --bs-link-hover-color-rgb: 103, 44, 34;
 }
 
 body {
@@ -75,7 +75,7 @@ a { text-underline-offset: .2em; }
     --bs-btn-disabled-color: var(--cream);
     --bs-btn-disabled-bg: var(--pine);
     --bs-btn-disabled-border-color: var(--pine);
-    --bs-btn-focus-shadow-rgb: 24, 84, 61;
+    --bs-btn-focus-shadow-rgb: 148, 59, 40;
 }
 
 .btn-outline-primary {
@@ -87,7 +87,7 @@ a { text-underline-offset: .2em; }
     --bs-btn-active-color: var(--cream);
     --bs-btn-active-bg: var(--pine-dark);
     --bs-btn-active-border-color: var(--pine-dark);
-    --bs-btn-focus-shadow-rgb: 24, 84, 61;
+    --bs-btn-focus-shadow-rgb: 148, 59, 40;
 }
 
 .btn-dark {
@@ -216,7 +216,7 @@ a { text-underline-offset: .2em; }
     display: flex;
     gap: .5rem 1.1rem;
     flex-wrap: wrap;
-    border-top: 1px solid #4d7363;
+    border-top: 1px solid #a06a5b;
     margin-top: 1.5rem;
     padding-top: .85rem;
     font-size: .85rem;
@@ -282,8 +282,8 @@ a { text-underline-offset: .2em; }
 .auth-sidebar {
     background:
         radial-gradient(ellipse at 86% 25%, #e7a789 0 10%, transparent 10.5%),
-        radial-gradient(ellipse at 85% 94%, #3d8768 0 40%, transparent 40.5%),
-        radial-gradient(ellipse at 29% 100%, #22684e 0 47%, transparent 47.5%),
+        radial-gradient(ellipse at 85% 94%, #c5785b 0 40%, transparent 40.5%),
+        radial-gradient(ellipse at 29% 100%, #a95139 0 47%, transparent 47.5%),
         var(--pine-dark);
     min-height: 100%;
 }
@@ -370,8 +370,8 @@ html[lang="bn"] h1, html[lang="bn"] h2 { font-weight: 700; letter-spacing: 0; li
 .journey-hero::before {
     content: "";
     grid-area: 1 / 1 / 2 / -1;
-    background: linear-gradient(145deg, #eee8d1, #f7f2e5 68%);
-    border: 1px solid #e5dfcb;
+    background: linear-gradient(145deg, #f4decc, #fbf2e4 68%);
+    border: 1px solid #ead5c6;
     border-radius: 1.6rem;
 }
 .journey-copy { grid-area: copy; position: relative; align-self: center; min-width: 0; padding: clamp(1.4rem, 4vw, 3.75rem); }
@@ -402,7 +402,7 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     content: "";
     position: absolute;
     inset: 45% 0 0;
-    background: linear-gradient(transparent, rgba(11, 48, 35, .90));
+    background: linear-gradient(transparent, rgba(57, 27, 19, .91));
     pointer-events: none;
 }
 .journey-gallery figcaption {
@@ -426,7 +426,7 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     height: 2.5rem;
     border: 1px solid #f9efd894;
     border-radius: 50%;
-    background: #103a2ced;
+    background: #672c22ed;
     color: var(--cream);
 }
 .gallery-controls button:hover { background: var(--cream); color: var(--pine-dark); }
@@ -438,7 +438,7 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     border: 1px solid var(--line);
     border-radius: 1.1rem;
     padding: .8rem 1rem .65rem;
-    box-shadow: 0 8px 28px rgba(16, 58, 44, .08);
+    box-shadow: 0 8px 28px rgba(103, 44, 34, .08);
 }
 .search-panel-compact { margin: 0; width: 100%; max-width: 62rem; }
 .travel-search { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(8.75rem, .85fr)) auto; gap: .45rem; align-items: stretch; }
@@ -467,10 +467,10 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     text-decoration: none;
     transition: border-color .2s, background .2s, transform .2s;
 }
-.destination-card:hover { background: var(--leaf); color: var(--ink); border-color: #a0aa83; transform: translateY(-2px); }
+.destination-card:hover { background: var(--leaf); color: var(--ink); border-color: #c38872; transform: translateY(-2px); }
 .destination-card strong, .destination-card small { display: block; overflow-wrap: anywhere; }
 .destination-card small { color: var(--moss); }
-.destination-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; flex: none; color: #7b412d; border-radius: .7rem; background: #fae5d9; }
+.destination-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; flex: none; color: #893b29; border-radius: .7rem; background: #f7dfcf; }
 .destination-arrow { margin-inline-start: auto; font-size: .75rem; color: var(--pine); }
 
 .stay-card, .room-heading { position: relative; }
@@ -532,9 +532,32 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
-.brand-logo img { display: block; width: clamp(7.5rem, 16vw, 10rem); height: 2.65rem; object-fit: contain; object-position: left center; }
+.brand-logo { margin-inline-end: .55rem; }
+.brand-logo img {
+    display: block;
+    width: clamp(9rem, 17vw, 13rem);
+    height: clamp(2.65rem, 5vw, 3.85rem);
+    object-fit: contain;
+    object-position: left center;
+}
+.brand-logo img.uses-image-fallback {
+    background: #361c18;
+    border-radius: .45rem;
+    padding: .25rem .45rem;
+}
 .footer-social { display: flex; flex-wrap: wrap; gap: .35rem .8rem; list-style: none; padding: 0; margin: .75rem 0 0; }
-.footer-social a { color: var(--cream); font-size: .85rem; }
+.footer-social a {
+    display: grid;
+    place-items: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    border: 1px solid #e9b39b8c;
+    border-radius: 50%;
+    background: #8d4635;
+    color: var(--cream);
+}
+.footer-social a:hover, .footer-social a:focus-visible { background: #823523; border-color: var(--cream); }
+.footer-social img { display: block; }
 
 .auth-layout-single { grid-template-columns: minmax(0, 1fr); max-width: 32rem; }
 .auth-intro { color: var(--moss); margin-top: -.65rem; }
@@ -563,9 +586,9 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     border-radius: 1.2rem;
     background: var(--surface);
     color: var(--ink);
-    box-shadow: 0 18px 55px #103a2c40;
+    box-shadow: 0 18px 55px #672c2240;
 }
-.first-offer::backdrop { background: #103a2c88; }
+.first-offer::backdrop { background: #672c2288; }
 .first-offer-close { position: absolute; top: .7rem; right: .7rem; }
 .first-offer-kicker { color: var(--moss); font-weight: 680; margin-bottom: .4rem; padding-right: 1rem; }
 .offer-code { display: inline-block; border: 1px dashed var(--pine); border-radius: .45rem; padding: .25rem .65rem; letter-spacing: .1em; background: var(--leaf); }
@@ -580,4 +603,13 @@ html[lang="bn"] .journey-copy h1 { font-size: clamp(2.15rem, 4.55vw, 4.05rem); l
     .help-questions h2, .first-offer h2 { font-size: 1.45rem; }
     .section-heading h2, .host-banner h2, .destinations .section-heading h2 { font-size: clamp(1.45rem, 4.5vw, 2rem); }
     .search-field input, .form-control, .form-select { font-size: 1rem; }
+}
+
+@media (max-width: 575.98px) {
+    .site-nav .navbar-toggler {
+        margin-inline-start: .35rem;
+        padding: .3rem .4rem;
+    }
+    .site-nav .navbar-toggler-icon { width: 1.3rem; height: 1.3rem; }
+    .language-switch button { padding: .3rem .55rem; font-size: .86rem; }
 }

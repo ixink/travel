@@ -2,7 +2,9 @@
 {% from 'room_card.html' import room_card with context %}
 {% from 'search_form.html' import search_form with context %}
 
-{% block title %}{{ tr('Explore stays', 'আবাসন খুঁজুন') }} | Traveller Stop{% endblock %}
+{% block title %}{{ tr('Find Hotels and Guest Rooms in Bangladesh', 'বাংলাদেশে হোটেল ও অতিথিকক্ষ খুঁজুন') }} | Traveller Stop{% endblock %}
+
+{% block description %}{{ tr('Browse hotels, guest rooms, and local stays across Bangladesh. Filter by travel dates, search by area, or find an available room nearby.', 'বাংলাদেশজুড়ে হোটেল, অতিথিকক্ষ ও স্থানীয় আবাসন খুঁজুন। তারিখ ও এলাকা দিয়ে ফিল্টার করুন অথবা কাছাকাছি খালি কক্ষ দেখুন।') }}{% endblock %}
 
 {% block content %}
 <section class="container page-space">

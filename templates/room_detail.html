@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% from 'room_card.html' import favourite_button with context %}
-{% block title %}{{ room.title }} | Traveller Stop{% endblock %}
+{% block title %}{{ room.title }} · {{ room.location }} | Traveller Stop{% endblock %}
+
+{% block description %}{{ room.title }} · {{ room.location }}. {{ room.description | striptags | truncate(125, true, '…') }}{% endblock %}
 
 {% block content %}
 <section class="container page-space">

@@ -9,6 +9,7 @@ from time import time
 from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
+from xml.etree import ElementTree
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, abort, send_from_directory, make_response
 from werkzeug.exceptions import HTTPException
@@ -57,6 +58,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 app.config['UDDOKTAPAY_API_URL'] = os.getenv('UDDOKTAPAY_API_URL', 'https://travellerstop.paymently.io/api')
 app.config['UDDOKTAPAY_API_KEY'] = os.getenv('UDDOKTAPAY_API_KEY')
 app.config['UDDOKTAPAY_SITE_URL'] = os.getenv('UDDOKTAPAY_SITE_URL', 'https://travellerstop.com').rstrip('/')
+app.config['PUBLIC_SITE_URL'] = os.getenv('PUBLIC_SITE_URL', 'https://travellerstop.com').rstrip('/')
 
 # ===================== DATABASE =====================
 db_url = os.getenv('DATABASE_URL')
@@ -272,6 +274,11 @@ THEME_FILES = {
     'logo.png',
     'fonts/dm-sans.woff2',
     'images/google.svg',
+    'images/social/facebook.svg',
+    'images/social/instagram.svg',
+    'images/social/linkedin.svg',
+    'images/social/reddit.svg',
+    'images/social/trustpilot.svg',
     'images/bandarban.webp',
     'images/sylhet.webp',
     'images/coxs-bazar.webp',
@@ -499,6 +506,26 @@ def logout():
     return redirect(url_for('index'))
 
 # ===================== MAIN ROUTES =====================
+@app.get('/robots.txt')
+def robots():
+    sitemap_url = app.config['PUBLIC_SITE_URL'] + url_for('sitemap')
+    return f'User-agent: *\nSitemap: {sitemap_url}\n', 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+
+@app.get('/sitemap.xml')
+def sitemap():
+    origin = app.config['PUBLIC_SITE_URL']
+    root = ElementTree.Element('urlset', xmlns='http://www.sitemaps.org/schemas/sitemap/0.9')
+    pages = ['index', 'rooms_page', 'about', 'services', 'contact', 'help_center', 'safety_tips']
+    paths = [url_for(endpoint) for endpoint in pages]
+    paths.extend(url_for('room_detail', room_id=room_id) for room_id in db.session.scalars(select(Room.id).order_by(Room.id)))
+    for path in paths:
+        entry = ElementTree.SubElement(root, 'url')
+        ElementTree.SubElement(entry, 'loc').text = origin + path
+    document = ElementTree.tostring(root, encoding='utf-8', xml_declaration=True)
+    return document, 200, {'Content-Type': 'application/xml; charset=utf-8'}
+
+
 @app.route('/')
 def index():
     featured = Room.query.order_by(Room.created_at.desc()).limit(8).all()

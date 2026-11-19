@@ -5,6 +5,7 @@ function initImageFallback() {
         const replaceImage = () => {
             if (fallback && image.src !== new URL(fallback, document.baseURI).href) {
                 image.removeAttribute('srcset');
+                image.classList.add('uses-image-fallback');
                 image.src = fallback;
             }
         };
